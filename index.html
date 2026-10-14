@@ -8,17 +8,21 @@
 <meta property="og:title" content="Елжан Махсот — ИИ-инженер">
 <meta property="og:description" content="Автоматизации, ИИ-агенты, видеопайплайн, учебная платформа. Алматы, удалённо или гибрид.">
 <meta property="og:type" content="profile">
+<meta property="og:url" content="https://nazaralmaty.github.io/elzhan/">
+<meta property="og:image" content="https://nazaralmaty.github.io/elzhan/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#4C7DF0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' rx='1' fill='%23FFD23F'/%3E%3Crect x='2' y='1' width='4' height='2' fill='%231D2340'/%3E%3Crect x='2' y='3' width='4' height='2' fill='%23F2C6A0'/%3E%3Crect x='2' y='5' width='4' height='2' fill='%23FF7A1A'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik+Pixels&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --skin:#4C7DF0; --skin-deep:#3A66D6; --ink:#1D2340; --ink-2:#3D4466; --mute:#5A6182;
   --page:#FFFFFF; --page-2:#F2F5FE; --rule:#C9D3F2; --sun:#FFD23F; --sun-deep:#E9B800;
   --orange:#FF7A1A; --orange-text:#B84300; --blue:#2350D8; --mint:#B9E6CF; --tg:#229ED9; --wa:#1DA851;
-  --px:"Rubik",system-ui,sans-serif; --pix:"Pixelify Sans","Rubik",system-ui,sans-serif; --ui:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --px:"Rubik",system-ui,sans-serif; --pix:"Pixelify Sans","Rubik",system-ui,sans-serif; --dot:"Rubik Pixels","Rubik",system-ui,sans-serif; --ui:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
   --r:14px; --ease:cubic-bezier(.16,1,.3,1); --settle:cubic-bezier(.34,1.56,.64,1);
 }
 *{box-sizing:border-box}
@@ -54,7 +58,7 @@ button{font:inherit;color:inherit}
 
 /* tabs on the outer edge, Cyworld style */
 .tabs{position:absolute;left:100%;top:56px;display:flex;flex-direction:column;gap:6px;margin-left:-3px}
-.tab{display:block;width:96px;padding:12px 8px 12px 10px;border:3px solid var(--ink);border-left:0;border-radius:0 12px 12px 0;background:var(--sun);
+.tab{display:block;min-width:96px;width:auto;padding:12px 8px 12px 10px;border:3px solid var(--ink);border-left:0;border-radius:0 12px 12px 0;background:var(--sun);
   font:700 14px/1.1 var(--px);text-align:center;cursor:pointer;color:var(--ink);transition:transform .2s var(--ease),background .2s}
 .tab:hover{transform:translateX(3px)}
 .tab[aria-selected=true]{background:#fff;transform:translateX(5px)}
@@ -66,8 +70,10 @@ button{font:inherit;color:inherit}
 .avatar .mood{position:absolute;z-index:2;top:10px;left:10px;right:10px;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:7px 10px;font-size:13px;line-height:1.35}
 .avatar .mood::after{content:"";position:absolute;left:46%;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg)}
 .mood b{font:700 12px/1 var(--px);color:var(--orange-text);display:block;margin-bottom:3px;letter-spacing:.04em}
-h1{font:700 clamp(30px,3.4vw,36px)/1.02 var(--px);margin:2px 0 0;letter-spacing:-.025em}
+h1{font:400 clamp(32px,3.6vw,38px)/1.02 var(--dot);margin:2px 0 0;letter-spacing:-.01em}
 .role{font-weight:600;font-size:16px;line-height:1.35;margin:-4px 0 0;color:var(--ink-2)}
+.proof{margin:0;display:flex;flex-wrap:wrap;gap:6px}
+.proof span{font-size:13px;font-weight:600;padding:5px 9px;border:2px solid var(--ink);border-radius:8px;background:var(--sun);box-shadow:0 2px 0 var(--ink)}
 .bio{margin:0;font-size:15px;color:var(--ink-2)}
 .contacts{display:grid;gap:8px}
 .cbtn{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border:2px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;box-shadow:0 3px 0 var(--ink);transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
@@ -84,7 +90,7 @@ h1{font:700 clamp(30px,3.4vw,36px)/1.02 var(--px);margin:2px 0 0;letter-spacing:
 
 /* right page header */
 .rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px 12px;border-bottom:2px solid var(--ink);background:var(--page-2);border-radius:var(--r) var(--r) 0 0}
-.rhead h2{font:700 20px/1.1 var(--px);margin:0}
+.rhead h2{font:400 22px/1.1 var(--dot);margin:0}
 .rhead .url{font-size:13px;color:var(--mute)}
 .rhead .hint{margin-left:auto;font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
 .blink{width:8px;height:8px;border-radius:2px;background:var(--orange);animation:blink 1.4s steps(2) infinite}
@@ -120,10 +126,10 @@ h1{font:700 clamp(30px,3.4vw,36px)/1.02 var(--px);margin:2px 0 0;letter-spacing:
 .card .top{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--sun);border-bottom:2px solid var(--ink);font:700 13px/1 var(--px)}
 .card .top .new{margin-left:auto;font-family:var(--pix);background:var(--orange);color:#fff;padding:4px 7px;border-radius:6px;border:2px solid var(--ink);font-size:11px}
 .card .body{padding:16px 16px 18px}
-.card h4{font:700 23px/1.12 var(--px);margin:0 0 10px}
+.card h4{font:400 25px/1.12 var(--dot);margin:0 0 10px}
 .card p{margin:0 0 12px;font-size:15.5px}
 .card .num{display:flex;align-items:baseline;gap:8px;margin:0 0 12px;padding:10px 12px;border:2px dashed var(--rule);border-radius:10px;font-size:14px;color:var(--ink-2)}
-.card .num strong{font:700 28px/1 var(--px);color:var(--ink);white-space:nowrap}
+.card .num strong{font:400 30px/1 var(--dot);color:var(--ink);white-space:nowrap}
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
 .pills li{font-size:12.5px;font-weight:600;padding:5px 9px;border-radius:999px;background:var(--page-2);border:1.5px solid var(--rule)}
 .go{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:2px solid var(--ink);border-radius:12px;background:var(--blue);color:#fff;text-decoration:none;font-weight:600;box-shadow:0 3px 0 var(--ink);transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
@@ -185,14 +191,13 @@ footer{max-width:1180px;margin:18px auto 0;color:#fff;font-size:13px;display:fle
   body{padding-top:12px}
   .book{grid-template-columns:1fr;margin-right:auto;padding:8px;border-radius:18px}
   .tabs{position:sticky;top:0;z-index:5;left:auto;flex-direction:row;margin:0;gap:4px;padding:6px;background:var(--skin-deep);border-radius:12px;overflow-x:auto;order:1}
-  .tab{width:auto;flex:1;border:2px solid var(--ink);border-radius:10px;padding:11px 6px;font-size:14px;white-space:nowrap}
+  .tab{width:auto;min-width:0;flex:1;border:2px solid var(--ink);border-radius:10px;padding:11px 6px;font-size:14px;white-space:nowrap}
   .tab:hover{transform:none}
   .tab[aria-selected=true]{transform:none;box-shadow:inset 0 -3px 0 var(--orange)}
   .left{order:0;display:grid;grid-template-columns:116px 1fr;gap:12px 14px;align-items:start}
   .left .avatar{grid-row:span 3}
   .avatar .mood{display:none}
-  .left .bio,.left .contacts,.left .facts,.left .moodm{grid-column:1/-1}
-  .moodm{display:block!important}
+  .left .bio,.left .contacts,.left .facts,.left .proof{grid-column:1/-1}
   .right{order:2}
   .rhead .hint{margin-left:0;width:100%}
   .shelf{grid-template-columns:1fr}
@@ -222,7 +227,7 @@ footer{max-width:1180px;margin:18px auto 0;color:#fff;font-size:13px;display:fle
 <body>
 <!--
 THESIS: A resume as Elzhan's own mini-room (Cyworld minihompy): every object in the room is a project or a career fact; click one and its card opens. Refuses the dark dev-portfolio with neon and the cream editorial CV.
-OWN-WORLD: Cornflower skin with white dot grid, a navy-outlined "book" with two white pages, sunflower tabs on the outer edge, isometric room in mint wallpaper and wood floor with sticker-outlined furniture, pixel minimi sprite, Pixelify Sans labels, Rubik body, orange only for "today/new".
+OWN-WORLD: Cornflower skin with white dot grid, a navy-outlined "book" with two white pages, sunflower tabs on the outer edge, isometric room in mint wallpaper and wood floor with sticker-outlined furniture, pixel minimi sprite, Rubik Pixels display (Cyrillic-safe dotted face), Pixelify Sans for Latin labels, Rubik body, orange only for "today/new".
 STORY: In 5 seconds: who (Елжан, AI engineer + marketing), proof (room objects with numbers and live links), action (Telegram / WhatsApp / email always visible on the left page, guestbook sends a prefilled message).
 FIRST VIEWPORT: Left page: pixel avatar with mood bubble, name, role, three contact buttons. Right page: room at ~60% width with the desk selected and its card open beside it.
 FORM: Cyworld minihompy room, challenger chosen by the user over the roll (assigned was #6 receipt); staging: classic minihompy tabs, no extra staging. Seed key b51b18b9.
@@ -247,7 +252,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <h1 data-en="Elzhan Makhsot">Елжан Махсот</h1>
     </div>
     <p class="role" data-en="AI engineer: automations, AI agents, products from idea to a working link">ИИ-инженер: автоматизации, ИИ-агенты, продукты от идеи до работающей ссылки</p>
-    <p class="moodm"><b data-en="TODAY">СЕГОДНЯ</b><span data-en="Open to work: remote or hybrid in Almaty.">Открыт к работе: удалённо или гибрид в Алматы.</span></p>
+    <p class="proof"><span data-en="$30K in ads">$30K таргета</span><span data-en="7M ₸ launch">запуск 7 млн ₸</span><span data-en="56-lesson platform">платформа на 56 уроков</span></p>
+    <p class="moodm" hidden><b data-en="TODAY">СЕГОДНЯ</b><span data-en="Open to work: remote or hybrid in Almaty.">Открыт к работе: удалённо или гибрид в Алматы.</span></p>
     <p class="bio" data-en="I build working products with AI agents and ship them myself. Before that I spent years in marketing and sales: Meta ads, launches, commercial director of an English school. So I know which leads and money an automation is supposed to bring.">Собираю рабочие продукты с ИИ-агентами и сам довожу их до запуска. До этого был в маркетинге и продажах: таргет, запуски, коммерческий директор школы английского. Поэтому знаю, какие заявки и деньги должна приносить автоматизация.</p>
     <div class="contacts">
       <a class="cbtn primary" href="https://t.me/elzhan_makhsot" target="_blank" rel="noopener"><span class="ico" style="background:#fff"><svg viewBox="0 0 24 24"><path d="M21 4 2.8 11.1c-.9.4-.9 1.6.1 1.9l4.5 1.4 1.7 5.3c.3.8 1.3 1 1.9.4l2.5-2.4 4.6 3.4c.7.5 1.7.1 1.9-.7L23 5.4C23.3 4.4 22 3.6 21 4Z" fill="#229ED9"/></svg></span><span>Telegram<small>@elzhan_makhsot</small></span></a>
@@ -273,7 +279,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     <header class="rhead">
       <h2 id="rtitle" data-en="Elzhan's room">Комната Елжана</h2>
       <span class="url">nazaralmaty.github.io/elzhan</span>
-      <span class="hint" id="rhint"><i class="blink"></i><span data-en="Tap any object: each one is a project">Нажми на любой предмет: каждый из них — проект</span></span>
+      <span class="hint" id="rhint"><i class="blink"></i><span data-en="Tap any object: each one is a project">Нажмите на любой предмет: каждый из них — проект</span></span>
     </header>
 
     <div class="panel" id="p-room" role="tabpanel" aria-labelledby="t-room">
@@ -295,12 +301,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     <div class="panel" id="p-diary" role="tabpanel" aria-labelledby="t-diary" hidden>
       <h3 data-en="Career diary">Дневник карьеры</h3>
       <ol class="diary">
-        <li><span class="when" data-en="Now">Сейчас</span><div><h4 data-en="AI engineer <span>· own projects</span>">ИИ-инженер <span>· свои проекты</span></h4><p data-en="Automations, AI agents and products end to end: the video pipeline, the learning platform, bots, cartoons on three.js. Every day in Claude Code.">Автоматизации, ИИ-агенты и продукты под ключ: видеопайплайн, учебная платформа, боты, мультики на three.js. Каждый день в Claude Code.</p></div></li>
+        <li><span class="when" data-en="Own projects">Свои проекты</span><div><h4 data-en="AI engineer <span>· own projects</span>">ИИ-инженер <span>· свои проекты</span></h4><p data-en="Automations, AI agents and products end to end: the video pipeline, the learning platform, bots, cartoons on three.js. Every day in Claude Code.">Автоматизации, ИИ-агенты и продукты под ключ: видеопайплайн, учебная платформа, боты, мультики на three.js. Каждый день в Claude Code.</p></div></li>
         <li><span class="when">1English</span><div><h4 data-en="Commercial director <span>· English school</span>">Коммерческий директор <span>· школа английского</span></h4><p data-en="Sales and marketing of the school. Built its learning platform myself: 56 lessons, dictionary, student, teacher and parent cabinets.">Продажи и маркетинг школы. Сам собрал для неё учебную платформу: 56 уроков, словарь, кабинеты ученика, учителя и родителя.</p></div></li>
         <li><span class="when">StudyLine</span><div><h4 data-en="Founder <span>· edtech for Kazakhstan</span>">Основатель <span>· edtech для Казахстана</span></h4><p data-en="An education platform with its own development team: I set the product and the briefs.">Образовательная платформа со своей командой разработки: я ставил продукт и задачи.</p></div></li>
         <li><span class="when">125 Online</span><div><h4 data-en="Head of marketing <span>· online school</span>">Маркетинг <span>· онлайн-школа</span></h4><p data-en="Wrote the school's whole marketing strategy and took part in building its sales department.">Написал всю маркетинговую стратегию школы и участвовал в создании отдела продаж.</p></div></li>
-        <li><span class="when" data-en="2 years">2 года</span><div><h4 data-en="Meta Ads specialist <span>· Facebook and Instagram</span>">Таргетолог <span>· Facebook и Instagram</span></h4><p data-en="Ran ad campaigns for different projects.">Запускал рекламу для разных проектов.</p><span class="n" data-en="≈ $30,000 ad spend">≈ $30 000 открученного бюджета</span></div></li>
-        <li><span class="when" data-en="Start">Начало</span><div><h4 data-en="Launches <span>· online courses, 6 months</span>">Запуски <span>· онлайн-курсы, полгода</span></h4><p data-en="This is where I started: product launches in the online education business.">С этого начинал: запуски онлайн-курсов в инфобизнесе.</p><span class="n" data-en="Launch of 7,000,000 ₸ ≈ $13,700">Запуск на 7 000 000 ₸ ≈ $13 700</span></div></li>
+        <li><span class="when">Meta Ads</span><div><h4 data-en="Meta Ads specialist <span>· Facebook and Instagram, 2 years</span>">Таргетолог <span>· Facebook и Instagram, 2 года</span></h4><p data-en="Ran ad campaigns for different projects.">Запускал рекламу для разных проектов.</p><span class="n" data-en="≈ $30,000 ad spend">≈ $30 000 открученного бюджета</span></div></li>
+        <li><span class="when" data-en="Info-business">Инфобизнес</span><div><h4 data-en="Launches <span>· online courses, 6 months</span>">Запуски <span>· онлайн-курсы, полгода</span></h4><p data-en="This is where I started: product launches in the online education business.">С этого начинал: запуски онлайн-курсов в инфобизнесе.</p><span class="n" data-en="Launch of 7,000,000 ₸ ≈ $13,700">Запуск на 7 000 000 ₸ ≈ $13 700</span></div></li>
       </ol>
     </div>
 
@@ -329,7 +335,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <div class="entry">
           <div class="eh"><b data-en="Elzhan">Елжан</b><span data-en="pinned note from the owner">запись хозяина, закреплена</span></div>
           <div class="eb"><div class="mini"><svg class="spr" data-p="me" viewBox="0 0 14 21" shape-rendering="crispEdges" aria-hidden="true"></svg></div>
-          <p data-en="Hi! Tell me which task you want to hand to AI: leads, content, reports, a bot, a platform. Write below and the message goes straight to me.">Привет! Напиши, какую задачу хочешь отдать ИИ: заявки, контент, отчёты, бот, платформа. Пиши ниже, сообщение придёт мне напрямую.</p></div>
+          <p data-en="Hi! Tell me which task you want to hand to AI: leads, content, reports, a bot, a platform. Write below and the message goes straight to me.">Здравствуйте! Напишите, какую задачу хотите отдать ИИ: заявки, контент, отчёты, бот, платформа. Сообщение ниже придёт мне напрямую.</p></div>
         </div>
         <form class="entry" id="gbform" novalidate>
           <div class="eh"><b data-en="New entry">Новая запись</b><span id="gbdate"></span></div>
@@ -362,11 +368,11 @@ let LANG = "ru";
 /* ---------- items: every object in the room ---------- */
 const ITEMS = {
   pipeline:{c:"#1E2240", new:true,
-    ru:{cat:"Стол · ИИ-видеопайплайн", t:"Видеопайплайн на ИИ", p:"Конвейер на Python: сценарий → картинки в локальной FLUX → озвучка TTS на русском, казахском и английском → субтитры по Whisper → сборка и рендер в ffmpeg. На выходе стоят автопроверки: пропущенные слова, длинные паузы, рассинхрон. Задачи раздают субагенты Claude Code.", n:["5 этапов","от текста до готового ролика"], tags:["Python","ffmpeg","FLUX","Whisper","TTS","Claude Code"], note:"Код закрыт, покажу на созвоне."},
-    en:{cat:"Desk · AI video pipeline", t:"AI video pipeline", p:"A Python pipeline: script → images from local FLUX → TTS voice-over in Russian, Kazakh and English → Whisper subtitles → assembly and render in ffmpeg. Automatic checks at the end: missed words, long pauses, desync. Claude Code subagents split the work.", n:["5 stages","from text to a finished video"], tags:["Python","ffmpeg","FLUX","Whisper","TTS","Claude Code"], note:"Private code, I'll demo it on a call."}},
+    ru:{cat:"Стол · ИИ-видеопайплайн", t:"Видеопайплайн на ИИ", p:"Конвейер на Python: сценарий → картинки в локальной FLUX → озвучка TTS на русском, казахском и английском → субтитры по Whisper → сборка и рендер в ffmpeg. На выходе стоят автопроверки: пропущенные слова, длинные паузы, рассинхрон. Задачи раздают субагенты Claude Code.", n:["RU · KZ · EN","озвучка на трёх языках"], tags:["Python","ffmpeg","FLUX","Whisper","TTS","Claude Code"], note:"Код закрыт, покажу на созвоне."},
+    en:{cat:"Desk · AI video pipeline", t:"AI video pipeline", p:"A Python pipeline: script → images from local FLUX → TTS voice-over in Russian, Kazakh and English → Whisper subtitles → assembly and render in ffmpeg. Automatic checks at the end: missed words, long pauses, desync. Claude Code subagents split the work.", n:["RU · KZ · EN","voice-over in three languages"], tags:["Python","ffmpeg","FLUX","Whisper","TTS","Claude Code"], note:"Private code, I'll demo it on a call."}},
   platform:{c:"#FFFFFF",
-    ru:{cat:"Доска · учебная платформа", t:"Платформа 1English", p:"Платформа английского для своей школы: уроки по уровням, словарь с интервальным повторением, кабинеты ученика, учителя и родителя. Вход по номеру телефона. Собрал сам от базы до интерфейса.", n:["56","уроков в курсе"], tags:["Supabase","PostgreSQL","JS","GitHub Pages"], link:["https://nazaralmaty.github.io/1english-platform/","Открыть платформу"]},
-    en:{cat:"Board · learning platform", t:"1English platform", p:"An English learning platform for my school: lessons by level, a dictionary with spaced repetition, student, teacher and parent cabinets. Phone-number sign-in. Built it myself, database to interface.", n:["56","lessons in the course"], tags:["Supabase","PostgreSQL","JS","GitHub Pages"], link:["https://nazaralmaty.github.io/1english-platform/","Open the platform"]}},
+    ru:{cat:"Доска · учебная платформа", t:"Платформа 1English", p:"Платформа английского для своей школы: уроки по уровням, словарь с интервальным повторением, кабинеты ученика, учителя и родителя. Вход по номеру телефона. Собрал сам от базы до интерфейса.", n:["56","уроков в курсе"], tags:["Supabase","PostgreSQL","JS","GitHub Pages"], link:["https://nazaralmaty.github.io/1english-platform/","Открыть платформу"], note:"Внутри вход по номеру телефона: уроки покажу на созвоне."},
+    en:{cat:"Board · learning platform", t:"1English platform", p:"An English learning platform for my school: lessons by level, a dictionary with spaced repetition, student, teacher and parent cabinets. Phone-number sign-in. Built it myself, database to interface.", n:["56","lessons in the course"], tags:["Supabase","PostgreSQL","JS","GitHub Pages"], link:["https://nazaralmaty.github.io/1english-platform/","Open the platform"], note:"Sign-in is by phone number; I'll walk you through the lessons on a call."}},
   ads:{c:"#2350D8",
     ru:{cat:"Плакат · таргет", t:"Реклама в Meta Ads", p:"Два года запускал рекламу в Facebook и Instagram. Оттуда привычка мерить любую автоматизацию заявками и их ценой.", n:["≈ $30 000","открученного бюджета"], tags:["Meta Ads","Conversions API","креативы","аналитика"]},
     en:{cat:"Poster · paid ads", t:"Meta Ads", p:"Two years running Facebook and Instagram ads. That's where I learned to measure any automation by leads and cost per lead.", n:["≈ $30,000","ad spend managed"], tags:["Meta Ads","Conversions API","creatives","analytics"]}},
@@ -627,15 +633,15 @@ function stamp(){
 const gs=document.getElementById("gbstatus");
 document.querySelectorAll(".send").forEach(b=>b.addEventListener("click",async()=>{
   const name=document.getElementById("gname").value.trim(), msg=document.getElementById("gmsg").value.trim();
-  if(!msg){ gs.className="status err"; gs.textContent = LANG==="en"?"Write a message first: what you need done.":"Сначала напиши сообщение: какая задача."; document.getElementById("gmsg").focus(); return; }
+  if(!msg){ gs.className="status err"; gs.textContent = LANG==="en"?"Write a message first: what you need done.":"Сначала напишите сообщение: какая задача."; document.getElementById("gmsg").focus(); return; }
   const text=(name?(LANG==="en"?"Hi Elzhan, this is ":"Здравствуйте, Елжан! Это ")+name+".\n":"")+msg;
   gs.className="status";
-  if(b.dataset.via==="wa"){ window.open("https://wa.me/77085123700?text="+encodeURIComponent(text),"_blank","noopener"); gs.textContent=LANG==="en"?"WhatsApp opened with your message.":"Открыл WhatsApp с твоим сообщением."; }
-  if(b.dataset.via==="ml"){ location.href="mailto:elzhanmahsot@gmail.com?subject="+encodeURIComponent(LANG==="en"?"From your resume site":"С сайта-резюме")+"&body="+encodeURIComponent(text); gs.textContent=LANG==="en"?"Opening your mail app.":"Открываю почту."; }
+  if(b.dataset.via==="wa"){ window.open("https://wa.me/77085123700?text="+encodeURIComponent(text),"_blank","noopener"); gs.textContent=LANG==="en"?"WhatsApp opened with your message.":"WhatsApp открыт с вашим сообщением."; }
+  if(b.dataset.via==="ml"){ location.href="mailto:elzhanmahsot@gmail.com?subject="+encodeURIComponent(LANG==="en"?"From your resume site":"С сайта-резюме")+"&body="+encodeURIComponent(text); gs.textContent=LANG==="en"?"Opening your mail app.":"Открываю почтовую программу."; }
   if(b.dataset.via==="tg"){
     let ok=false; try{ await navigator.clipboard.writeText(text); ok=true; }catch(e){}
     window.open("https://t.me/elzhan_makhsot","_blank","noopener");
-    gs.textContent = ok ? (LANG==="en"?"Message copied. Paste it into the Telegram chat.":"Текст скопирован. Вставь его в чат Telegram.") : (LANG==="en"?"Couldn't copy automatically: copy the text above and paste it in Telegram.":"Не получилось скопировать сам: выдели текст выше и вставь в Telegram.");
+    gs.textContent = ok ? (LANG==="en"?"Message copied. Paste it into the Telegram chat.":"Текст скопирован. Вставьте его в чат Telegram.") : (LANG==="en"?"Couldn't copy automatically: copy the text above and paste it in Telegram.":"Скопировать не вышло: выделите текст выше и вставьте в Telegram.");
   }
 }));
 
