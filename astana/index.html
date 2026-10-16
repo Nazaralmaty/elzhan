@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Астана · Байтерек — 3D-сцена</title>
+<meta name="description" content="Детализированная 3D-сцена Астаны у монумента Байтерек на Three.js: картонные люди в стиле Minecraft, двое главных героев, шоты камеры, запись видео и пакет референсов для Seedance 2.5.">
+<meta name="theme-color" content="#0f141c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2300AFCA'/%3E%3Ccircle cx='16' cy='10' r='5.5' fill='%23F2C14E'/%3E%3Cpath d='M14.6 15h2.8l1.2 13h-5.2z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --glass:rgba(14,18,26,.74); --glass-2:rgba(255,255,255,.06); --line:rgba(255,255,255,.12);
+  --ink:#eef2f7; --mute:#a7b0bf; --gold:#f2c14e; --sky:#00afca; --red:#ff4d5e;
+  --a:#38bdf8; --b:#f472b6; --r:14px; --ui:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --top:56px; --panel:372px; --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0b0f15;color:var(--ink);font:400 14px/1.45 var(--ui);overflow:hidden;-webkit-font-smoothing:antialiased;touch-action:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+[hidden]{display:none!important}
+
+#stage{position:fixed;inset:0;display:grid;place-items:center;background:#05070a}
+#frame{position:relative;overflow:hidden;background:#000;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+#c{display:block;width:100%;height:100%;outline:none;cursor:grab}
+#c:active{cursor:grabbing}
+#labels{position:absolute;inset:0;pointer-events:none}
+.hl{position:absolute;transform:translate(-50%,-100%);display:flex;align-items:center;gap:6px;padding:4px 9px 4px 6px;border-radius:999px;background:rgba(10,14,20,.78);border:1px solid var(--line);font:600 12px/1 var(--ui);white-space:nowrap;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hl i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font:700 10px/1 var(--ui);color:#071018;font-style:normal}
+.hl::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:10px;background:currentColor;opacity:.6}
+#thirds{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(90deg,transparent calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% + .5px),transparent calc(66.666% + .5px)),
+  linear-gradient(0deg,transparent calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% + .5px),transparent calc(66.666% + .5px))}
+#safe{position:absolute;inset:5%;border:1px dashed rgba(255,255,255,.4);pointer-events:none}
+#aspectTag{position:absolute;left:10px;bottom:10px;font:500 11px/1 var(--mono);color:rgba(255,255,255,.7);background:rgba(0,0,0,.35);padding:4px 6px;border-radius:6px;pointer-events:none}
+
+/* top bar */
+#top{position:fixed;left:10px;right:10px;top:10px;height:var(--top);display:flex;align-items:center;gap:10px;padding:0 10px 0 14px;border-radius:16px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);z-index:10}
+.brand{display:flex;align-items:baseline;gap:8px;white-space:nowrap;min-width:0}
+.brand b{font-weight:700;font-size:16px;letter-spacing:.2px}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold);align-self:center}
+.brand .sub{color:var(--mute);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.modes{display:flex;gap:4px;margin:0 auto;padding:4px;border-radius:12px;background:var(--glass-2)}
+.modes button{display:flex;align-items:center;gap:6px;border:0;background:none;padding:7px 11px;border-radius:9px;color:var(--mute);font-weight:500;white-space:nowrap}
+.modes button svg{width:16px;height:16px}
+.modes button[aria-pressed=true]{background:var(--ink);color:#0b0f15}
+.tools{display:flex;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:999px;background:var(--glass-2);border:1px solid var(--line);font:500 12px/1 var(--mono);color:var(--mute);white-space:nowrap}
+.ib{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--glass-2);color:var(--ink)}
+.ib:hover{background:rgba(255,255,255,.12)}
+.ib svg{width:18px;height:18px}
+.ib[aria-pressed=true]{background:var(--gold);color:#16120a;border-color:transparent}
+
+/* side panel */
+#panel{position:fixed;top:calc(var(--top) + 20px);right:10px;bottom:10px;width:var(--panel);display:flex;flex-direction:column;border-radius:16px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);z-index:9;transition:transform .35s var(--ease),opacity .25s}
+#panel.closed{transform:translateX(calc(100% + 20px));opacity:0;pointer-events:none}
+.tabs{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1;border:0;background:none;padding:8px 6px;border-radius:9px;color:var(--mute);font-weight:500;font-size:13px;white-space:nowrap}
+.tabs button[aria-selected=true]{background:rgba(255,255,255,.1);color:var(--ink)}
+.tabs button.seed{color:var(--gold)}
+.body{flex:1;overflow-y:auto;padding:12px 14px 16px;overscroll-behavior:contain}
+.body section{display:none}
+.body section.on{display:block}
+h3{margin:14px 0 8px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+h3:first-child{margin-top:2px}
+.row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.row label{flex:1;color:var(--ink)}
+.row output{font:500 12px/1 var(--mono);color:var(--gold);min-width:46px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--gold);height:22px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:3px;border-radius:11px;background:var(--glass-2);border:1px solid var(--line)}
+.seg button{flex:1 1 auto;border:0;background:none;padding:7px 8px;border-radius:8px;color:var(--mute);font-size:12.5px;font-weight:500;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--ink);color:#0b0f15}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.grid.g3{grid-template-columns:repeat(3,1fr)}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--glass-2);color:var(--ink);font-weight:500;font-size:13px;text-align:center}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.pri{background:var(--gold);color:#16120a;border-color:transparent;font-weight:600}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.rec{background:rgba(255,77,94,.16);border-color:rgba(255,77,94,.5);color:#ffd5da}
+.btn.act[aria-pressed=true]{background:rgba(242,193,78,.18);border-color:rgba(242,193,78,.6);color:#ffe6a6}
+.btn svg{width:16px;height:16px;flex:none}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:7px 0;cursor:pointer}
+.tog input{appearance:none;width:38px;height:22px;border-radius:999px;background:rgba(255,255,255,.18);position:relative;transition:background .2s;flex:none;cursor:pointer}
+.tog input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s var(--ease)}
+.tog input:checked{background:var(--sky)}
+.tog input:checked::after{transform:translateX(16px)}
+.note{color:var(--mute);font-size:12.5px;margin:6px 0 10px}
+.note b{color:var(--ink);font-weight:600}
+.hero{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--glass-2);margin-bottom:8px}
+.hero.sel{border-color:currentColor}
+.hero .badge{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#071018;font-weight:700}
+.hero p{margin:2px 0 0;color:var(--mute);font-size:12px;line-height:1.4}
+.hero strong{font-weight:600}
+.shot{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;padding:8px 8px 8px 10px;border-radius:11px;border:1px solid var(--line);background:var(--glass-2);margin-bottom:6px}
+.shot b{font-weight:500;font-size:13px}
+.shot small{display:block;color:var(--mute);font-size:11.5px;line-height:1.35;margin-top:2px}
+.shot .ib{width:32px;height:32px}
+.shot.playing{border-color:var(--gold)}
+.keys{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.keys div{display:flex;align-items:center;gap:8px;font:500 12px/1 var(--mono);color:var(--mute);padding:6px 8px;border-radius:8px;background:var(--glass-2)}
+.keys div span{flex:1}
+.keys div button{border:0;background:none;color:var(--mute);padding:2px 4px}
+textarea{width:100%;min-height:190px;resize:vertical;padding:10px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.3);font:400 12px/1.5 var(--mono);color:var(--ink)}
+.steps{margin:0 0 10px;padding-left:18px;color:var(--mute);font-size:12.5px}
+.steps li{margin:3px 0}
+.steps b{color:var(--ink);font-weight:600}
+select{width:100%;padding:8px;border-radius:9px;border:1px solid var(--line);background:#141a24;color:var(--ink)}
+
+#rec{position:fixed;top:calc(var(--top) + 24px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(200,20,40,.9);font:600 13px/1 var(--mono);z-index:11}
+#rec i{width:9px;height:9px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:.3s var(--ease);z-index:20;max-width:min(560px,calc(100vw - 32px));text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#hint{position:fixed;left:14px;bottom:14px;max-width:420px;padding:10px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--mute);font-size:12.5px;z-index:8;transition:opacity .4s}
+#hint b{color:var(--ink);font-weight:600}
+#hint kbd,dialog kbd{font:500 11px/1 var(--mono);padding:2px 5px;border-radius:5px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink)}
+#joystick{position:fixed;left:22px;bottom:22px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--line);z-index:8;touch-action:none}
+#joystick .knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(255,255,255,.35)}
+
+/* loader */
+#loader{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 10%,#173049 0%,#0b0f15 60%);transition:opacity .6s}
+#loader.done{opacity:0;pointer-events:none}
+.load{width:min(440px,calc(100vw - 32px));text-align:center}
+.load svg{width:86px;height:120px;margin-bottom:12px}
+.load h1{margin:0 0 4px;font-size:26px;font-weight:700;letter-spacing:.2px}
+.load p{margin:0 0 18px;color:var(--mute)}
+.bar{height:6px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sky),var(--gold));transition:width .25s}
+.msg{margin-top:10px;font:500 12px/1 var(--mono);color:var(--mute)}
+.enter{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.enter .btn{min-width:170px;min-height:44px;font-size:14px}
+
+dialog{max-width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;border:1px solid var(--line);border-radius:18px;background:#121823;color:var(--ink);padding:20px 22px}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h2{margin:0 0 10px;font-size:18px}
+dialog table{width:100%;border-collapse:collapse;font-size:13px}
+dialog td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+dialog td:first-child{color:var(--mute);width:42%}
+
+body.clean #top,body.clean #panel,body.clean #hint,body.clean #labels,body.clean #aspectTag{display:none!important}
+
+@media (max-width:900px){
+  :root{--panel:340px}
+  .brand .sub{display:none}
+  .modes button span{display:none}
+}
+@media (max-width:720px){
+  :root{--top:50px}
+  #top{left:6px;right:6px;top:6px;padding:0 6px 0 10px;gap:6px}
+  .brand b{display:none}
+  .modes{margin:0}
+  .tools{margin-left:auto;gap:4px}
+  .ib{width:34px;height:34px}
+  #fps{display:none}
+  #panel{top:auto;left:6px;right:6px;bottom:6px;width:auto;height:min(56vh,520px)}
+  #panel.closed{transform:translateY(calc(100% + 20px))}
+  #hint{display:none}
+  #rec{top:calc(var(--top) + 14px)}
+}
+@media (max-width:420px){
+  .modes{gap:2px;padding:3px}
+  .modes button{padding:7px 8px}
+  #clock,#btn-full,#btn-help{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+</script>
+</head>
+<body>
+<div id="stage">
+  <div id="frame">
+    <canvas id="c" tabindex="0" aria-label="3D-сцена: Астана, Байтерек"></canvas>
+    <div id="labels"></div>
+    <div id="thirds" hidden></div>
+    <div id="safe" hidden></div>
+    <div id="aspectTag" hidden></div>
+  </div>
+</div>
+
+<header id="top">
+  <div class="brand"><i class="dot"></i><b>Астана · Байтерек</b><span class="sub">3D-референс для Seedance</span></div>
+  <nav class="modes" aria-label="Режим камеры">
+    <button data-mode="orbit" aria-pressed="true" title="Обзор (1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.5"/></svg><span>Обзор</span></button>
+    <button data-mode="walk" aria-pressed="false" title="Прогулка (2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13" cy="4" r="2"/><path d="M9 21l3-7 3 3v4M12 14l-1-5 4 1 2 3M11 9l-3 2-1 3"/></svg><span>Прогулка</span></button>
+    <button data-mode="fly" aria-pressed="false" title="Полёт (3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3l3 9-3 9-3-9z"/></svg><span>Полёт</span></button>
+    <button data-mode="follow" aria-pressed="false" title="За героями (4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="2.5"/><circle cx="16" cy="7" r="2.5"/><path d="M4 21v-5a4 4 0 018 0v5M12 21v-5a4 4 0 018 0v5"/></svg><span>За героями</span></button>
+  </nav>
+  <div class="tools">
+    <span id="clock" class="chip" title="Местное время, Астана (UTC+5)">13:00</span>
+    <span id="fps" class="chip">— fps</span>
+    <button class="ib" id="btn-shot" title="Сохранить кадр PNG (P)" aria-label="Сохранить кадр"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    <button class="ib" id="btn-clean" title="Чистый вид без интерфейса (H)" aria-label="Скрыть интерфейс"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button class="ib" id="btn-help" title="Управление (?)" aria-label="Помощь"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.7-2.5 2-2.5 4M12 17h.01"/></svg></button>
+    <button class="ib" id="btn-full" title="Полный экран (F11)" aria-label="Полный экран"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="ib" id="btn-panel" title="Панель" aria-label="Панель настроек" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+</header>
+
+<aside id="panel" aria-label="Настройки">
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="scene" aria-selected="true">Сцена</button>
+    <button role="tab" data-tab="heroes" aria-selected="false">Герои</button>
+    <button role="tab" data-tab="camera" aria-selected="false">Камера</button>
+    <button role="tab" data-tab="director" aria-selected="false">Режиссёр</button>
+    <button role="tab" data-tab="seedance" aria-selected="false" class="seed">Seedance</button>
+  </div>
+  <div class="body">
+    <section data-tab="scene" class="on">
+      <h3>Время суток · Астана, UTC+5</h3>
+      <div class="row"><input type="range" id="time" min="3.5" max="23.9" step="0.05" value="13"><output id="time-o">13:00</output></div>
+      <div class="seg" id="time-presets">
+        <button data-h="4.6">Рассвет</button><button data-h="8.5">Утро</button><button data-h="13">День</button><button data-h="19.6">Золотой час</button><button data-h="20.6">Закат</button><button data-h="21.3">Синий час</button><button data-h="23">Ночь</button>
+      </div>
+      <h3>Сезон</h3>
+      <div class="seg" id="season"><button data-v="0" aria-pressed="true">Лето</button><button data-v="1">Осень</button><button data-v="2">Зима</button></div>
+      <h3>Погода</h3>
+      <div class="row"><label for="cloud">Облачность</label><output id="cloud-o">35%</output></div>
+      <input type="range" id="cloud" min="0" max="1" step="0.01" value="0.35">
+      <div class="row"><label for="haze">Дымка</label><output id="haze-o">50%</output></div>
+      <input type="range" id="haze" min="0" max="1" step="0.01" value="0.5">
+      <div class="row"><label for="wind">Ветер</label><output id="wind-o">60%</output></div>
+      <input type="range" id="wind" min="0" max="2" step="0.01" value="1">
+      <h3>Жизнь на бульваре</h3>
+      <div class="row"><label for="crowd">Прохожие</label><output id="crowd-o">220</output></div>
+      <input type="range" id="crowd" min="0" max="400" step="10" value="220">
+      <label class="tog">Фонтаны<input type="checkbox" id="fountains" checked></label>
+      <label class="tog">Машины на проспектах<input type="checkbox" id="cars" checked></label>
+      <h3>Стиль людей</h3>
+      <div class="seg" id="style"><button data-v="pixel" aria-pressed="true">Пиксель (Minecraft)</button><button data-v="cardboard">Крафт-картон</button></div>
+      <h3>Качество графики</h3>
+      <div class="seg" id="quality"><button data-v="low">Низкое</button><button data-v="medium">Среднее</button><button data-v="high" aria-pressed="true">Высокое</button><button data-v="ultra">Ультра</button></div>
+      <label class="tog">Отражения в воде (зеркало)<input type="checkbox" id="reflect" checked></label>
+      <label class="tog">Тени от солнца<input type="checkbox" id="shadows" checked></label>
+      <label class="tog">Свечение (bloom)<input type="checkbox" id="bloom" checked></label>
+      <label class="tog">Ambient occlusion (GTAO)<input type="checkbox" id="ao"></label>
+      <p class="note">На MacBook «Высокое» держит 50–60 fps. «Ультра» включает GTAO и полную плотность пикселей Retina.</p>
+    </section>
+
+    <section data-tab="heroes">
+      <div class="hero" id="hero-0" style="color:var(--a)">
+        <span class="badge" style="background:var(--a)">A</span>
+        <div><strong style="color:var(--ink)">Мужчина · Арман</strong><p>Тёмно-синий пиджак, белая футболка, голубые джинсы, белые кеды, борода, золотые часы.</p></div>
+        <button class="ib" data-focus="0" title="Показать" aria-label="Показать героя A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+      </div>
+      <div class="hero" id="hero-1" style="color:var(--b)">
+        <span class="badge" style="background:var(--b)">B</span>
+        <div><strong style="color:var(--ink)">Женщина · Айгерим</strong><p>Красное платье миди, длинные чёрные волосы, белые кеды, кремовая сумочка, золотые серьги.</p></div>
+        <button class="ib" data-focus="1" title="Показать" aria-label="Показать героя B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+      </div>
+      <h3>Действие</h3>
+      <div class="grid" id="actions">
+        <button class="btn act" data-a="idle" aria-pressed="true">Стоят за руки</button>
+        <button class="btn act" data-a="walkToTower">Идут к башне</button>
+        <button class="btn act" data-a="walkAway">Идут от башни</button>
+        <button class="btn act" data-a="lookUp">Смотрят на шар</button>
+        <button class="btn act" data-a="point">Она показывает</button>
+        <button class="btn act" data-a="selfie">Селфи</button>
+        <button class="btn act" data-a="talk">Разговор</button>
+        <button class="btn act" data-a="wave">Машут в камеру</button>
+        <button class="btn act" data-a="hug">Обнимаются</button>
+        <button class="btn act" data-a="pose">Позируют</button>
+      </div>
+      <h3>Управление</h3>
+      <label class="tog">Вести героев клавишами (B) — WASD / ←↑↓→, Shift — бег<input type="checkbox" id="drive"></label>
+      <label class="tog">Вместе, держась за руки<input type="checkbox" id="together" checked></label>
+      <div class="seg" id="selhero"><button data-v="0" aria-pressed="true">Ведём A</button><button data-v="1">Ведём B</button></div>
+      <div class="row"><label for="facing">Направление взгляда</label><output id="facing-o">90°</output></div>
+      <input type="range" id="facing" min="0" max="360" step="1" value="90">
+      <div class="grid" style="margin-top:8px">
+        <button class="btn" id="place">Поставить по двойному клику</button>
+        <button class="btn" id="home">Вернуть на место</button>
+      </div>
+      <h3>Обозначения</h3>
+      <label class="tog">Кольца-маркеры в сцене (M)<input type="checkbox" id="markers" checked></label>
+      <label class="tog">Подписи A / B (L)<input type="checkbox" id="labels-t" checked></label>
+      <label class="tog">Прохожие обходят героев<input type="checkbox" id="avoid" checked></label>
+      <label class="tog">Показывать героев<input type="checkbox" id="heroes-v" checked></label>
+    </section>
+
+    <section data-tab="camera">
+      <h3>Режим</h3>
+      <div class="seg" id="mode2"><button data-v="orbit" aria-pressed="true">Обзор</button><button data-v="walk">Прогулка</button><button data-v="fly">Полёт</button><button data-v="follow">За героями</button></div>
+      <h3>Объектив (полный кадр)</h3>
+      <div class="seg" id="lens"><button data-v="14">14</button><button data-v="18">18</button><button data-v="24">24</button><button data-v="28">28</button><button data-v="35" aria-pressed="true">35</button><button data-v="50">50</button><button data-v="85">85</button><button data-v="135">135</button></div>
+      <h3>Кадр (формат Seedance)</h3>
+      <div class="seg" id="aspect"><button data-v="free" aria-pressed="true">Окно</button><button data-v="16:9">16:9</button><button data-v="9:16">9:16</button><button data-v="1:1">1:1</button><button data-v="4:3">4:3</button><button data-v="3:4">3:4</button><button data-v="21:9">21:9</button></div>
+      <label class="tog">Сетка третей<input type="checkbox" id="thirds-t"></label>
+      <label class="tog">Безопасная зона 90%<input type="checkbox" id="safe-t"></label>
+      <h3>Точки обзора</h3>
+      <div class="grid" id="views">
+        <button class="btn" data-view="heroes">Герои крупно</button>
+        <button class="btn" data-view="east">Бульвар · восток</button>
+        <button class="btn" data-view="west">Бульвар · запад</button>
+        <button class="btn" data-view="base">Под башней</button>
+        <button class="btn" data-view="plaza">Площадь 3/4</button>
+        <button class="btn" data-view="drone">Дрон над бульваром</button>
+        <button class="btn" data-view="deck">С шара (97 м)</button>
+        <button class="btn" data-view="akorda">Ак Орда</button>
+        <button class="btn" data-view="khanshatyr">Хан Шатыр</button>
+        <button class="btn" data-view="arch">Арка КМГ</button>
+      </div>
+      <h3>Трекпад и мышь</h3>
+      <div class="seg" id="device"><button data-v="auto">Авто</button><button data-v="trackpad">Трекпад</button><button data-v="mouse">Мышь</button></div>
+      <div class="row"><label for="sens">Чувствительность</label><output id="sens-o">1.0</output></div>
+      <input type="range" id="sens" min="0.3" max="2.5" step="0.05" value="1">
+    </section>
+
+    <section data-tab="director">
+      <p class="note">Шот = движение камеры + действие героев. <b>▶</b> — просмотр, <b>●</b> — сразу запись видео (24 к/с, {res}). Вмешательство трекпадом прерывает просмотр.</p>
+      <div id="shots"></div>
+      <h3>Свои ключевые кадры</h3>
+      <p class="note">Поставьте камеру, нажмите «+ Ключ» (K). Минимум два ключа — камера пройдёт плавной кривой.</p>
+      <div class="grid g3">
+        <button class="btn" id="key-add">+ Ключ</button>
+        <button class="btn" id="key-play">▶ Пуск</button>
+        <button class="btn rec" id="key-rec">● Запись</button>
+      </div>
+      <div class="keys" id="keys"></div>
+      <div class="row"><label for="dur">Длительность</label><output id="dur-o">8 с</output></div>
+      <input type="range" id="dur" min="4" max="30" step="1" value="8">
+      <button class="btn" id="key-clear" style="width:100%">Очистить ключи</button>
+      <h3>Запись видео</h3>
+      <div class="seg" id="recres"><button data-v="720" aria-pressed="true">720p</button><button data-v="1080">1080p</button></div>
+      <div class="grid" style="margin-top:8px">
+        <button class="btn rec" id="rec-live">● Записывать вручную</button>
+        <button class="btn" id="rec-stop">■ Стоп</button>
+      </div>
+      <div class="row"><label for="recmax">Лимит ручной записи</label><output id="recmax-o">15 с</output></div>
+      <input type="range" id="recmax" min="4" max="30" step="1" value="15">
+      <p class="note">Seedance 2.5 принимает видео-референсы 1,8–30 с (суммарно ≤ 30 с). Chrome и Safari пишут MP4, Firefox — WebM.</p>
+    </section>
+
+    <section data-tab="seedance">
+      <ol class="steps">
+        <li>Выберите <b>формат кадра</b> (Камера → Кадр) и время суток.</li>
+        <li>Поставьте героев и камеру или снимите шот во вкладке «Режиссёр».</li>
+        <li>Нажмите <b>«Пакет ZIP»</b> — внутри листы персонажей, первый кадр, планы локации, маска, промпт и сцена.</li>
+        <li>Загрузите изображения в Seedance по порядку (@Image1…) и вставьте промпт.</li>
+      </ol>
+      <button class="btn pri" id="pack" style="width:100%;min-height:42px">Пакет ZIP для Seedance</button>
+      <h3>Отдельные файлы</h3>
+      <div class="grid">
+        <button class="btn" id="ex-frame">Кадр PNG</button>
+        <button class="btn" id="ex-clean">Чистый план</button>
+        <button class="btn" id="ex-a">Лист: мужчина A</button>
+        <button class="btn" id="ex-b">Лист: женщина B</button>
+        <button class="btn" id="ex-ab">Лист: пара</button>
+        <button class="btn" id="ex-mask">Маска героев</button>
+      </div>
+      <div class="row"><label>Разрешение кадров</label></div>
+      <div class="seg" id="stillres"><button data-v="1080" aria-pressed="true">1080p</button><button data-v="1440">1440p</button></div>
+      <h3>Промпт</h3>
+      <div class="seg" id="plang"><button data-v="en" aria-pressed="true">English</button><button data-v="ru">Русский</button></div>
+      <textarea id="prompt" spellcheck="false" style="margin-top:8px"></textarea>
+      <div class="grid" style="margin-top:6px">
+        <button class="btn" id="p-refresh">Обновить</button>
+        <button class="btn" id="p-copy">Копировать</button>
+      </div>
+      <h3>Сцена</h3>
+      <div class="grid">
+        <button class="btn" id="scene-save">Сохранить JSON</button>
+        <button class="btn" id="scene-load">Загрузить JSON</button>
+      </div>
+      <input type="file" id="scene-file" accept="application/json,.json" hidden>
+    </section>
+  </div>
+</aside>
+
+<div id="rec" hidden><i></i>REC <span>00:00</span></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="joystick" hidden><div class="knob"></div></div>
+<div id="hint"><b>Трекпад:</b> два пальца — вращать · щипок — зум · <kbd>Shift</kbd>+два пальца — сдвиг · двойной клик — перелететь. <kbd>?</kbd> — все жесты.</div>
+
+<div id="loader">
+  <div class="load">
+    <svg viewBox="0 0 86 120" aria-hidden="true"><defs><radialGradient id="g" cx="40%" cy="35%"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#f2c14e"/><stop offset="1" stop-color="#9c6a14"/></radialGradient></defs><path d="M38 118l3-74h4l3 74z" fill="#eef2f7"/><path d="M30 44c4-6 9-8 13-8s9 2 13 8" fill="none" stroke="#eef2f7" stroke-width="3"/><circle cx="43" cy="24" r="18" fill="url(#g)"/><path d="M26 118h34" stroke="#eef2f7" stroke-width="3"/></svg>
+    <h1>Астана · Байтерек</h1>
+    <p>Бульвар Нуржол, картонные люди и двое главных героев</p>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="msg" id="msg">Подготовка…</div>
+    <div class="enter" id="enter" hidden>
+      <button class="btn pri" data-enter="walk">Войти пешком</button>
+      <button class="btn" data-enter="orbit">Обзор сверху</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="help">
+  <h2>Управление</h2>
+  <table>
+    <tr><td>Два пальца по трекпаду</td><td>Вращать камеру вокруг точки (Обзор) · смотреть по сторонам (Прогулка/Полёт)</td></tr>
+    <tr><td>Щипок (pinch)</td><td>Приблизить / отдалить · в Прогулке — шаг вперёд/назад</td></tr>
+    <tr><td><kbd>Shift</kbd> + два пальца</td><td>Сдвинуть точку обзора</td></tr>
+    <tr><td>Нажать и тянуть</td><td>Вращать · <kbd>⌘</kbd>/<kbd>Ctrl</kbd>/правая кнопка — сдвиг</td></tr>
+    <tr><td>Двойной клик</td><td>Перелететь к точке (или поставить героев, если включено)</td></tr>
+    <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки</td><td>Двигать камеру · ходить · вести героев (если включено <kbd>B</kbd>)</td></tr>
+    <tr><td><kbd>Q</kbd> <kbd>E</kbd></td><td>Обзор: поворот · Полёт: вниз / вверх</td></tr>
+    <tr><td><kbd>R</kbd> <kbd>F</kbd> · <kbd>+</kbd> <kbd>−</kbd></td><td>Наклон камеры · зум</td></tr>
+    <tr><td><kbd>Shift</kbd></td><td>Быстрее / бег</td></tr>
+    <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></td><td>Обзор · Прогулка · Полёт · За героями</td></tr>
+    <tr><td><kbd>K</kbd> · <kbd>Пробел</kbd></td><td>Добавить ключевой кадр · проиграть / остановить</td></tr>
+    <tr><td><kbd>P</kbd> · <kbd>H</kbd></td><td>Сохранить кадр PNG · спрятать интерфейс</td></tr>
+    <tr><td><kbd>M</kbd> · <kbd>L</kbd> · <kbd>B</kbd></td><td>Маркеры · подписи · вести героев</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Остановить шот или запись</td></tr>
+  </table>
+  <p class="note" style="margin-top:12px">Мышь определяется автоматически: колесо — зум. Если жесты путаются, выберите устройство во вкладке «Камера».</p>
+  <form method="dialog" style="text-align:right;margin-top:8px"><button class="btn pri">Понятно</button></form>
+</dialog>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
