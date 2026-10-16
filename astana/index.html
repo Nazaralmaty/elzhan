@@ -415,6 +415,14 @@ body.clean #top,body.clean #panel,body.clean #hint,body.clean #labels,body.clean
   <form method="dialog" style="text-align:right;margin-top:8px"><button class="btn pri">Понятно</button></form>
 </dialog>
 
+<script>
+// Opened straight from disk: browsers block ES modules on file://, so explain what to do.
+if (location.protocol === 'file:') addEventListener('DOMContentLoaded', () => {
+  const m = document.getElementById('msg');
+  m.style.color = '#ffd27a';
+  m.innerHTML = 'Страница открыта как файл — браузер блокирует модули. Запустите в папке репозитория <b>python3 -m http.server 8000</b> и откройте <b>http://localhost:8000/astana/</b>';
+});
+</script>
 <script type="module" src="./js/main.js"></script>
 </body>
 </html>
