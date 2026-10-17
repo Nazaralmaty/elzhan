@@ -23,14 +23,14 @@ export const SHOTS = [
       const c = live.c, f = live.f, r = live.r;
       // angle around the couple from their facing direction: π = right behind them
       const a = Math.PI - sm(0.3, 0.58, t) * Math.PI * 0.42 + sm(0.64, 1, t) * Math.PI * 0.36;
-      const rad = 3.3 + Math.pow(sm(0.64, 1, t), 1.3) * 19;
+      const rad = 3.3 + Math.pow(sm(0.64, 1, t), 1.3) * 12.5;
       const dir = f.clone().multiplyScalar(Math.cos(a)).addScaledVector(r, Math.sin(a));
       const pos = c.clone().addScaledVector(dir, rad);
       pos.y = c.y + 1.3 + sm(0.64, 1, t) * 1.4;
       const ahead = c.clone().addScaledVector(f, 30).add(V(0, 16, 0));
       const faces = c.clone().add(V(0, 1.5, 0)).addScaledVector(f, 2);
-      const tower = V(0, 44, 0);
-      const look = ahead.clone().lerp(faces, sm(0.3, 0.55, t) * 0.7).lerp(tower, sm(0.64, 1, t));
+      const tower = V(0, 29, 0);
+      const look = ahead.clone().lerp(faces, sm(0.22, 0.45, t)).lerp(tower, sm(0.64, 1, t));
       return { pos, look, lens: 24 };
     },
   },
