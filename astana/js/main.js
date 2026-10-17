@@ -440,7 +440,7 @@ function renderFrame(dt) {
   app.composer.render(dt);
 }
 app.renderFrame = renderFrame;
-app.step = (dt = 1 / 30) => step(dt);
+app.step = (dt = 1 / 30, render = true) => step(dt, render);
 
 let fpsAcc = 0, fpsN = 0;
 const clock = new THREE.Clock();
@@ -448,7 +448,7 @@ function loop() {
   step(Math.min(clock.getDelta(), 0.05));
 }
 // One simulation + render step (also used by tests to render deterministically).
-function step(dt) {
+function step(dt, render = true) {
   app.dt = dt;
   app.time += dt;
   U.time.value = app.time;
@@ -460,7 +460,7 @@ function step(dt) {
   app.crowdSim.update(dt, app.time, app.camera);
   if (app.state.cars) app.traffic.update(dt);
   if (app.snow.pts.visible) app.snow.mat.uniforms.uCam.value.copy(app.camera.position);
-  renderFrame(dt);
+  if (render) renderFrame(dt);
   // recording composite
   if (app.director.recording) {
     app.recordCtx.drawImage(app.renderer.domElement, 0, 0, app.recordCanvas.width, app.recordCanvas.height);
