@@ -13,6 +13,28 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 // built in the couple's frame: f = forward (where they face), r = their right, c = centre.
 export const SHOTS = [
   {
+    id: 'reels', ru: 'Рилс 9:16 · 10 с: прогулка к Байтереку', en: 'Reels 9:16 · 10 s: walk to Bayterek', dur: 10,
+    aspect: '9:16', hour: 19.7, reels: true,
+    timeline: [[0, 'walkToTower', { distance: 5.6, speed: 1.1 }], [5.4, 'point'], [8.2, 'lookUp']],
+    moveRu: 'вертикальный кадр: камера идёт за парой, облетает их спереди, когда она показывает на шар, и краном поднимается к золотому шару в золотой час',
+    moveEn: 'vertical frame: the camera follows the couple from behind, arcs round to their front as she points at the sphere, then cranes up to the golden sphere at golden hour',
+    cam(t, k, live) {
+      const sm = (a, b, x) => { const v = clamp((x - a) / (b - a), 0, 1); return v * v * (3 - 2 * v); };
+      const c = live.c, f = live.f, r = live.r;
+      // angle around the couple: π = behind them, small = in front of them
+      const a = Math.PI - sm(0.28, 0.72, t) * Math.PI * 0.78;
+      const rad = 3.3 + sm(0.6, 1, t) * 1.6;
+      const dir = f.clone().multiplyScalar(Math.cos(a)).addScaledVector(r, Math.sin(a) * 1.0);
+      const pos = c.clone().addScaledVector(dir, rad);
+      pos.y = c.y + 1.25 + t * 0.6 + Math.pow(sm(0.72, 1, t), 1.4) * 13;
+      const ahead = c.clone().addScaledVector(f, 30).add(V(0, 16, 0));
+      const faces = c.clone().add(V(0, 1.45, 0));
+      const sphere = V(0, SPHERE.y - 4, 0);
+      const look = ahead.clone().lerp(faces, sm(0.25, 0.55, t)).lerp(sphere, sm(0.74, 1, t));
+      return { pos, look, lens: 24 - sm(0.7, 1, t) * 4 };
+    },
+  },
+  {
     id: 'establish', ru: 'Общий план: башня и пара', en: 'Establishing wide: tower and couple', dur: 8, action: 'lookUp',
     moveRu: 'медленный подъём камеры от уровня глаз вверх, Байтерек целиком в кадре', moveEn: 'slow crane up from eye level, the whole Bayterek tower in frame',
     cam(t, k) { const back = k.c.clone().addScaledVector(k.away, 34).addScaledVector(k.side, 9); back.y = 1.6 + t * 9; return { pos: back, look: V(0, 38 + t * 10, 0).lerp(k.c, 0.15), lens: 24 }; },
@@ -114,6 +136,13 @@ export class Director {
     this.stop(false);
     const dur = duration || shot.dur;
     // put the couple where the move needs them
+    if (shot.aspect && this.app.state.aspect !== shot.aspect) { this.app.state.aspect = shot.aspect; this.app.layout(); this.app.hub.emit('aspect', shot.aspect); }
+    if (shot.hour !== undefined) { this.app.state.hour = shot.hour; this.app.applyTime(); this.app.ui?.time?.set(shot.hour); }
+    if (shot.reels) {
+      // on the plaza east of the tower, facing it, clear of the pools
+      H.place(54, 1.2 + 0.34, -Math.PI / 2);
+      this.app.crowdSim.build();
+    }
     if (shot.prePlace !== undefined) {
       const c = H.center;
       const d = Math.max(36, Math.hypot(c.x, c.z));
@@ -125,7 +154,8 @@ export class Director {
       H.place(p.x - Math.cos(towerHeading) * -0.34, p.z + Math.sin(towerHeading) * -0.34, shot.id === 'frontWalk' ? towerHeading + Math.PI : towerHeading);
     }
     const k = this.frameOfCouple();
-    if (shot.face === 'camera') H.setAction(shot.action, { face: Math.atan2(k.away.x, k.away.z) });
+    if (shot.timeline) H.setAction(shot.timeline[0][1], shot.timeline[0][2] || {});
+    else if (shot.face === 'camera') H.setAction(shot.action, { face: Math.atan2(k.away.x, k.away.z) });
     else if (shot.id === 'tracking' || shot.id === 'follow') H.setAction('walkToTower', { distance: 6, speed: 1.15 });
     else if (shot.id === 'frontWalk') H.setAction('walkAway');
     else H.setAction(shot.action);
@@ -187,6 +217,13 @@ export class Director {
     const u = clamp(P.t / P.dur, 0, 1);
     const cam = this.app.camera;
     let pos, look, lens;
+    if (P.kind === 'shot' && P.shot.timeline) {
+      P.fired = P.fired || 1;
+      while (P.fired < P.shot.timeline.length && P.t >= P.shot.timeline[P.fired][0]) {
+        const [, act, opts] = P.shot.timeline[P.fired++];
+        this.app.heroes.setAction(act, opts || {});
+      }
+    }
     if (P.kind === 'shot') {
       const r = P.shot.cam(easeInOutSine(u) * 0.15 + u * 0.85, P.k, this.liveFrame(), time);
       pos = r.pos; look = r.look; lens = r.lens;

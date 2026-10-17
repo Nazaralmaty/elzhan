@@ -138,7 +138,8 @@ export class UI {
     this.mode2 = seg('#mode2', (v) => this.setMode(v, v === 'follow' ? { radius: 9 } : {}));
     this.lens = seg('#lens', (v) => app.rig.setLens(+v));
     this.lens.set(app.rig.lens);
-    seg('#aspect', (v) => { state.aspect = v; app.layout(); this.refreshPrompt(); });
+    const aspectSeg = seg('#aspect', (v) => { state.aspect = v; app.layout(); this.refreshPrompt(); this.updateResNote(); });
+    hub.on('aspect', (v) => { aspectSeg.set(v); this.updateResNote(); });
     toggle('thirds-t', (v) => ($('#thirds').hidden = !v));
     toggle('safe-t', (v) => ($('#safe').hidden = !v));
     $('#views').addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) app.flyTo(b.dataset.view); });
