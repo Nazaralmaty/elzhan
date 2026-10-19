@@ -1,0 +1,542 @@
+#!/usr/local/bin/python3
+"""_engine/score.py — SFX bus from the composition's own cue list.
+   Run from the reel folder after `node engine/render.js --cues`:
+     python3 engine/score.py [--palette motion|faceless|triplex|zoomplex|infograph|canvas|speaker|literal|gold|icon|archive|apple|apple-speaker|limbo|goz|board] [--gaps]
+   Reads work/cues.json (written by render.js from window.CUES) and builds
+   work/_sfx.wav. The schedule is never typed by hand: the same objects that
+   draw the frame emit the cues.
+
+   Laws: no impact on a zoom seam (motion); holes > 0.55 s filled with dry
+   ticks every 0.30 s at half level; library folders 06_game / 07_cartoon are
+   never used; two impacts per reel at most, on script turns only."""
+import json, os, subprocess, sys, wave
+from pathlib import Path
+import numpy as np
+
+SR = 48000
+LIB = Path.home() / ".claude" / "assets" / "sfx"
+argv = sys.argv[1:]
+PAL = argv[argv.index('--palette') + 1] if '--palette' in argv else 'motion'
+GAPS = '--gaps' in argv
+
+D = json.loads(Path('work/cues.json').read_text())
+DUR = D["DUR"]; CUES = D["cues"]
+
+E = []
+GAIN = 0.82
+def ev(tm, name, v, cut=None):
+    # cut = seconds: the sample is trimmed to this length with a fade-out. A map entry
+    # may carry it as a 4th field. 13.09.2026 (Elzhan on fragrancia/reel_036): a long
+    # sample keeps running where the event is already over — counter_run 3.52 s under a
+    # 0.9 s counter read as one unbroken rattle. Length is part of «звук к месту».
+    if 0 <= tm <= DUR: E.append((round(tm, 3), name, v * GAIN, cut))
+
+# 14.09.2026, Motionix pack: the whooshes measure 0.89–1.00 on ear's «дорогой» axis — the
+# best in the library, so the pan rotation is built out of them and the old ones stay as alternates.
+PAN = ['whoosh_cine_low', 'whoosh_fast_c', 'whoosh_deep_short', 'whoosh_cine_mid',
+       'whoosh_high_fast', 'whoosh_cloth', 'whoosh_smooth_fast', 'whoosh_deep']
+CLICK = ['click_snap', 'tick_wood', 'click_soft', 'tick']
+CLICKPRO = ['click_pro', 'click_mx_b', 'click_mx_c', 'click_hollow']
+# v9 (14.09.2026): мягкие попы — посадка вставки перестала быть щелчком, как и её кривая
+POPSOFT = ['pop_smooth', 'pop_slow', 'pop_med', 'button_c']
+# 14.09.2026 (hakk_academy/reel_002): у canvas-ролика 9–12 движений камеры, и все играли один
+# whoosh_cine_norm — слой читался как один повторяющийся звук. Теперь движение камеры и подъём
+# перед швом берутся по кругу из пака Motionix (замер «дорогой» 0.90–1.00, лучшее в библиотеке).
+CAMPAN = ['whoosh_cine_norm', 'whoosh_simple', 'whoosh_cine_fast', 'whoosh_slow_smooth', 'whoosh_data', 'whoosh_simple2']
+RISER = ['riser_short', 'riser_smooth']
+# 22.09.2026: тела вместо верхов — три тика из пака 28.08 (дерево, механика, войлок)
+TICKBODY = ['tick_wood_a', 'tick_mech_b', 'tick_body_c', 'tick_wood']
+# 23.09.2026, Элжан: «один акцентный звук слишком часто звучит, часто могут звучать
+# только фоновые». Превращение в жанре morph случается десятки раз, поэтому у него
+# своя ротация из МЯГКИХ файлов, а акценты вынесены в редкие кии burst / land.
+SOFTMORPH = ['soft_slide_up', 'ui_soft_05', 'click_crispy', 'soft_slide_up']
+SWISH = ['soft_woosh', 'whoosh_vac_a', 'click_crispy', 'whoosh_small']   # kinetic: one light air per landing word, rotated
+LAND = ['land_soft_a', 'land_pad_c', 'land_air_b', 'click_pro']   # literal: the body of an object landing, rotated so no pop repeats
+cp_i = 0
+pan_i = tok_i = cam_i = ris_i = ps_i = tb_i = sm_i = cp_i2 = sw_i = ld_i = 0
+# per-genre mapping: cue kind → list of (offset, sound, level)
+MAP = {
+  'apple': {
+    # 19.09.2026 — Apple-палитра. Звуки 11_apple/ скачаны с mixkit.co (Mixkit Free
+    # License, коммерческое использование разрешено); проприетарные звуки Apple не
+    # используются. Закон палитры: тихо, сухо, одно событие — один звук, импактов нет.
+    'act':       [(-0.18, 'whoosh_smooth_fast', 0.15), (0.04, 'apple_thud', 0.13)],
+    'panel':     [(0.0, 'apple_open', 0.13)],
+    'word':      [(0.02, 'apple_tick', 0.055)],
+    'pill':      [(0.0, 'apple_click', 0.11)],
+    'btn':       [(0.0, 'apple_pop', 0.14)],
+    'press':     [(0.0, 'apple_tap', 0.20)],
+    'row':       [(0.0, 'apple_click_hi', 0.10)],
+    'grid':      [(0.0, 'apple_tick', 0.07)],
+    'counter':   [(0.0, 'counter_run', 0.09, 1.0)],
+    'land':      [(0.0, 'apple_switch', 0.15)],
+    'morph':     [(-0.10, 'SOFTMORPH', 0.085)],
+    'burst':     [(-0.16, 'whip_fast', 0.17), (0.0, 'camera_flash', 0.20)],   # хук: вспышка, один раз на ролик
+    'shut':      [(-0.30, 'slowmo_pull', 0.13)],                              # отъезд/замедление, редко
+    'snap':      [(0.0, 'camera_click_ring', 0.15)],                          # редкий акцент с послезвоном
+    'cta':       [(0.0, 'notif_positive', 0.18)],
+    # /apple-motion runs on canvas.js, so the palette also answers canvas cues (04.10.2026, QAISAR/reel_003:
+    # without them a canvas reel got 2 sounds and the hole-filler ticks did the rest)
+    'pop':       [(0.0, 'apple_pop', 0.10)],
+    'card':      [(0.0, 'apple_open', 0.12)],
+    'shot':      [(0.0, 'apple_open', 0.10)],
+    'glass':     [(0.0, 'apple_open', 0.09)],
+    'key':       [(0.0, 'apple_tick', 0.045)],
+    'typed':     [(0.0, 'apple_click', 0.10)],
+    'check':     [(0.0, 'apple_click_hi', 0.12)],
+    'xmark':     [(0.0, 'apple_thud', 0.10)],
+    'draw':      [(0.0, 'apple_tick', 0.06)],
+    'bars':      [(0.0, 'counter_run', 0.08, 0.8)],
+    'cam':       [(-0.10, 'whoosh_smooth_fast', 0.05)],
+    'dive':      [(-0.12, 'whoosh_smooth_fast', 0.12)],
+    'zoom':      [(-0.12, 'whoosh_smooth_fast', 0.15), (0.05, 'apple_switch', 0.12)],
+    'iris':      [(-0.10, 'whoosh_smooth_fast', 0.12), (0.05, 'apple_switch', 0.12)],
+    'flash':     [(0.0, 'apple_switch', 0.14)],
+    'click':     [(0.0, 'apple_tap', 0.20)],
+  },
+  'apple-speaker': {
+    # 01.10.2026 — Apple-язык поверх живой речи (/apple-design §18). Те же сэмплы 11_apple/, но
+    # звук стоит только на ПРИЧИНЕ: окно превратилось, поверхность пришла, выбор сдвинулся,
+    # что-то завершилось. Слова, подписи и сборка частей (`word`, `grid`, `vis`, `draw`) молчат:
+    # под голосом каждый тик читается помехой речи, а не интерфейсом. Дыр не заливаем.
+    'act':     [(-0.20, 'whoosh_smooth_fast', 0.135)],
+    'morph':   [(-0.08, 'SOFTMORPH', 0.105)],
+    'panel':   [(0.0, 'apple_open', 0.15)],
+    'pill':    [(0.0, 'apple_click', 0.135)],
+    'btn':     [(0.0, 'apple_pop', 0.165)],
+    'press':   [(0.0, 'apple_tap', 0.21)],
+    'row':     [(0.0, 'apple_click_hi', 0.105)],
+    'counter': [(0.0, 'counter_run', 0.09, 0.7)],
+    'land':    [(0.0, 'apple_switch', 0.18)],
+    'snap':    [(0.0, 'camera_click_ring', 0.15)],
+    'cta':     [(0.0, 'notif_positive', 0.21)],
+  },
+  'board': {
+    # 26.09.2026 — BOARD (genre/board.js): the Apple UI sounds, one event — one quiet sound. A chapter
+    # pan is the only whoosh; the stamp is the only accent with a tail. No hole filling: the voice runs
+    # without gaps and the references carry no tick bed.
+    'act':     [(-0.22, 'whoosh_smooth_fast', 0.12)],
+    'panel':   [(0.0, 'apple_open', 0.11)],
+    'pill':    [(0.0, 'apple_click', 0.09)],
+    'row':     [(0.0, 'apple_click_hi', 0.09)],
+    'grid':    [(0.0, 'apple_tick', 0.07)],
+    'link':    [(0.0, 'apple_tick', 0.05)],
+    'counter': [(0.0, 'counter_run', 0.08, 1.2)],
+    'cut':     [(0.0, 'apple_switch', 0.14)],
+    'snap':    [(0.0, 'camera_click_ring', 0.16)],
+    'press':   [(0.0, 'apple_tap', 0.20)],
+    'cta':     [(0.0, 'notif_positive', 0.16)],
+  },
+  'limbo': {
+    # 22.09.2026 — LIMBO. Закон палитры: воздух, а не удары. Объект прилетает — мягкий
+    # воздушный ход и приземление; слово — тихий тик; счётчик — один прогон. Ударов
+    # (impact_boom, bass_hit) в лимбе нет: пустой кадр делает любой удар громким.
+    'land':      [(-0.26, 'whoosh_slow_smooth', 0.18), (0.02, 'land_pad', 0.16)],
+    'word':      [(0.02, 'tick_wood', 0.07)],
+    'value':     [(0.0, 'click_soft', 0.10), (0.06, 'shine', 0.09)],
+    'note':      [(0.0, 'tick', 0.06)],
+    'count':     [(0.0, 'counter_run', 0.08, 1.0)],
+    'fan':       [(0.0, 'paper_slide', 0.11)],
+    'disc':      [(-0.10, 'whoosh_air', 0.14), (0.10, 'ding_soft', 0.10)],
+    'strip':     [(-0.14, 'whoosh_cloth', 0.15)],
+    'sheet':     [(-0.08, 'paper_turn', 0.14), (0.20, 'land_pad', 0.12)],
+    'plate':     [(-0.42, 'riser_smooth', 0.16), (0.0, 'sub_drop', 0.24)],
+    'cta':       [(0.0, 'notif_soft', 0.18)],
+  },
+  'goz': {
+    # 22.09.2026, v2 — замер трёх референсов gozmotion.ae: low/mid 8.7–14.9, hi/mid 0.05–0.09.
+    # Звук жанра лежит НА НИЗАХ, а не на щелчках. Первая версия палитры («бумага и воздух,
+    # ударов нет») дала low/mid 6.3 и была забракована Элжаном как слабая: у референса вес
+    # стоит на каждом резе, а сверху почти ничего.
+    # Исключение из общего закона «два импакта на ролик»: здесь импакт — это и есть рез, и он
+    # звучит на каждом. Закон держится другим — импакт всегда в паре с сабом и никогда не
+    # ставится на слово.
+    'bed':       [(0.0, 'drone_low', 0.085)],                                     # 54 с, одно размещение на любой ролик
+    'cut_cut':   [(-0.55, 'riser_smooth', 0.17), (-0.20, 'whoosh_cine_low', 0.20),
+                  (0.0, 'sub_drop', 0.30), (0.02, 'impact_soft', 0.22)],
+    'cut_push':  [(-0.70, 'charge_up', 0.15), (-0.18, 'whoosh_cine_low2', 0.22, 0.80),
+                  (0.0, 'bass_hit', 0.28), (0.03, 'land_deep', 0.16)],
+    'cut_pan':   [(-0.26, 'whoosh_deep', 0.24), (0.14, 'land_pad', 0.13)],
+    'art':       [(-0.10, 'whoosh_smooth_fast', 0.13, 0.45), (0.14, 'land_deep', 0.18)],
+    'band':      [(-0.14, 'whoosh_cloth', 0.18), (0.04, 'impact_soft', 0.15)],
+    'hit':       [(0.0, 'click_pro', 0.10, 0.35), (0.02, 'land_pad', 0.15)],      # большое слово садится
+    'accent':    [(0.02, 'impact_soft', 0.14)],                                   # акцентное слово надевает плашку
+    'word':      [(0.02, 'tick_wood', 0.05)],                                     # верх тихий: hi/mid у референса 0.05–0.09
+    'cta':       [(0.0, 'shine_long', 0.18)],
+  },
+  'motion': {
+    # 22.09.2026 (Элжан: «звуковых эффектов почти не было»). Три причины, все в этой таблице:
+    # половина событий жанра сюда не заходила вовсе (карточка съёмки `vid`, счёт `blocks`,
+    # зачёркнутое слово `strike`), один тихий тик закрывал всю графику, а тела у звуков не было —
+    # `tick` и `click_ui` это верх без низа. Теперь каждое событие звучит парой «воздух + посадка»
+    # на телах из 09_accent/_prompts (низ, движение массы, короткий хвост).
+    'tr_push':   [(-0.34, 'PAN', 0.30), (0.24, 'land_soft_a', 0.20)],
+    'tr_pull':   [(-0.30, 'sub_drop', 0.22), (0.26, 'land_pad_c', 0.22), (0.30, 'click_snap_b', 0.16)],
+    'tr_reveal': [(-0.40, 'whoosh_cinematic', 0.26), (0.10, 'paper_pull_a', 0.20)],
+    'tok':       [(0.03, 'CLICK', 0.17)],
+    'det':       [(-0.14, 'whoosh_vac_a', 0.13), (0.24, 'click_stone_c', 0.16)],
+    'gfx':       [(0.05, 'TICKBODY', 0.13)],
+    'obj':       [(-0.18, 'whoosh_cloth_b', 0.15), (0.30, 'land_deep', 0.28)],
+    'vid':       [(-0.20, 'whoosh_vac_a', 0.20), (0.06, 'land_air_b', 0.24)],   # карточка съёмки прилетает
+    'blocks':    [(0.0, 'tick_mech_b', 0.16)],                                   # счёт предметами
+    'strike':    [(0.0, 'paper_tear_b', 0.22)],                                  # заявление зачёркнуто
+    'bar':       [(-0.10, 'whoosh_fast', 0.16), (0.14, 'impact_soft', 0.22)],
+    'chip':      [(0.06, 'click_soft_a', 0.16)],
+    'row':       [(-0.06, 'paper_slide', 0.15), (0.16, 'click_ui', 0.14)],
+    'wipe':      [(-0.26, 'sweep_metal', 0.30), (0.0, 'impact_boom', 0.38)],
+    'plate':     [(-0.55, 'riser_long', 0.22), (0.0, 'sub_drop', 0.34)],
+    'cta':       [(0.0, 'notif_positive', 0.20)],
+  },
+  'faceless': {
+    'swipe':     [(-0.22, 'PAN', 0.24), (0.12, 'land_pad', 0.16)],
+    'word':      [(0.02, 'CLICK', 0.12)],
+    'card':      [(-0.08, 'whoosh_smooth_fast', 0.14), (0.22, 'land_deep', 0.24)],
+    'sticker':   [(0.0, 'paper_slide', 0.16), (0.18, 'click_snap', 0.14)],
+    'badge':     [(0.0, 'click_ui', 0.16)],
+    'tally':     [(0.0, 'tick', 0.09)],
+    'secnum':    [(0.0, 'click_soft', 0.12)],
+    'plate':     [(-0.40, 'riser_long', 0.18), (0.0, 'sub_drop', 0.30)],
+    'cta':       [(0.0, 'notif_positive', 0.20)],
+  },
+  'triplex': {
+    'cut':       [(-0.18, 'PAN', 0.22), (0.02, 'impact_soft', 0.20)],
+    'word':      [(0.02, 'CLICK', 0.12)],
+    'three':     [(0.0, 'tick_metal', 0.16), (0.30, 'land_deep', 0.24)],
+    'plate_in':  [(0.0, 'drone_low', 0.16)],
+    'plate_out': [(0.0, 'sub_drop', 0.16)],
+    'card':      [(-0.06, 'paper_slide', 0.14), (0.20, 'click_snap', 0.14)],
+    'giant':     [(-0.10, 'whoosh_epic_fast', 0.16), (0.12, 'impact_soft', 0.22)],
+    'tally':     [(0.0, 'tick', 0.09)],
+    'mech':      [(0.0, 'impact_metal', 0.22)],
+    'plate':     [(-0.50, 'riser_long', 0.20), (0.0, 'sub_drop', 0.32)],
+    'cta':       [(0.0, 'notif_positive', 0.20)],
+  },
+  # zoomplex = motion's seams + triplex's materials: the zoom carries the transition,
+  # the material carries the event. No impact on a seam (motion's law) — the material
+  # sounds where it lands, the seam only breathes.
+  'zoomplex': {
+    'tr_push':   [(-0.34, 'PAN', 0.26), (0.24, 'land_pad', 0.15)],
+    'tr_pull':   [(-0.30, 'sub_drop', 0.20), (0.26, 'land_pad', 0.18), (0.30, 'click_snap', 0.14)],
+    'tr_reveal': [(-0.40, 'whoosh_cinematic', 0.24), (0.10, 'paper_slide', 0.18)],
+    'tok':       [(0.03, 'CLICK', 0.15)],
+    'kick':      [(0.0, 'click_soft', 0.11)],
+    'obj':       [(0.30, 'land_deep', 0.26)],
+    'det':       [(0.24, 'click_soft', 0.13)],
+    'gfx':       [(0.05, 'tick', 0.10)],
+    'three':     [(0.0, 'tick_metal', 0.16), (0.30, 'land_deep', 0.24)],
+    'mech':      [(0.0, 'impact_metal', 0.22)],
+    'card':      [(-0.06, 'paper_slide', 0.14), (0.20, 'click_snap', 0.14)],
+    'plate_in':  [(0.0, 'drone_low', 0.16)],
+    'plate_out': [(0.0, 'sub_drop', 0.16)],
+    'bar':       [(-0.10, 'whoosh_fast', 0.16), (0.14, 'impact_soft', 0.22)],
+    'chip':      [(0.06, 'click_ui', 0.14)],
+    'row':       [(-0.06, 'paper_slide', 0.15), (0.16, 'click_ui', 0.14)],
+    'wipe':      [(-0.26, 'sweep_metal', 0.30), (0.0, 'impact_boom', 0.38)],
+    'plate':     [(-0.55, 'riser_long', 0.20), (0.0, 'sub_drop', 0.34)],
+    'cta':       [(0.0, 'notif_positive', 0.20)],
+  },
+  # infograph = one continuous camera over a dark map: the route draws, the icons land.
+  # The drone under the whole reel is the bed; nothing hits on a dissolve.
+  'infograph': {
+    'seam':      [(-0.26, 'PAN', 0.22), (0.14, 'land_pad', 0.14)],
+    'icon':      [(0.0, 'click_ui', 0.15), (0.16, 'land_pad', 0.16)],
+    'pin':       [(0.0, 'click_snap', 0.17)],
+    'route':     [(0.0, 'whoosh_small', 0.18)],
+    'run':       [(0.0, 'whoosh_fast', 0.15)],
+    'label':     [(0.02, 'CLICK', 0.13)],
+    'big':       [(-0.10, 'whoosh_fast', 0.16), (0.12, 'impact_soft', 0.24)],
+    'ui':        [(0.0, 'button_a', 0.16)],
+    'split':     [(0.0, 'tick_metal', 0.15)],
+    'check':     [(0.0, 'notif_positive', 0.22)],
+    'tally':     [(0.0, 'tick', 0.09)],
+    'plate':     [(-0.50, 'riser_long', 0.20), (0.0, 'sub_drop', 0.32)],
+    'cta':       [(0.0, 'notif_positive', 0.20)],
+  },
+  'canvas': {   # 13.09.2026 — rebuilt on Elzhan's eight sounds (riser_short, shine_long, click_pro, ding_soft, bleep_bloop, click_hollow, counter_run, popup): "звучат дороже и современнее, использовать почаще"
+    'word':      [(0.0, 'CLICKPRO', 0.16, 0.45)],                                # click_pro / click_hollow alternating; click_hollow тянется 1.39 с — режем
+    'draw':      [(0.0, 'ui_open', 0.15, 0.50)],                                 # 14.09.2026: панель обводится — Motionix ui_open вместо шуршания бумаги
+    'card':      [(-0.06, 'whoosh_smooth_fast', 0.12), (0.16, 'ding_soft', 0.20, 0.80)],
+    'pop':       [(0.02, 'POPSOFT', 0.15, 0.45)],                                 # 14.09.2026: popup бил щелчком на каждой посадке — мягкие попы Motionix по кругу
+    'cam':       [(-0.10, 'CAMPAN', 0.14)],
+    # v9 (14.09.2026, замечания автора референсов): смена плоскости кадра — свой звук, не проезд камеры.
+    # Разгон 1.78 с (charge_up) идёт под наклон, низкий whoosh кладёт мир в новую плоскость, хвост — воздух.
+    'dive':      [(0.0, 'charge_up', 0.12, 0.95), (0.45, 'whoosh_cine_low2', 0.17, 0.80)],
+    'glass':     [(0.0, 'shimmer_glass', 0.15, 0.55)],                            # стеклянная панель обводится — стекло, а не бумага
+    'grid':      [(0.0, 'data_collect', 0.16, 0.80)],                             # сетка из 50 клеток собирается одним набором
+    'gridtick':  [],                                                              # ряд встал: набор data_collect уже читается, клики поверх — трещотка
+    'tr_blur':   [(-0.45, 'RISER', 0.24), (0.10, 'land_pad', 0.16)],
+    'tr_card':   [(-0.35, 'RISER', 0.20), (0.05, 'impact_soft', 0.22)],
+    'tr_pop':    [(-0.20, 'whoosh_deep_light', 0.20), (0.02, 'land_deep', 0.20)],
+    'plate':     [(-0.50, 'riser_long', 0.20), (0.0, 'sub_drop', 0.30)],
+    'cta':       [(0.0, 'shine_long', 0.24)],
+    'flash':     [(-0.50, 'RISER', 0.26), (-0.09, 'bass_hit', 0.22), (0.0, 'shutter_hard', 0.18, 0.40)],   # riser into the white frame, the hit on it, затвор на самой вспышке
+    'key':       [(0.0, 'typing_short', 0.16, 0.12)],   # 0.36 с при 12 знаках/с накладывается сам на себя — остаётся один щелчок
+    'typed':     [(0.0, 'ui_enter', 0.20, 0.70)],                                 # the word is in (bleep_bloop — 06_game, cheap: 0.00)
+    'bar':       [(0.0, 'click_pro', 0.10)],                                      # one bar grows (quiet: the group has its counter)
+    'bars':      [(0.0, 'counter_run', 0.22, 1.00)],                              # a bar group / counter runs: сэмпл 3.52 с длиннее любого счётчика
+    'wave':      [(0.0, 'whoosh_deep_short', 0.26)],
+    'shot':      [(-0.30, 'whoosh_deep_b', 0.20), (0.05, 'land_deep', 0.20)],
+    'tl':        [(0.0, 'click_hollow', 0.18, 0.50)],
+    'check':     [(0.0, 'ding_soft', 0.20, 0.55)],
+    'iris':      [(-0.55, 'RISER', 0.26), (0.02, 'ding_soft', 0.24)],        # riser closes the disc, ding opens the next world
+    'band':      [(-0.30, 'whoosh_cloth', 0.24), (0.0, 'impact_soft', 0.20), (0.05, 'shine_long', 0.14, 1.20)],
+    'hard':      [(0.0, 'click_mx_c', 0.18, 0.45)],
+    'zoom':      [(-0.45, 'RISER', 0.28), (0.02, 'bass_hit', 0.20), (0.05, 'shine_long', 0.16, 1.20)],   # zoom-through into the next world
+    'spot':      [(0.0, 'gear_soft', 0.12, 0.42)],                                # the spotlight moves
+    # v15 (28.09.2026): `gen` — картинка проявляется из шума (engine/gen/gen.js): цифровой набор на старте, стекло на проявлении, низкий уход на распаде
+    'gen':       [(0.0, 'data_collect', 0.14, 0.90)],
+    'genok':     [(0.0, 'shimmer_glass', 0.14, 0.55)],
+    'genlose':   [(0.0, 'whoosh_deep_short', 0.20)],
+    # v11 (15.09.2026, four references — lamp, collage, UI, Vox): every new seam and insert sounds as what it is
+    'push':      [(-0.10, 'soft_slide_side', 0.22, 0.60), (0.30, 'land_pad', 0.12)],   # a panel shoves the world out
+    'torn':      [(-0.05, 'paper_tear', 0.26, 0.90)],                             # the new paper rises with a torn edge
+    'slice':     [(-0.30, 'paper_slide', 0.22, 0.70), (0.02, 'impact_soft', 0.14)],
+    'blink':     [(0.0, 'click_mx_c', 0.16, 0.35)],                               # one click per one-word flash frame
+    'marker':    [(0.0, 'marker_write', 0.22, 0.55)],
+    'hl':        [(0.0, 'marker_write', 0.13, 0.40)],
+    'lamp':      [(-0.04, 'land_deep', 0.22)],                                    # the projector lands
+    'swing':     [(0.0, 'whoosh_smooth_fast', 0.12, 0.50)],
+    'click':     [(0.0, 'click_mouse', 0.24, 0.30)],
+    'tear':      [(-0.06, 'paper_slide', 0.15, 0.50)],
+    # v12 iOS story kit
+    'xmark':     [(0.0, 'click_mx_b', 0.18, 0.35)],
+    'streak':    [(-0.04, 'whoosh_smooth_fast', 0.11, 0.45), (0.36, 'POPSOFT', 0.14, 0.40)],
+  },
+  'kinetic': {   # genre/kinetic.js. Measured on the agency reference (B2jIfWsR, 23.7 s): a music bed under the voice, a
+                 # high-band transient every 0.3–0.5 s (≈200/min — one light swish per landing word), a low hit only on
+                 # a world change (card shrink 3.8 s, tear 5.8 s, collage 7.1 s), paper on the tear, a riser into each glow.
+    'word':      [(-0.03, 'SWISH', 0.07, 0.40)],
+    'bigword':   [(-0.08, 'whoosh_epic_fast', 0.12, 0.45), (0.0, 'click_crispy', 0.10)],
+    'slam':      [(-0.10, 'whoosh_epic_fast', 0.15, 0.45), (0.02, 'punch_body', 0.20), (0.02, 'sub_drop', 0.14, 0.90)],
+    'count':     [(0.0, 'counter_run', 0.13, 0.75)],
+    'sticker':   [(-0.05, 'whoosh_smooth_fast', 0.14, 0.60), (0.30, 'paper_slide', 0.13, 0.40), (0.34, 'land_pad', 0.13)],
+    'card':      [(-0.10, 'whoosh_deep_b', 0.18), (0.40, 'land_deep', 0.18)],
+    'frag':      [(0.0, 'shutter_smooth', 0.10, 0.35)],
+    'photo':     [(-0.06, 'whoosh_cloth', 0.12, 0.50), (0.22, 'land_soft_a', 0.13)],
+    'pop':       [(0.02, 'POPSOFT', 0.12, 0.45)],
+    'doodle':    [(0.0, 'marker_write', 0.10, 0.40)],
+    'brk':       [(0.0, 'click_pro', 0.14)],
+    'tear':      [(-0.06, 'paper_tear', 0.30, 0.90), (0.04, 'bass_hit', 0.12)],
+    'shards':    [(0.0, 'sparkle_soft', 0.10, 0.80)],
+    'stroke':    [(0.0, 'shine_a', 0.14)],
+    'bars':      [(0.0, 'data_collect', 0.14, 0.80)],
+    'punch':     [(0.0, 'punch_air', 0.10, 0.50)],
+    'cta':       [(0.0, 'notif_positive', 0.16)],
+    'tr_hard':   [(0.0, 'click_mx_c', 0.10, 0.30)],
+    'tr_whip':   [(-0.12, 'whip_fast', 0.20, 0.55), (0.0, 'whoosh_fast_c', 0.10, 0.50)],
+    'tr_zoom':   [(-0.30, 'zoom_in', 0.18, 0.70), (0.02, 'impact_soft', 0.16)],
+    'tr_blur':   [(-0.20, 'whoosh_cine_low', 0.16, 0.80)],
+    'tr_glow':   [(-0.60, 'riser_rjd', 0.18), (0.0, 'bass_hit', 0.20), (0.02, 'shimmer_deep_a', 0.10, 0.90)],
+    'tr_flash':  [(-0.50, 'RISER', 0.20), (0.0, 'bass_hit', 0.18), (0.0, 'camera_flash', 0.14, 0.50)],
+  },
+  'speaker': {   # footage carries the voice: SFX only on events, no hole filling, no clicks per word
+    'sub':       [(0.0, 'click_soft', 0.07)],
+    'pop':       [(0.02, 'click_ui', 0.13)],
+    'card':      [(-0.06, 'whoosh_smooth_fast', 0.14), (0.20, 'land_pad', 0.18)],
+    'strip':     [(-0.08, 'paper_slide', 0.16), (0.16, 'click_snap', 0.14)],
+    'bigtype':   [(-0.10, 'whoosh_epic_fast', 0.16), (0.12, 'impact_soft', 0.20)],
+    'counter':   [(0.0, 'tick_wood', 0.12)],
+    'tick':      [(0.0, 'click_snap', 0.12)],
+    'cut':       [(-0.10, 'PAN', 0.22), (0.02, 'impact_soft', 0.22)],
+    'cam':       [(-0.10, 'whoosh_cine_norm', 0.10)],
+    'cta':       [(0.0, 'notif_positive', 0.18)],
+  },
+  'literal': {  # /literal-speaker — speaker + a literal insert on every claim. Measured on the reference (marmelad_ich DdEEfans1eg,
+                # 44 s): voice-separated background only 8.2 LUFS under the voice, 157 sound events/min, median gap 0.27 s,
+                # a whoosh + low thump on every hard cut into an insert, a body pop on every object that lands, the
+                # object's own sound named by the reel (sfx:), no click per subtitle word.
+    'cut':       [(-0.06, 'PAN', 0.20, 0.55), (0.0, 'impact_soft', 0.16, 0.45)],
+    'html':      [(-0.04, 'SWISH', 0.09, 0.35), (0.05, 'LAND', 0.13, 0.40)],
+    'card':      [(-0.06, 'whoosh_vac_a', 0.12, 0.45), (0.12, 'LAND', 0.14, 0.40)],
+    'pop':       [(0.02, 'LAND', 0.10, 0.35)],
+    'seq':       [(0.0, 'shutter_smooth', 0.09, 0.30)],
+    'counter':   [(0.0, 'TICKBODY', 0.12, 0.30)],
+    'tick':      [(0.0, 'ding_soft', 0.10, 0.60)],
+    'strip':     [(-0.06, 'whoosh_cloth', 0.11, 0.45)],
+    'bigtype':   [(-0.10, 'whoosh_epic_fast', 0.14, 0.45), (0.04, 'punch_body', 0.16, 0.40)],
+    'cam':       [(-0.10, 'CAMPAN', 0.08, 0.80)],
+    'cta':       [(0.0, 'notif_soft', 0.14)],
+  },
+  'gold': {      # the gold-speaker branch (15.09.2026, Elzhan «убавь шума»): the reference fires a
+                 # sub-bass impact on every card cut and NOTHING per word — no click per subtitle,
+                 # no click per line. Measured on Dc6aFR2tA35: low band ×8…14 of its median on the
+                 # six card cuts, ×1.3 everywhere else.
+    'cut':       [(-0.22, 'PAN', 0.26), (0.0, 'sub_drop', 0.30, 1.40), (0.02, 'impact_soft', 0.22)],
+    'bigtype':   [(-0.12, 'whoosh_deep_light', 0.13, 0.70)],
+    'cam':       [(-0.12, 'whoosh_cine_low', 0.11, 0.90)],
+    'card':      [(-0.05, 'whoosh_smooth_fast', 0.10, 0.45)],
+    'strip':     [(-0.06, 'whoosh_cloth', 0.11, 0.45)],
+    'counter':   [(0.0, 'tick_wood', 0.10)],
+  },
+  'icon': {      # speaker + the SFX packs the I-CON client sent (assets/sfx/10_icon_refs, 14.09.2026)
+    'sub':       [(0.0, 'click_soft', 0.04)],
+    'pop':       [(0.0, 'icon_pop_up', 0.10)],
+    'html':      [(-0.06, 'icon_slide_whoosh', 0.15)],
+    'card':      [(-0.02, 'icon_enter', 0.18)],
+    'strip':     [(-0.06, 'icon_slide_whoosh', 0.16)],
+    'bigtype':   [(-0.10, 'icon_impact_cinematic', 0.22)],
+    'counter':   [(0.0, 'icon_counter', 0.12)],
+    'tick':      [(0.0, 'icon_click', 0.14)],
+    'cut':       [(-0.12, 'icon_slide_whoosh', 0.22)],
+    'cam':       [(-0.10, 'icon_slide_whoosh', 0.10)],
+    'seq':       [(-0.02, 'icon_camera_flash', 0.22)],
+    'cta':       [(-0.70, 'icon_riser', 0.16), (0.0, 'icon_bleep_bloop', 0.15)],
+    # genre/kinetic.js cues (icon reels 067–070 on the client's own edit language): seams and stickers on the client's pack
+    'blk':       [(-0.04, 'icon_slide_whoosh', 0.12)],   # a subtitle block lands (genre/stack.js)
+    'tr_hard':   [(0.0, 'icon_slide_whoosh', 0.07)],
+    'tr_zoom':   [(-0.12, 'icon_slide_whoosh', 0.18)],
+    'tr_whip':   [(-0.12, 'icon_slide_whoosh', 0.18)],
+    'tr_glow':   [(-0.60, 'icon_riser', 0.13), (0.0, 'icon_camera_flash', 0.18)],
+    'tr_flash':  [(0.0, 'icon_camera_flash', 0.18)],
+    'sticker':   [(0.0, 'icon_pop_up', 0.12)],
+    'doodle':    [(0.0, 'icon_interface', 0.10)],
+    'photo':     [(0.0, 'icon_enter', 0.14)],
+    'punch':     [(0.0, 'icon_slide_whoosh', 0.08)],
+    'count':     [(0.0, 'icon_counter', 0.12)],
+  },
+  'archive': {
+    'bed':       [(0.0, 'bed_projector', 0.075)],
+    'film':      [(-0.55, 'whoosh_small', 0.12), (-0.13, 'projector_feed', 0.22)],
+    'feed':      [(-0.13, 'projector_feed', 0.11)],
+    'print':     [(-0.13, 'photo_shutter', 0.20), (0.10, 'paper_slide', 0.15)],
+    'vhs':       [(-0.13, 'vcr_clunk', 0.24), (0.06, 'glitch_short', 0.11)],
+    'today':     [(-0.30, 'whoosh_cloth', 0.17), (0.10, 'land_pad', 0.13)],
+    'card':      [(-2.17, 'tape_rewind', 0.15), (-0.13, 'vcr_snap', 0.22)],
+    'turn':      [(-2.25, 'projector_halt', 0.30)],
+    'word':      [(0.02, 'CLICK', 0.13)],
+    'scr':       [(0.0, 'marker_write', 0.15)],
+    'cta':       [(0.0, 'notif_positive', 0.18)],
+  },
+}[PAL]
+
+# 15.09.2026 (I-CON reel_031, Elzhan: «звук появления субтитров — слишком много и слишком часто»): text cues sound 1 in N
+THIN = {'sub': 4, 'pop': 2} if PAL == 'icon' else {}
+_thin = {}
+
+# 21.09.2026 (Elzhan on atlas/reel_017: «поработай чуть чуть с таймингами звуков sfx»).
+# Камера жанра canvas держит ПЯТЬ ключей на бит, и каждый ключ просил свой свуш: замер
+# reel_017 — 93 свуша на 73.3 с, медианный зазор 0.59 с, минимальный 0.09. Слой читался
+# одним непрерывным шелестом, и отдельное движение в нём уже не слышно. Два закона:
+#   MIN_GAP — повторяющийся звук события звучит не чаще, чем раз в N секунд (слышен первый
+#             ключ бита, промежуточные молчат);
+#   SEAM    — проезд камеры молчит рядом со швом мира: у шва свой звук (ирис, полоса,
+#             вспышка, ризер), и свуш поверх него съедает атаку.
+_PK = json.loads((LIB / 'peaks.json').read_text()) if (LIB / 'peaks.json').exists() else {}
+SEAM = {'iris', 'band', 'flash', 'hard', 'zoom', 'tr_blur', 'tr_card', 'tr_pop', 'plate', 'dive'}
+MIN_GAP = {'cam': 1.6} if PAL in ('canvas', 'speaker') else {'html': 0.12, 'cam': 1.6} if PAL == 'literal' else {'word': 0.22, 'punch': 0.8} if PAL == 'kinetic' else {'morph': 0.30, 'row': 0.18} if PAL == 'apple-speaker' else {'key': 0.12, 'cam': 1.6} if PAL == 'apple' else {}
+SEAM_GUARD = 0.40
+_seam_t = sorted(c["t"] for c in CUES if c["k"] in SEAM)
+_last_k, _seen = {}, set()
+for c in CUES:
+    t, k = c["t"], c["k"]
+    if (round(t, 3), k) in _seen: continue          # один и тот же кий дважды в один кадр = один звук вдвое громче
+    _seen.add((round(t, 3), k))
+    if k in THIN:
+        _thin[k] = _thin.get(k, -1) + 1
+        if _thin[k] % THIN[k]: continue
+    if k in MIN_GAP:
+        if k in _last_k and t - _last_k[k] < MIN_GAP[k]: continue
+        if any(abs(t - st) < SEAM_GUARD for st in _seam_t): continue
+        _last_k[k] = t
+    if k.startswith('sfx:'):   # ролик назвал звук сам: `sfx: [{ at, s: 'water_pour' }]` в спеке.
+        # Палитра знает ЖАНР, а не тему: бассейн, сердце, деньги приходят с роликом.
+        nm, _, lv = k[4:].partition('@'); lv, _, ct = lv.partition('~')   # `~сек` — длина: гул и ризер без неё играют весь файл
+        # by the PEAK, not the start (/sound §1): the named event is the moment the object lands; a bed or drone starts on it
+        pk = 0 if nm.startswith('bed_') or 'drone' in nm else _PK.get(nm, {}).get('peak', 0)
+        ev(t - pk, nm, float(lv) if lv else 0.26, float(ct) if ct else None); continue
+    for spec in MAP.get(k, []):
+        off, name, v = spec[0], spec[1], spec[2]; cut = spec[3] if len(spec) > 3 else None
+        if name == 'PAN': name = PAN[pan_i % len(PAN)]; pan_i += 1
+        if name == 'CLICK': name = CLICK[tok_i % len(CLICK)]; v = v if tok_i % 2 else v + 0.03; tok_i += 1
+        if name == 'CLICKPRO': name = CLICKPRO[cp_i % len(CLICKPRO)]; cp_i += 1
+        if name == 'CAMPAN': name = CAMPAN[cam_i % len(CAMPAN)]; cam_i += 1
+        if name == 'RISER': name = RISER[ris_i % len(RISER)]; ris_i += 1
+        if name == 'POPSOFT': name = POPSOFT[ps_i % len(POPSOFT)]; ps_i += 1
+        if name == 'TICKBODY': name = TICKBODY[tb_i % len(TICKBODY)]; tb_i += 1
+        if name == 'SOFTMORPH': name = SOFTMORPH[sm_i % len(SOFTMORPH)]; sm_i += 1
+        if name == 'SWISH': name = SWISH[sw_i % len(SWISH)]; sw_i += 1
+        if name == 'LAND': name = LAND[ld_i % len(LAND)]; ld_i += 1
+        ev(t + off, name, v, cut)
+if PAL == 'icon':
+    ev(0.0, 'icon_riser_hook', 0.20)   # the hook frame builds to the first cut
+if PAL not in ('archive', 'speaker', 'icon', 'goz', 'apple-speaker', 'literal'):
+    ev(DUR - 1.05, 'tick_metal', 0.12)
+
+# fill holes > 0.55 s with dry ticks every 0.30 s at half level
+_ts = sorted(t for t, _, _, _ in E) if PAL not in ('archive', 'speaker', 'literal', 'gold', 'canvas', 'icon', 'limbo', 'goz', 'board', 'kinetic', 'apple-speaker', 'apple') else []   # canvas: no hole filling at all (13.09.2026, Elzhan: too many sfx)
+FILL = ['tick_wood', 'click_soft']; _fi = 0
+for i in range(len(_ts) - 1):
+    a, b = _ts[i], _ts[i + 1]; t = a + 0.30
+    while b - t > (1.1 if PAL == 'canvas' else 0.28):   # canvas (13.09.2026, Elzhan: too many sfx): holes under 1.4 s stay silent
+        ev(t, FILL[_fi % 2], 0.075); _fi += 1; t += 0.30
+
+# ── auto-cut: a sound never runs longer than the shot it belongs to ─────────
+# 14.09.2026 (Elzhan): «обрежь ситуативно с затуханием, чтобы звук не звучал дольше, чем
+# нужно в кадре». The frame's own clock is the cue list: an event owns the frame until the
+# next cue. So the allowed length = time to the next cue + TAIL, never cutting before the
+# file's peak (peaks.json) — a sample trimmed before its peak leaves a click (/sound §0).
+# Sustained roles (riser, drone, bed, sub drop, charge, long shine) are exempt: their job is
+# to run under what follows. An explicit cut in MAP still wins when it is shorter.
+TAIL = 0.35
+_SFXMAX = (json.loads(Path('reel.json').read_text()).get('sfx_max')
+           if Path('reel.json').exists() else None)
+SUSTAIN = ('riser', 'drone', 'bed_', 'sub_drop', 'charge', 'shine_long', 'counter_run')
+PEAKS = json.loads((LIB / 'peaks.json').read_text()) if (LIB / 'peaks.json').exists() else {}
+CUE_T = sorted(c["t"] for c in CUES)
+def allowed(tm, name, cut):
+    # reel.json "sfx_max": потолок длины ОДНОГО эффекта в секундах. Без него эффект звенит до
+    # следующего куэ, и в редкой сцене это 1.5–2 с («некоторые длятся дольше, чем должны быть»,
+    # Элжан 07.10.2026). Тянущиеся по замыслу (riser, drone, bed_, counter_run) потолку не подчиняются.
+    MAX = _SFXMAX
+    if any(s in name for s in SUSTAIN): return cut
+    nxt = next((t for t in CUE_T if t > tm + 0.06), None)
+    if nxt is None: return cut if MAX is None else min(cut or MAX, MAX)
+    a = max(nxt - tm + TAIL, PEAKS.get(name, {}).get('peak', 0) + 0.18, 0.22)
+    if MAX is not None: a = min(a, max(MAX, PEAKS.get(name, {}).get('peak', 0) + 0.18))
+    return a if cut is None else min(cut, a)
+
+buf = np.zeros(int(DUR * SR) + SR, dtype=np.float32)
+cache = {}; missing = set(); trimmed = 0
+for tm, name, vol, cut in E:
+    cut = allowed(tm, name, cut)
+    if name not in cache:
+        f = next((p for p in LIB.rglob(f"{name}.*") if p.suffix in ('.wav', '.mp3') and '/_' not in str(p)), None)
+        if f is None: missing.add(name); cache[name] = None
+        else:
+            raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(f), "-ar", str(SR), "-ac", "1", "-f", "s16le", "-"], capture_output=True, check=True).stdout
+            cache[name] = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768
+    a = cache[name]
+    if a is None: continue
+    if cut and len(a) > int(cut * SR):   # trim to the length of the event, fade out so the cut is not heard
+        a = a[:int(cut * SR)].copy(); f = min(int(0.12 * SR), len(a) // 3)
+        if f > 0: a[-f:] *= np.linspace(1, 0, f, dtype=np.float32)
+        trimmed += 1
+    k = int(tm * SR); n = min(len(a), len(buf) - k)
+    if n > 0: buf[k:k + n] += a[:n] * vol
+if missing: print("not in library:", ", ".join(sorted(missing)), file=sys.stderr)
+
+ts = sorted(t for t, _, _, _ in E)
+gaps = np.diff(ts) if len(ts) > 1 else np.array([0])
+if GAPS:
+    print(f"events {len(E)}, {len(E) / DUR * 60:.0f}/min, median gap {np.median(gaps):.2f} s")
+    for i, g in enumerate(gaps):
+        if g > 0.7: print(f"  hole {g:.2f} s at {ts[i]:.2f}")
+    sys.exit(0)
+buf = buf[:int(DUR * SR)]
+# /mnt-sfx §1, measured not judged: the isolated SFX layer peaks 5–6 dB below the voice peak. At 10 dB the
+# events are inaudible and the reel reads as empty (12.09.2026: a canvas score landed at −11.6 vs voice −1.9).
+_v = Path('work/_voice.wav')
+if _v.exists() and len(E):
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(_v), "-ac", "1", "-f", "s16le", "-"], capture_output=True).stdout
+    vpk = np.abs(np.frombuffer(raw, dtype=np.int16)).max() / 32768; spk = np.abs(buf).max()
+    if vpk > 0 and spk > 0:
+        g = min(4.0, (vpk * 10 ** (-5.5 / 20)) / spk); buf *= g
+        print(f"SFX layer: peak {20*np.log10(spk):.1f} → {20*np.log10(spk*g):.1f} dBFS (voice {20*np.log10(vpk):.1f}), gain ×{g:.2f}")
+_cfg = json.loads(Path('reel.json').read_text()) if Path('reel.json').exists() else {}
+if _cfg.get('sfx_gain', 1) != 1:   # reel.json sfx_gain: the whole layer after peak matching (0.7 = 30 % quieter)
+    buf *= _cfg['sfx_gain']; print(f"SFX layer ×{_cfg['sfx_gain']} (reel.json sfx_gain)")
+np.clip(buf, -1, 1, out=buf)
+Path('work').mkdir(exist_ok=True)
+w = wave.open('work/_sfx.wav', 'wb'); w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
+w.writeframes((buf * 32767).astype(np.int16).tobytes()); w.close()
+print(f"SFX: {len(E)} events, {len(E) / DUR * 60:.0f}/min, {trimmed} trimmed to their shot, max silence {gaps.max():.2f} s → work/_sfx.wav")

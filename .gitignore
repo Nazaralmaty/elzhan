@@ -2,3 +2,10 @@
 PRODUCT.md
 DESIGN.md
 *.sidecar*
+engine/node_modules/
+**/work/fr/
+**/work/fr2/
+**/work/mt/
+**/renders/
+**/work/voice16.wav
+**/assets/vo/voice.wav

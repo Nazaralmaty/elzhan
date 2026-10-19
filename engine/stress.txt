@@ -1,0 +1,21 @@
+# engine/stress.txt — stress and spelling Gemini gets wrong, applied by tts_or.py to the spoken text before every request.
+# One word form per line: plain<TAB>as spoken (U+0301 after the stressed vowel). Match is whole-word, case-insensitive;
+# the first letter's case is taken from the script. Add the form Elzhan corrected, never a guess.
+# A vowel Gemini reduces (Отан → «Атан», Шанырак → «Шанерак») gets a second mark: «О́та́н» — checked by back-transcription.
+таргет	та́ргет
+таргета	та́ргета
+таргету	та́ргету
+таргете	та́ргете
+таргетом	та́ргетом
+Айкон	А́йкон
+Ай-Кон	А́йкон
+Нур Отан	Нур О́та́н
+Надирова	Нади́рова
+Байдильды	Байди́льды
+Джейкобс	Дже́йкобс
+Борусан	Боруса́н
+Юсуп	Юсу́п
+Карада	Карада́
+Жумабаев	Жумаба́ев
+Шанырак	Шаны́ра́к
+Нейро	Не́йро́

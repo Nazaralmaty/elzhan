@@ -1,0 +1,1 @@
+window.PLATE={"frames": 1836, "fps": 30, "dur": 61.2, "src": "work/take.mov", "from": 0, "matte": false};
