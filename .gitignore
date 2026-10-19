@@ -11,3 +11,6 @@ engine/node_modules/
 **/assets/vo/voice.wav
 **/work/voice_raw.wav
 **/work/*.log
+**/out/
+**/work/_*.wav
+**/work/_*.mp4

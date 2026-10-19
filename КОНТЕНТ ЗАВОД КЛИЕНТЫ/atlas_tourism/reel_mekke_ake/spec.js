@@ -59,7 +59,10 @@ const cell = (i, cls, at, until, txt = '') => ({ k: 'html', x: 120 + i * 122, y:
 
 mount(reel({
   subs: false,
-  extra: { tail: 0.2 },
+  extra: { tail: 0.2,
+    /* звук объекта, названный роликом: часы идут, пока он думает «қашан»; список и чек — бумага; яйцо шипит на сковороде */
+    sfx: [{ t: 12.85, s: 'stopwatch', v: .14, cut: 2.6 }, { t: 18.82, s: 'paper_pull_a', v: .18, cut: .6 },
+          { t: 41.12, s: 'paper_slide', v: .2, cut: .5 }, { t: 44.50, s: 'stove_sizzle', v: .2, cut: 1.5 }] },
   rooms: [
     { id: 'face',   x: 0,     y: 0,     footage: true },
     { id: 'axis',   x: 6000,  y: 0,     w: 1080, h: 2700, top: 700, bg: 'dark' },
@@ -81,7 +84,6 @@ mount(reel({
       el: [
         { r: 'line', t: 'МЕККЕ — ӘКЕ', at: '0.03s', u: '2.45s' },
         { r: 'pill', t: 'Мәдина — ана', at: '1.15s', u: '2.45s' },
-        { r: 'pill', t: 'Райымбек Жайлау', at: '3.75s', u: '4.62s' },
       ],
       raw: [
         mini('m', 780, 1250, '0.40s', '2.45s'),
@@ -122,8 +124,7 @@ mount(reel({
       world: { life: '10.60s', cardDir: FR2 },
       el: [
         { r: 'wscript', t: 'Мәдинада', on: 'мәдене', row: 'top', u: '10.55s' },
-        { r: 'wtitle', t: 'УАЙЫМДАМАЙСЫЗ', on: 'оайымдамайыз', row: 'title', still: true, u: '9.55s' },
-        { r: 'wtitle', t: 'УАЙЫММЕН ЖҮРЕСІЗ', on: 'оайым', row: 'title', still: true, gold: true, u: '10.55s' },
+        { r: 'wtitle', t: 'УАЙЫМДАМАЙСЫЗ', on: 'мәдене', row: 'title', still: true, u: '9.60s' },
       ],
       raw: [
         orn(-.1, '10.60s'),
@@ -133,6 +134,7 @@ mount(reel({
         lbl('АНА', 810, 1010, 'мәдене', '10.60s', 'g'),
         tick(780, 1060, 'оайымдамайыз', '10.60s'),
         { k: 'arrow', d: 'M520 40 Q270 -40 30 40', head: 'M58 18 L30 40 L60 58', x: 270, y: 800, w: 540, h: 80, color: CREAM, sw: 5, on: 'оайым', dur: .6, until: '10.60s' },
+        lbl('УАЙЫММЕН', 270, 1010, 'оайым', '10.60s', 'big'),
         ring(270, 900, 'жересін', '10.60s', 130),
       ] },
 
@@ -144,7 +146,6 @@ mount(reel({
       world: { ghost: 'ЯЛЛА', ghostS: 320, ghostY: 1240, life: '12.80s', cardDir: FR2 },
       el: [
         { r: 'wtitle', t: 'ЯЛЛА, ХАДЖИ!', s: 130, on: 'ялла', row: 'title', still: true, gold: true, u: '12.70s' },
-        { r: 'whit', t: 'ЯЛЛА, ХАДЖИ!', s: 84, on: 'ялла#2', row: 'item1', still: true, u: '12.70s' },
       ],
       raw: [
         orn(-.1, '12.80s'),
@@ -161,8 +162,8 @@ mount(reel({
             { at: .3, x: 546, y: 950, z: 1.05 },
             { aim: 'q', dx: -210, dy: 60, z: 1.10, rot: -2, rx: 6, ry: -8, move: 1.1 },
             { at: .95, x: 560, y: 930, z: 1.10, rot: -2, rx: 6, ry: -8, hold: 0 }],
-      world: { ghost: 'ҚАШАН', ghostS: 260, ghostY: 1240, life: '15.65s', cardDir: FR2 },
-      el: [{ r: 'wtitle', t: 'ҚАШАН ШЫҒАМ?', on: 'қашан', row: 'title', still: true, gold: true, u: '15.55s' }],
+      world: { ghost: 'ҚАШАН', ghostS: 260, ghostY: 1240, life: '15.85s', cardDir: FR2 },
+      el: [{ r: 'wtitle', t: 'ҚАШАН ШЫҒАМ?', on: 'қашан', row: 'title', still: true, gold: true, u: '15.72s' }],
       raw: [
         orn(-.1, '15.65s'),
         rule(-.1, '15.65s', 1120),
@@ -179,7 +180,7 @@ mount(reel({
     { from: 'шашты', room: 'face', cut: { kind: 'focus' }, cam: FACE,
       el: [
         { r: 'line', t: 'ШАШТЫ ДҰРЫС ҚЫСҚАРТЫП', s: 45, on: 'шашты', u: '18.70s' },
-        { r: 'pill', t: 'жазаға түсіп қалмаймын ба?', on: 'жазаға', u: '18.70s' },
+        { r: 'pill', t: 'жаза?', on: 'жазаға', u: '18.70s' },
       ],
       raw: [
         ico('scissors', 820, 1150, 170, 'сқартып', '18.70s', { expr: { rot: (t, v) => v + Math.sin(t * 14) * 8 } }),
@@ -195,7 +196,6 @@ mount(reel({
       world: { card: false, ghost: 'КӘФФАРАТ', ghostS: 190, ghostY: 1240, life: '20.95s' },
       el: [
         { r: 'wtitle', t: 'КӘФФАРАТ', on: 'кафарат', row: 'title', still: true, gold: true, u: '20.85s' },
-        { r: 'wscript', t: 'төлеп қалмаймын ба?', on: 'төліп', row: 'top', u: '20.85s' },
       ],
       raw: [
         medal('20.95s'),
@@ -215,7 +215,7 @@ mount(reel({
       cam: [{ at: .02, x: 540, y: 930, z: 1.03 }, { at: .3, x: 536, y: 920, z: 1.05 }, { at: .6, x: 532, y: 912, z: 1.07 },
             { at: .95, x: 528, y: 904, z: 1.09, hold: .1 }],
       world: { card: false, ghost: 'ОЙ', ghostS: 330, ghostY: 1240, life: '24.10s' },
-      el: [{ r: 'wtitle', t: 'ОЙМЕН ЖҮРЕСІЗ', on: 'ойымен', row: 'title', still: true, u: '24.00s' }],
+      el: [{ r: 'wtitle', t: 'ОЙМЕН ЖҮРЕСІЗ', on: 'сонда', row: 'title', still: true, u: '24.02s' }],
       raw: [
         medal('24.10s'),
         { k: 'html', x: 120, y: 560, w: 520, h: 470, html: list(['Шаш', 'Жаза', 'Кәффарат', 'Садақа']), at: -.2, anim: 'fade', until: '24.10s' },
@@ -225,14 +225,14 @@ mount(reel({
 
     /* 9 · 24.34–28.33 · МИР-ПОВОРОТ (зелёный перелив) · «Мәдина қаласының өзі … келеді, ана сияқты деп тұр ғой».
          Ось возвращается: МӘДИНА горит, подпись АНА на «ана», нырок на неё. */
-    { from: 'мәдене', room: 'medina', cut: { kind: 'tone', color: GREEN, lead: .1, dur: .9, dir: 'up' },
+    { from: 'мәдене', room: 'medina', cut: { kind: 'tone', color: GREEN, lead: .1, dur: .6, dir: 'up' },
       cam: [{ at: .03, x: 540, y: 950, z: 1.02 }, { at: .3, x: 546, y: 960, z: 1.05 },
             { aim: 'pmd2', dx: -260, dy: 100, z: 1.12, rot: -2, rx: 7, ry: -9, move: 1.2 },
             { at: .95, x: 560, y: 920, z: 1.12, rot: -2, rx: 7, ry: -9, hold: 0 }],
       world: { ghost: 'АНА', ghostS: 330, ghostY: 1240, life: '28.30s', cardDir: FR2 },
       el: [
         { r: 'wscript', t: 'Мәдина қаласы', on: 'мәдене', row: 'top', u: '28.20s' },
-        { r: 'wtitle', t: 'АНА СИЯҚТЫ', s: 120, on: 'ана', row: 'title', still: true, gold: true, u: '28.20s' },
+        { r: 'wtitle', t: 'АНА СИЯҚТЫ', s: 120, on: 'келеді', row: 'title', still: true, gold: true, u: '28.40s' },
       ],
       raw: [
         orn(-.1, '28.30s'),
@@ -261,8 +261,8 @@ mount(reel({
          Спорное слово на экран не идёт: миска на нём, крест на «ұнамай». */
     { from: 'меккенің', room: 'face', cam: { p: 'pull', y: 935, z: 1.14 },
       el: [
-        { r: 'pill', t: 'кейбір кісілерге', on: 'кейбіркісілерге', u: '34.60s' },
-        { r: 'line', t: 'ҰНАМАЙ ҚАЛАДЫ', on: 'ойнамай', u: '34.60s' },
+        { r: 'pill', t: 'кейбір кісілерге', on: 'меккенің', u: '34.60s' },
+        { r: 'line', t: 'ҰНАМАЙ ҚАЛАДЫ', on: 'кейбіркісілерге', u: '34.62s' },
       ],
       raw: [
         mini('m', 780, 1060, 'меккенің', '34.60s'),
@@ -275,7 +275,7 @@ mount(reel({
       cam: [{ at: .02, x: 540, y: 940, z: 1.02 }, { at: .26, x: 536, y: 948, z: 1.04 }, { at: .5, x: 532, y: 956, z: 1.06 },
             { at: .74, x: 528, y: 962, z: 1.08 }, { at: .95, x: 524, y: 968, z: 1.10, hold: .1 }],
       world: { card: false, ghost: 'ӘКЕ', ghostS: 330, ghostY: 1240, life: '38.00s' },
-      el: [{ r: 'wtitle', t: 'ӘКЕМІЗ ҒОЙ', s: 120, on: 'әкеміз', row: 'title', still: true, gold: true, u: '37.90s' }],
+      el: [{ r: 'wtitle', t: 'ӘКЕМІЗ ҒОЙ', s: 120, on: 'әкенгіміз', row: 'title', still: true, gold: true, u: '37.95s' }],
       raw: [
         medal('38.00s'),
         orn(-.1, '38.00s'),
@@ -329,7 +329,7 @@ mount(reel({
     { from: 'анамен', room: 'face', cam: FACE,
       el: [
         { r: 'pill', t: 'анамен болған кезде,', on: 'анамен', u: '50.40s' },
-        { r: 'line', t: 'БАРЛЫҚ РАХАТ', on: 'барлық', u: '50.40s' },
+        { r: 'line', t: 'БАРЛЫҚ РАХАТ', on: 'барған', u: '50.45s' },
       ],
       raw: [
         mini('d', 780, 1060, 'мәдин', '50.40s'),
