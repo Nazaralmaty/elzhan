@@ -10,4 +10,7 @@ if [ ! -d "$REPO/engine/node_modules/puppeteer" ]; then
   (cd "$REPO/engine" && PUPPETEER_SKIP_DOWNLOAD=1 npm install --no-audit --no-fund >/dev/null 2>&1) || echo "cloud_setup: npm install не прошёл"
 fi
 python3 -c "import numpy, cv2, fontTools" 2>/dev/null || pip install -q numpy opencv-python-headless fonttools >/dev/null 2>&1 || true
+# скрипты движка зовут /usr/local/bin/python3 (путь Mac); assets/sfx репо → ~/.claude/assets/sfx (score.py)
+[ -e /usr/local/bin/python3 ] || ln -s "$(command -v python3)" /usr/local/bin/python3 2>/dev/null || true
+mkdir -p ~/.claude/assets; [ -e ~/.claude/assets/sfx ] || ln -s "$REPO/assets/sfx" ~/.claude/assets/sfx
 echo "cloud_setup: engine → ~/.claude/engine готов"

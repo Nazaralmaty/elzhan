@@ -1,0 +1,1616 @@
+{
+ "bed_beyond": {
+  "folder": "00_bed",
+  "sec": 300.02,
+  "peak": 31.97,
+  "tail": 283.03
+ },
+ "bed_clinic_room": {
+  "folder": "00_bed",
+  "sec": 4.02,
+  "peak": 2.43,
+  "tail": 3.91
+ },
+ "bed_drone": {
+  "folder": "00_bed",
+  "sec": 139.34,
+  "peak": 19.45,
+  "tail": 30.21
+ },
+ "bed_projector": {
+  "folder": "00_bed",
+  "sec": 27.5,
+  "peak": 7.03,
+  "tail": 19.44
+ },
+ "bed_tv_hum": {
+  "folder": "00_bed",
+  "sec": 30.43,
+  "peak": 0.06,
+  "tail": 0.11
+ },
+ "film_reel": {
+  "folder": "01_transition",
+  "sec": 4.39,
+  "peak": 1.35,
+  "tail": 4.12
+ },
+ "flash": {
+  "folder": "01_transition",
+  "sec": 1.51,
+  "peak": 0.3,
+  "tail": 0.33
+ },
+ "nk_click_fast": {
+  "folder": "01_transition",
+  "sec": 0.16,
+  "peak": 0.0,
+  "tail": 0.13
+ },
+ "nk_flash": {
+  "folder": "01_transition",
+  "sec": 1.69,
+  "peak": 0.26,
+  "tail": 0.48
+ },
+ "nk_shutter": {
+  "folder": "01_transition",
+  "sec": 0.2,
+  "peak": 0.06,
+  "tail": 0.1
+ },
+ "nk_shutter_click": {
+  "folder": "01_transition",
+  "sec": 0.5,
+  "peak": 0.05,
+  "tail": 0.14
+ },
+ "nk_tap": {
+  "folder": "01_transition",
+  "sec": 0.17,
+  "peak": 0.09,
+  "tail": 0.11
+ },
+ "nk_type": {
+  "folder": "01_transition",
+  "sec": 0.34,
+  "peak": 0.19,
+  "tail": 0.21
+ },
+ "soft_slide_side": {
+  "folder": "01_transition",
+  "sec": 1.06,
+  "peak": 0.3,
+  "tail": 0.81
+ },
+ "soft_slide_up": {
+  "folder": "01_transition",
+  "sec": 0.91,
+  "peak": 0.53,
+  "tail": 0.79
+ },
+ "soft_woosh": {
+  "folder": "01_transition",
+  "sec": 0.41,
+  "peak": 0.08,
+  "tail": 0.17
+ },
+ "sweep_metal": {
+  "folder": "01_transition",
+  "sec": 1.72,
+  "peak": 0.61,
+  "tail": 1.11
+ },
+ "sweep_short": {
+  "folder": "01_transition",
+  "sec": 0.61,
+  "peak": 0.45,
+  "tail": 0.52
+ },
+ "tape_rewind": {
+  "folder": "01_transition",
+  "sec": 2.6,
+  "peak": 2.17,
+  "tail": 2.59
+ },
+ "tech_slide": {
+  "folder": "01_transition",
+  "sec": 1.65,
+  "peak": 0.11,
+  "tail": 0.48
+ },
+ "vcr_clunk": {
+  "folder": "01_transition",
+  "sec": 0.52,
+  "peak": 0.15,
+  "tail": 0.18
+ },
+ "vcr_snap": {
+  "folder": "01_transition",
+  "sec": 0.45,
+  "peak": 0.14,
+  "tail": 0.17
+ },
+ "whip_fast": {
+  "folder": "01_transition",
+  "sec": 2.02,
+  "peak": 0.31,
+  "tail": 0.4
+ },
+ "whoosh_air": {
+  "folder": "01_transition",
+  "sec": 0.9,
+  "peak": 0.55,
+  "tail": 0.76
+ },
+ "whoosh_cine_fast": {
+  "folder": "01_transition",
+  "sec": 1.16,
+  "peak": 0.28,
+  "tail": 1.0
+ },
+ "whoosh_cine_long": {
+  "folder": "01_transition",
+  "sec": 10.77,
+  "peak": 1.32,
+  "tail": 1.92
+ },
+ "whoosh_cine_low": {
+  "folder": "01_transition",
+  "sec": 1.11,
+  "peak": 0.71,
+  "tail": 1.0
+ },
+ "whoosh_cine_low2": {
+  "folder": "01_transition",
+  "sec": 1.87,
+  "peak": 0.53,
+  "tail": 1.41
+ },
+ "whoosh_cine_mid": {
+  "folder": "01_transition",
+  "sec": 1.5,
+  "peak": 0.58,
+  "tail": 1.04
+ },
+ "whoosh_cine_norm": {
+  "folder": "01_transition",
+  "sec": 0.82,
+  "peak": 0.26,
+  "tail": 0.53
+ },
+ "whoosh_cinematic": {
+  "folder": "01_transition",
+  "sec": 1.33,
+  "peak": 1.07,
+  "tail": 1.21
+ },
+ "whoosh_cloth": {
+  "folder": "01_transition",
+  "sec": 0.81,
+  "peak": 0.28,
+  "tail": 0.34
+ },
+ "whoosh_cloth_b": {
+  "folder": "01_transition",
+  "sec": 0.81,
+  "peak": 0.28,
+  "tail": 0.34
+ },
+ "whoosh_data": {
+  "folder": "01_transition",
+  "sec": 1.08,
+  "peak": 0.49,
+  "tail": 0.84
+ },
+ "whoosh_deep": {
+  "folder": "01_transition",
+  "sec": 2.26,
+  "peak": 1.56,
+  "tail": 1.84
+ },
+ "whoosh_deep_b": {
+  "folder": "01_transition",
+  "sec": 1.1,
+  "peak": 0.38,
+  "tail": 0.79
+ },
+ "whoosh_deep_light": {
+  "folder": "01_transition",
+  "sec": 3.17,
+  "peak": 1.13,
+  "tail": 1.65
+ },
+ "whoosh_deep_short": {
+  "folder": "01_transition",
+  "sec": 1.78,
+  "peak": 0.16,
+  "tail": 0.75
+ },
+ "whoosh_epic_fast": {
+  "folder": "01_transition",
+  "sec": 0.47,
+  "peak": 0.18,
+  "tail": 0.34
+ },
+ "whoosh_fast": {
+  "folder": "01_transition",
+  "sec": 1.0,
+  "peak": 0.5,
+  "tail": 0.6
+ },
+ "whoosh_fast_b": {
+  "folder": "01_transition",
+  "sec": 1.39,
+  "peak": 0.62,
+  "tail": 0.96
+ },
+ "whoosh_fast_c": {
+  "folder": "01_transition",
+  "sec": 0.84,
+  "peak": 0.5,
+  "tail": 0.76
+ },
+ "whoosh_high_fast": {
+  "folder": "01_transition",
+  "sec": 1.24,
+  "peak": 0.38,
+  "tail": 0.6
+ },
+ "whoosh_high_fast2": {
+  "folder": "01_transition",
+  "sec": 2.21,
+  "peak": 0.85,
+  "tail": 1.38
+ },
+ "whoosh_long_b": {
+  "folder": "01_transition",
+  "sec": 4.26,
+  "peak": 0.77,
+  "tail": 2.39
+ },
+ "whoosh_overhead": {
+  "folder": "01_transition",
+  "sec": 2.32,
+  "peak": 0.71,
+  "tail": 1.1
+ },
+ "whoosh_simple": {
+  "folder": "01_transition",
+  "sec": 1.21,
+  "peak": 0.51,
+  "tail": 0.96
+ },
+ "whoosh_simple2": {
+  "folder": "01_transition",
+  "sec": 1.05,
+  "peak": 0.47,
+  "tail": 0.69
+ },
+ "whoosh_slow_smooth": {
+  "folder": "01_transition",
+  "sec": 2.73,
+  "peak": 0.71,
+  "tail": 1.06
+ },
+ "whoosh_small": {
+  "folder": "01_transition",
+  "sec": 0.81,
+  "peak": 0.22,
+  "tail": 0.39
+ },
+ "whoosh_smooth_fast": {
+  "folder": "01_transition",
+  "sec": 1.06,
+  "peak": 0.52,
+  "tail": 0.89
+ },
+ "whoosh_vac_a": {
+  "folder": "01_transition",
+  "sec": 0.81,
+  "peak": 0.22,
+  "tail": 0.39
+ },
+ "zoom_in": {
+  "folder": "01_transition",
+  "sec": 1.27,
+  "peak": 0.44,
+  "tail": 0.52
+ },
+ "bass_hit": {
+  "folder": "02_impact",
+  "sec": 1.1,
+  "peak": 0.09,
+  "tail": 0.4
+ },
+ "bass_switch": {
+  "folder": "02_impact",
+  "sec": 2.0,
+  "peak": 0.33,
+  "tail": 0.55
+ },
+ "charge": {
+  "folder": "02_impact",
+  "sec": 2.81,
+  "peak": 0.7,
+  "tail": 1.22
+ },
+ "impact_boom": {
+  "folder": "02_impact",
+  "sec": 4.87,
+  "peak": 0.99,
+  "tail": 1.82
+ },
+ "impact_glass": {
+  "folder": "02_impact",
+  "sec": 0.56,
+  "peak": 0.07,
+  "tail": 0.17
+ },
+ "impact_metal": {
+  "folder": "02_impact",
+  "sec": 0.77,
+  "peak": 0.12,
+  "tail": 0.26
+ },
+ "impact_soft": {
+  "folder": "02_impact",
+  "sec": 1.33,
+  "peak": 0.16,
+  "tail": 0.55
+ },
+ "projector_halt": {
+  "folder": "02_impact",
+  "sec": 3.31,
+  "peak": 2.25,
+  "tail": 2.47
+ },
+ "punch_air": {
+  "folder": "02_impact",
+  "sec": 1.19,
+  "peak": 0.08,
+  "tail": 0.15
+ },
+ "punch_body": {
+  "folder": "02_impact",
+  "sec": 0.46,
+  "peak": 0.05,
+  "tail": 0.12
+ },
+ "synth_hit": {
+  "folder": "02_impact",
+  "sec": 2.75,
+  "peak": 0.2,
+  "tail": 0.75
+ },
+ "click_crispy": {
+  "folder": "02_ui",
+  "sec": 0.14,
+  "peak": 0.11,
+  "tail": 0.14
+ },
+ "soft_click": {
+  "folder": "02_ui",
+  "sec": 0.26,
+  "peak": 0.0,
+  "tail": 0.07
+ },
+ "ui_soft_05": {
+  "folder": "02_ui",
+  "sec": 0.43,
+  "peak": 0.0,
+  "tail": 0.04
+ },
+ "charge_up": {
+  "folder": "03_riser",
+  "sec": 1.75,
+  "peak": 1.39,
+  "tail": 1.65
+ },
+ "drop": {
+  "folder": "03_riser",
+  "sec": 5.5,
+  "peak": 0.17,
+  "tail": 0.83
+ },
+ "drum_roll": {
+  "folder": "03_riser",
+  "sec": 5.94,
+  "peak": 3.01,
+  "tail": 3.62
+ },
+ "projector_start": {
+  "folder": "03_riser",
+  "sec": 12.02,
+  "peak": 6.4,
+  "tail": 11.02
+ },
+ "riser_b": {
+  "folder": "03_riser",
+  "sec": 0.74,
+  "peak": 0.45,
+  "tail": 0.48
+ },
+ "riser_glitch": {
+  "folder": "03_riser",
+  "sec": 3.7,
+  "peak": 0.36,
+  "tail": 0.66
+ },
+ "riser_long": {
+  "folder": "03_riser",
+  "sec": 31.0,
+  "peak": 25.94,
+  "tail": 27.28
+ },
+ "riser_long_b": {
+  "folder": "03_riser",
+  "sec": 4.78,
+  "peak": 2.91,
+  "tail": 2.99
+ },
+ "riser_premium": {
+  "folder": "03_riser",
+  "sec": 2.45,
+  "peak": 0.05,
+  "tail": 0.59
+ },
+ "riser_rjd": {
+  "folder": "03_riser",
+  "sec": 0.69,
+  "peak": 0.04,
+  "tail": 0.54
+ },
+ "riser_short": {
+  "folder": "03_riser",
+  "sec": 1.2,
+  "peak": 0.68,
+  "tail": 0.97
+ },
+ "riser_smooth": {
+  "folder": "03_riser",
+  "sec": 2.23,
+  "peak": 1.76,
+  "tail": 2.18
+ },
+ "riser_space": {
+  "folder": "03_riser",
+  "sec": 6.54,
+  "peak": 6.25,
+  "tail": 6.49
+ },
+ "slowmo_pull": {
+  "folder": "03_riser",
+  "sec": 3.46,
+  "peak": 2.01,
+  "tail": 2.97
+ },
+ "crispy_bite": {
+  "folder": "04_object",
+  "sec": 1.23,
+  "peak": 0.26,
+  "tail": 0.45
+ },
+ "paper_page": {
+  "folder": "04_object",
+  "sec": 0.31,
+  "peak": 0.14,
+  "tail": 0.23
+ },
+ "paper_rustle": {
+  "folder": "04_object",
+  "sec": 0.98,
+  "peak": 0.54,
+  "tail": 0.78
+ },
+ "phone_vibrate": {
+  "folder": "04_object",
+  "sec": 3.02,
+  "peak": 2.06,
+  "tail": 2.59
+ },
+ "plane_flyby": {
+  "folder": "04_object",
+  "sec": 4.47,
+  "peak": 2.24,
+  "tail": 2.98
+ },
+ "stove_sizzle": {
+  "folder": "04_object",
+  "sec": 2.8,
+  "peak": 0.0,
+  "tail": 1.2
+ },
+ "button_a": {
+  "folder": "04_ui",
+  "sec": 0.52,
+  "peak": 0.23,
+  "tail": 0.27
+ },
+ "button_b": {
+  "folder": "04_ui",
+  "sec": 0.47,
+  "peak": 0.13,
+  "tail": 0.19
+ },
+ "button_c": {
+  "folder": "04_ui",
+  "sec": 0.47,
+  "peak": 0.12,
+  "tail": 0.27
+ },
+ "button_mx": {
+  "folder": "04_ui",
+  "sec": 0.24,
+  "peak": 0.02,
+  "tail": 0.08
+ },
+ "button_sel": {
+  "folder": "04_ui",
+  "sec": 0.17,
+  "peak": 0.0,
+  "tail": 0.15
+ },
+ "button_sel2": {
+  "folder": "04_ui",
+  "sec": 0.22,
+  "peak": 0.12,
+  "tail": 0.16
+ },
+ "click": {
+  "folder": "04_ui",
+  "sec": 0.29,
+  "peak": 0.14,
+  "tail": 0.17
+ },
+ "click_beat": {
+  "folder": "04_ui",
+  "sec": 0.18,
+  "peak": 0.11,
+  "tail": 0.15
+ },
+ "click_cine": {
+  "folder": "04_ui",
+  "sec": 0.09,
+  "peak": 0.0,
+  "tail": 0.05
+ },
+ "click_dig1": {
+  "folder": "04_ui",
+  "sec": 0.44,
+  "peak": 0.11,
+  "tail": 0.32
+ },
+ "click_dig3": {
+  "folder": "04_ui",
+  "sec": 0.21,
+  "peak": 0.05,
+  "tail": 0.15
+ },
+ "click_dig4": {
+  "folder": "04_ui",
+  "sec": 0.17,
+  "peak": 0.07,
+  "tail": 0.16
+ },
+ "click_digital_b": {
+  "folder": "04_ui",
+  "sec": 0.55,
+  "peak": 0.11,
+  "tail": 0.44
+ },
+ "click_glitch": {
+  "folder": "04_ui",
+  "sec": 0.29,
+  "peak": 0.12,
+  "tail": 0.15
+ },
+ "click_high": {
+  "folder": "04_ui",
+  "sec": 0.08,
+  "peak": 0.0,
+  "tail": 0.04
+ },
+ "click_hitech": {
+  "folder": "04_ui",
+  "sec": 0.25,
+  "peak": 0.0,
+  "tail": 0.06
+ },
+ "click_hollow": {
+  "folder": "04_ui",
+  "sec": 1.39,
+  "peak": 0.55,
+  "tail": 0.68
+ },
+ "click_mouse": {
+  "folder": "04_ui",
+  "sec": 1.05,
+  "peak": 0.0,
+  "tail": 0.02
+ },
+ "click_mx_a": {
+  "folder": "04_ui",
+  "sec": 0.57,
+  "peak": 0.05,
+  "tail": 0.17
+ },
+ "click_mx_b": {
+  "folder": "04_ui",
+  "sec": 0.18,
+  "peak": 0.0,
+  "tail": 0.03
+ },
+ "click_mx_c": {
+  "folder": "04_ui",
+  "sec": 0.16,
+  "peak": 0.06,
+  "tail": 0.11
+ },
+ "click_mx_d": {
+  "folder": "04_ui",
+  "sec": 1.3,
+  "peak": 0.24,
+  "tail": 0.73
+ },
+ "click_pro": {
+  "folder": "04_ui",
+  "sec": 0.22,
+  "peak": 0.09,
+  "tail": 0.21
+ },
+ "click_snap": {
+  "folder": "04_ui",
+  "sec": 0.5,
+  "peak": 0.08,
+  "tail": 0.12
+ },
+ "click_snap_b": {
+  "folder": "04_ui",
+  "sec": 0.5,
+  "peak": 0.08,
+  "tail": 0.12
+ },
+ "click_soft": {
+  "folder": "04_ui",
+  "sec": 0.5,
+  "peak": 0.14,
+  "tail": 0.24
+ },
+ "click_soft_a": {
+  "folder": "04_ui",
+  "sec": 0.5,
+  "peak": 0.14,
+  "tail": 0.24
+ },
+ "click_stone_c": {
+  "folder": "04_ui",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.28
+ },
+ "click_ui": {
+  "folder": "04_ui",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.28
+ },
+ "counter_run": {
+  "folder": "04_ui",
+  "sec": 3.52,
+  "peak": 1.47,
+  "tail": 3.38
+ },
+ "data_cine": {
+  "folder": "04_ui",
+  "sec": 2.2,
+  "peak": 1.1,
+  "tail": 2.2
+ },
+ "data_collect": {
+  "folder": "04_ui",
+  "sec": 0.96,
+  "peak": 0.02,
+  "tail": 0.05
+ },
+ "data_collect2": {
+  "folder": "04_ui",
+  "sec": 3.46,
+  "peak": 3.23,
+  "tail": 3.31
+ },
+ "data_collect_b": {
+  "folder": "04_ui",
+  "sec": 1.01,
+  "peak": 0.01,
+  "tail": 0.97
+ },
+ "gear": {
+  "folder": "04_ui",
+  "sec": 1.1,
+  "peak": 0.23,
+  "tail": 0.28
+ },
+ "glitch_short": {
+  "folder": "04_ui",
+  "sec": 1.02,
+  "peak": 0.0,
+  "tail": 0.07
+ },
+ "glitch_static": {
+  "folder": "04_ui",
+  "sec": 1.4,
+  "peak": 0.15,
+  "tail": 0.33
+ },
+ "key_single": {
+  "folder": "04_ui",
+  "sec": 0.26,
+  "peak": 0.13,
+  "tail": 0.17
+ },
+ "key_tap": {
+  "folder": "04_ui",
+  "sec": 0.08,
+  "peak": 0.0,
+  "tail": 0.03
+ },
+ "land_air_b": {
+  "folder": "04_ui",
+  "sec": 0.81,
+  "peak": 0.22,
+  "tail": 0.31
+ },
+ "land_deep": {
+  "folder": "04_ui",
+  "sec": 0.81,
+  "peak": 0.22,
+  "tail": 0.31
+ },
+ "land_pad": {
+  "folder": "04_ui",
+  "sec": 0.81,
+  "peak": 0.43,
+  "tail": 0.49
+ },
+ "land_pad_c": {
+  "folder": "04_ui",
+  "sec": 0.81,
+  "peak": 0.43,
+  "tail": 0.49
+ },
+ "land_soft_a": {
+  "folder": "04_ui",
+  "sec": 0.81,
+  "peak": 0.0,
+  "tail": 0.12
+ },
+ "load": {
+  "folder": "04_ui",
+  "sec": 1.14,
+  "peak": 0.2,
+  "tail": 0.31
+ },
+ "notif_error": {
+  "folder": "04_ui",
+  "sec": 1.95,
+  "peak": 0.52,
+  "tail": 1.01
+ },
+ "notif_positive": {
+  "folder": "04_ui",
+  "sec": 2.8,
+  "peak": 0.22,
+  "tail": 0.81
+ },
+ "notif_soft": {
+  "folder": "04_ui",
+  "sec": 0.81,
+  "peak": 0.0,
+  "tail": 0.12
+ },
+ "page_turn_ui": {
+  "folder": "04_ui",
+  "sec": 1.71,
+  "peak": 0.21,
+  "tail": 0.59
+ },
+ "pop_med": {
+  "folder": "04_ui",
+  "sec": 0.47,
+  "peak": 0.02,
+  "tail": 0.05
+ },
+ "pop_normal": {
+  "folder": "04_ui",
+  "sec": 3.05,
+  "peak": 1.99,
+  "tail": 2.02
+ },
+ "pop_premium": {
+  "folder": "04_ui",
+  "sec": 3.44,
+  "peak": 0.05,
+  "tail": 0.08
+ },
+ "pop_slow": {
+  "folder": "04_ui",
+  "sec": 0.32,
+  "peak": 0.09,
+  "tail": 0.13
+ },
+ "pop_smooth": {
+  "folder": "04_ui",
+  "sec": 0.08,
+  "peak": 0.0,
+  "tail": 0.04
+ },
+ "popup": {
+  "folder": "04_ui",
+  "sec": 0.77,
+  "peak": 0.24,
+  "tail": 0.34
+ },
+ "typing_loop": {
+  "folder": "04_ui",
+  "sec": 25.34,
+  "peak": 11.75,
+  "tail": 11.88
+ },
+ "typing_short": {
+  "folder": "04_ui",
+  "sec": 0.32,
+  "peak": 0.14,
+  "tail": 0.18
+ },
+ "ui_backspace": {
+  "folder": "04_ui",
+  "sec": 0.29,
+  "peak": 0.02,
+  "tail": 0.14
+ },
+ "ui_enter": {
+  "folder": "04_ui",
+  "sec": 0.39,
+  "peak": 0.02,
+  "tail": 0.2
+ },
+ "ui_glitch_text": {
+  "folder": "04_ui",
+  "sec": 0.38,
+  "peak": 0.16,
+  "tail": 0.34
+ },
+ "ui_mx": {
+  "folder": "04_ui",
+  "sec": 0.75,
+  "peak": 0.15,
+  "tail": 0.27
+ },
+ "ui_open": {
+  "folder": "04_ui",
+  "sec": 1.51,
+  "peak": 0.47,
+  "tail": 0.75
+ },
+ "ui_open_premium": {
+  "folder": "04_ui",
+  "sec": 3.84,
+  "peak": 0.65,
+  "tail": 1.27
+ },
+ "ui_open_sweet": {
+  "folder": "04_ui",
+  "sec": 0.14,
+  "peak": 0.0,
+  "tail": 0.03
+ },
+ "ui_stretch": {
+  "folder": "04_ui",
+  "sec": 1.24,
+  "peak": 0.25,
+  "tail": 0.69
+ },
+ "ui_typing_b": {
+  "folder": "04_ui",
+  "sec": 2.06,
+  "peak": 0.73,
+  "tail": 1.35
+ },
+ "drone_low": {
+  "folder": "05_cinematic",
+  "sec": 54.0,
+  "peak": 24.61,
+  "tail": 36.05
+ },
+ "heartbeat": {
+  "folder": "05_cinematic",
+  "sec": 1.1,
+  "peak": 0.04,
+  "tail": 0.11
+ },
+ "heartbeat_fast": {
+  "folder": "05_cinematic",
+  "sec": 9.87,
+  "peak": 0.82,
+  "tail": 0.88
+ },
+ "horn": {
+  "folder": "05_cinematic",
+  "sec": 4.95,
+  "peak": 0.83,
+  "tail": 2.64
+ },
+ "ping": {
+  "folder": "05_cinematic",
+  "sec": 1.29,
+  "peak": 0.18,
+  "tail": 0.33
+ },
+ "sub_drop": {
+  "folder": "05_cinematic",
+  "sec": 3.0,
+  "peak": 2.14,
+  "tail": 2.44
+ },
+ "achievement": {
+  "folder": "06_game",
+  "sec": 3.6,
+  "peak": 0.17,
+  "tail": 0.73
+ },
+ "bleep_bloop": {
+  "folder": "06_game",
+  "sec": 2.05,
+  "peak": 0.09,
+  "tail": 0.31
+ },
+ "bonus": {
+  "folder": "06_game",
+  "sec": 1.65,
+  "peak": 0.13,
+  "tail": 0.36
+ },
+ "coin": {
+  "folder": "06_game",
+  "sec": 1.02,
+  "peak": 0.51,
+  "tail": 0.69
+ },
+ "coin_win": {
+  "folder": "06_game",
+  "sec": 2.5,
+  "peak": 0.25,
+  "tail": 0.67
+ },
+ "game_over": {
+  "folder": "06_game",
+  "sec": 5.72,
+  "peak": 5.52,
+  "tail": 5.65
+ },
+ "level_up": {
+  "folder": "06_game",
+  "sec": 2.99,
+  "peak": 1.05,
+  "tail": 1.58
+ },
+ "unlock": {
+  "folder": "06_game",
+  "sec": 1.4,
+  "peak": 0.17,
+  "tail": 0.6
+ },
+ "boing": {
+  "folder": "07_cartoon",
+  "sec": 1.24,
+  "peak": 0.08,
+  "tail": 0.44
+ },
+ "bubble_pop": {
+  "folder": "07_cartoon",
+  "sec": 1.14,
+  "peak": 0.05,
+  "tail": 0.09
+ },
+ "fail_tone": {
+  "folder": "07_cartoon",
+  "sec": 1.52,
+  "peak": 0.25,
+  "tail": 0.82
+ },
+ "joke_drums": {
+  "folder": "07_cartoon",
+  "sec": 2.03,
+  "peak": 0.24,
+  "tail": 0.36
+ },
+ "pop": {
+  "folder": "07_cartoon",
+  "sec": 1.17,
+  "peak": 0.05,
+  "tail": 0.08
+ },
+ "splat": {
+  "folder": "07_cartoon",
+  "sec": 1.04,
+  "peak": 0.09,
+  "tail": 0.46
+ },
+ "trombone_sad": {
+  "folder": "07_cartoon",
+  "sec": 2.65,
+  "peak": 0.5,
+  "tail": 0.76
+ },
+ "whistle_fall": {
+  "folder": "07_cartoon",
+  "sec": 2.69,
+  "peak": 0.85,
+  "tail": 1.41
+ },
+ "camera_button": {
+  "folder": "08_foley",
+  "sec": 0.29,
+  "peak": 0.13,
+  "tail": 0.16
+ },
+ "camera_shutter": {
+  "folder": "08_foley",
+  "sec": 0.63,
+  "peak": 0.13,
+  "tail": 0.27
+ },
+ "cash_register": {
+  "folder": "08_foley",
+  "sec": 1.46,
+  "peak": 0.45,
+  "tail": 0.82
+ },
+ "engine_start_keys": {
+  "folder": "08_foley",
+  "sec": 3.38,
+  "peak": 2.47,
+  "tail": 3.38
+ },
+ "gear_fast": {
+  "folder": "08_foley",
+  "sec": 2.83,
+  "peak": 1.84,
+  "tail": 2.19
+ },
+ "gear_fast_b": {
+  "folder": "08_foley",
+  "sec": 2.16,
+  "peak": 1.92,
+  "tail": 2.16
+ },
+ "gear_mid": {
+  "folder": "08_foley",
+  "sec": 0.67,
+  "peak": 0.26,
+  "tail": 0.66
+ },
+ "gear_premium": {
+  "folder": "08_foley",
+  "sec": 1.33,
+  "peak": 1.14,
+  "tail": 1.17
+ },
+ "gear_soft": {
+  "folder": "08_foley",
+  "sec": 0.39,
+  "peak": 0.0,
+  "tail": 0.36
+ },
+ "gear_soft_b": {
+  "folder": "08_foley",
+  "sec": 1.42,
+  "peak": 1.35,
+  "tail": 1.37
+ },
+ "gear_speed": {
+  "folder": "08_foley",
+  "sec": 0.45,
+  "peak": 0.06,
+  "tail": 0.43
+ },
+ "glass_clink": {
+  "folder": "08_foley",
+  "sec": 1.2,
+  "peak": 0.02,
+  "tail": 0.26
+ },
+ "ice_drop": {
+  "folder": "08_foley",
+  "sec": 2.04,
+  "peak": 0.38,
+  "tail": 0.7
+ },
+ "marker_write": {
+  "folder": "08_foley",
+  "sec": 1.19,
+  "peak": 0.15,
+  "tail": 0.53
+ },
+ "money_cine": {
+  "folder": "08_foley",
+  "sec": 1.47,
+  "peak": 0.33,
+  "tail": 0.91
+ },
+ "money_cine_b": {
+  "folder": "08_foley",
+  "sec": 1.1,
+  "peak": 0.5,
+  "tail": 0.6
+ },
+ "money_high": {
+  "folder": "08_foley",
+  "sec": 1.45,
+  "peak": 0.47,
+  "tail": 0.92
+ },
+ "money_med": {
+  "folder": "08_foley",
+  "sec": 2.67,
+  "peak": 0.09,
+  "tail": 0.23
+ },
+ "paper_crumple": {
+  "folder": "08_foley",
+  "sec": 1.33,
+  "peak": 0.14,
+  "tail": 0.47
+ },
+ "paper_cut": {
+  "folder": "08_foley",
+  "sec": 0.35,
+  "peak": 0.12,
+  "tail": 0.27
+ },
+ "paper_pull_a": {
+  "folder": "08_foley",
+  "sec": 0.81,
+  "peak": 0.29,
+  "tail": 0.47
+ },
+ "paper_slide": {
+  "folder": "08_foley",
+  "sec": 0.81,
+  "peak": 0.29,
+  "tail": 0.47
+ },
+ "paper_tear": {
+  "folder": "08_foley",
+  "sec": 0.81,
+  "peak": 0.5,
+  "tail": 0.59
+ },
+ "paper_tear_b": {
+  "folder": "08_foley",
+  "sec": 0.81,
+  "peak": 0.5,
+  "tail": 0.59
+ },
+ "paper_turn": {
+  "folder": "08_foley",
+  "sec": 0.45,
+  "peak": 0.22,
+  "tail": 0.27
+ },
+ "pen_strike": {
+  "folder": "08_foley",
+  "sec": 0.5,
+  "peak": 0.33,
+  "tail": 0.39
+ },
+ "pencil_write": {
+  "folder": "08_foley",
+  "sec": 1.87,
+  "peak": 1.58,
+  "tail": 1.81
+ },
+ "photo_shutter": {
+  "folder": "08_foley",
+  "sec": 0.85,
+  "peak": 0.14,
+  "tail": 0.44
+ },
+ "projector_feed": {
+  "folder": "08_foley",
+  "sec": 0.45,
+  "peak": 0.15,
+  "tail": 0.22
+ },
+ "scissors": {
+  "folder": "08_foley",
+  "sec": 2.94,
+  "peak": 2.09,
+  "tail": 2.13
+ },
+ "shutter_hard": {
+  "folder": "08_foley",
+  "sec": 0.4,
+  "peak": 0.02,
+  "tail": 0.35
+ },
+ "shutter_smooth": {
+  "folder": "08_foley",
+  "sec": 0.48,
+  "peak": 0.03,
+  "tail": 0.17
+ },
+ "sip": {
+  "folder": "08_foley",
+  "sec": 2.79,
+  "peak": 1.61,
+  "tail": 1.83
+ },
+ "slide_carousel": {
+  "folder": "08_foley",
+  "sec": 1.2,
+  "peak": 0.03,
+  "tail": 0.1
+ },
+ "slide_change": {
+  "folder": "08_foley",
+  "sec": 0.9,
+  "peak": 0.12,
+  "tail": 0.21
+ },
+ "stamp_rubber": {
+  "folder": "08_foley",
+  "sec": 0.71,
+  "peak": 0.04,
+  "tail": 0.45
+ },
+ "tokens_drop": {
+  "folder": "08_foley",
+  "sec": 1.02,
+  "peak": 0.14,
+  "tail": 0.19
+ },
+ "truck_engine_rev": {
+  "folder": "08_foley",
+  "sec": 2.38,
+  "peak": 0.29,
+  "tail": 2.37
+ },
+ "water_pour": {
+  "folder": "08_foley",
+  "sec": 7.91,
+  "peak": 2.09,
+  "tail": 3.89
+ },
+ "window_snap": {
+  "folder": "08_foley",
+  "sec": 0.5,
+  "peak": 0.05,
+  "tail": 0.09
+ },
+ "camera_click_ring": {
+  "folder": "09_accent",
+  "sec": 2.18,
+  "peak": 0.13,
+  "tail": 0.19
+ },
+ "camera_flash": {
+  "folder": "09_accent",
+  "sec": 2.65,
+  "peak": 0.3,
+  "tail": 0.57
+ },
+ "chime": {
+  "folder": "09_accent",
+  "sec": 3.36,
+  "peak": 0.1,
+  "tail": 1.06
+ },
+ "combo_ui": {
+  "folder": "09_accent",
+  "sec": 1.32,
+  "peak": 0.19,
+  "tail": 0.68
+ },
+ "ding": {
+  "folder": "09_accent",
+  "sec": 1.69,
+  "peak": 0.31,
+  "tail": 0.67
+ },
+ "ding_soft": {
+  "folder": "09_accent",
+  "sec": 1.15,
+  "peak": 0.35,
+  "tail": 0.39
+ },
+ "magic_sparkle": {
+  "folder": "09_accent",
+  "sec": 2.33,
+  "peak": 0.53,
+  "tail": 1.13
+ },
+ "shimmer_deep_a": {
+  "folder": "09_accent",
+  "sec": 1.2,
+  "peak": 0.0,
+  "tail": 0.51
+ },
+ "shimmer_glass": {
+  "folder": "09_accent",
+  "sec": 1.2,
+  "peak": 0.13,
+  "tail": 0.9
+ },
+ "shimmer_glass_b": {
+  "folder": "09_accent",
+  "sec": 1.2,
+  "peak": 0.13,
+  "tail": 0.9
+ },
+ "shine": {
+  "folder": "09_accent",
+  "sec": 0.6,
+  "peak": 0.3,
+  "tail": 0.6
+ },
+ "shine_a": {
+  "folder": "09_accent",
+  "sec": 0.6,
+  "peak": 0.3,
+  "tail": 0.6
+ },
+ "shine_long": {
+  "folder": "09_accent",
+  "sec": 2.59,
+  "peak": 0.64,
+  "tail": 2.4
+ },
+ "snap": {
+  "folder": "09_accent",
+  "sec": 3.1,
+  "peak": 0.11,
+  "tail": 0.18
+ },
+ "sparkle": {
+  "folder": "09_accent",
+  "sec": 1.2,
+  "peak": 0.0,
+  "tail": 0.51
+ },
+ "sparkle_soft": {
+  "folder": "09_accent",
+  "sec": 1.82,
+  "peak": 0.56,
+  "tail": 0.92
+ },
+ "sparkle_sweep": {
+  "folder": "09_accent",
+  "sec": 3.0,
+  "peak": 0.92,
+  "tail": 1.51
+ },
+ "stopwatch": {
+  "folder": "09_accent",
+  "sec": 5.62,
+  "peak": 0.62,
+  "tail": 0.65
+ },
+ "tick": {
+  "folder": "09_accent",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.26
+ },
+ "tick_body_c": {
+  "folder": "09_accent",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.24
+ },
+ "tick_mech_b": {
+  "folder": "09_accent",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.1
+ },
+ "tick_metal": {
+  "folder": "09_accent",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.1
+ },
+ "tick_wood": {
+  "folder": "09_accent",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.24
+ },
+ "tick_wood_a": {
+  "folder": "09_accent",
+  "sec": 0.5,
+  "peak": 0.0,
+  "tail": 0.26
+ },
+ "icon_bleep_bloop": {
+  "folder": "10_icon_refs",
+  "sec": 1.8,
+  "peak": 0.12,
+  "tail": 0.33
+ },
+ "icon_camera_charge": {
+  "folder": "10_icon_refs",
+  "sec": 1.6,
+  "peak": 0.67,
+  "tail": 0.72
+ },
+ "icon_camera_flash": {
+  "folder": "10_icon_refs",
+  "sec": 0.6,
+  "peak": 0.11,
+  "tail": 0.32
+ },
+ "icon_click": {
+  "folder": "10_icon_refs",
+  "sec": 0.9,
+  "peak": 0.1,
+  "tail": 0.24
+ },
+ "icon_counter": {
+  "folder": "10_icon_refs",
+  "sec": 3.4,
+  "peak": 2.89,
+  "tail": 3.37
+ },
+ "icon_data_analysis": {
+  "folder": "10_icon_refs",
+  "sec": 1.0,
+  "peak": 0.35,
+  "tail": 0.99
+ },
+ "icon_enter": {
+  "folder": "10_icon_refs",
+  "sec": 0.8,
+  "peak": 0.31,
+  "tail": 0.36
+ },
+ "icon_gears_cycle": {
+  "folder": "10_icon_refs",
+  "sec": 0.9,
+  "peak": 0.48,
+  "tail": 0.84
+ },
+ "icon_impact_cinematic": {
+  "folder": "10_icon_refs",
+  "sec": 1.2,
+  "peak": 0.47,
+  "tail": 1.19
+ },
+ "icon_interface": {
+  "folder": "10_icon_refs",
+  "sec": 2.3,
+  "peak": 0.97,
+  "tail": 2.2
+ },
+ "icon_pop_up": {
+  "folder": "10_icon_refs",
+  "sec": 0.8,
+  "peak": 0.1,
+  "tail": 0.22
+ },
+ "icon_radio_beep": {
+  "folder": "10_icon_refs",
+  "sec": 0.5,
+  "peak": 0.33,
+  "tail": 0.38
+ },
+ "icon_ref_bass_impact": {
+  "folder": "10_icon_refs",
+  "sec": 1.87,
+  "peak": 0.22,
+  "tail": 1.53
+ },
+ "icon_ref_camera_flash": {
+  "folder": "10_icon_refs",
+  "sec": 1.54,
+  "peak": 0.13,
+  "tail": 0.34
+ },
+ "icon_ref_metal_riser": {
+  "folder": "10_icon_refs",
+  "sec": 1.38,
+  "peak": 1.35,
+  "tail": 1.38
+ },
+ "icon_ref_right": {
+  "folder": "10_icon_refs",
+  "sec": 0.65,
+  "peak": 0.17,
+  "tail": 0.57
+ },
+ "icon_ref_vine_boom": {
+  "folder": "10_icon_refs",
+  "sec": 1.32,
+  "peak": 0.7,
+  "tail": 1.2
+ },
+ "icon_ref_wrong": {
+  "folder": "10_icon_refs",
+  "sec": 0.77,
+  "peak": 0.25,
+  "tail": 0.71
+ },
+ "icon_riser": {
+  "folder": "10_icon_refs",
+  "sec": 1.25,
+  "peak": 0.67,
+  "tail": 1.03
+ },
+ "icon_riser_hook": {
+  "folder": "10_icon_refs",
+  "sec": 1.95,
+  "peak": 1.35,
+  "tail": 1.92
+ },
+ "icon_slide_whoosh": {
+  "folder": "10_icon_refs",
+  "sec": 0.65,
+  "peak": 0.29,
+  "tail": 0.54
+ },
+ "icon_tic_tac": {
+  "folder": "10_icon_refs",
+  "sec": 1.25,
+  "peak": 0.94,
+  "tail": 1.24
+ },
+ "apple_click": {
+  "folder": "11_apple",
+  "sec": 0.22,
+  "peak": 0.11,
+  "tail": 0.15
+ },
+ "apple_click_hi": {
+  "folder": "11_apple",
+  "sec": 0.46,
+  "peak": 0.07,
+  "tail": 0.12
+ },
+ "apple_open": {
+  "folder": "11_apple",
+  "sec": 0.53,
+  "peak": 0.1,
+  "tail": 0.42
+ },
+ "apple_pop": {
+  "folder": "11_apple",
+  "sec": 0.2,
+  "peak": 0.0,
+  "tail": 0.04
+ },
+ "apple_switch": {
+  "folder": "11_apple",
+  "sec": 0.33,
+  "peak": 0.15,
+  "tail": 0.19
+ },
+ "apple_tap": {
+  "folder": "11_apple",
+  "sec": 0.35,
+  "peak": 0.18,
+  "tail": 0.24
+ },
+ "apple_thud": {
+  "folder": "11_apple",
+  "sec": 0.24,
+  "peak": 0.11,
+  "tail": 0.18
+ },
+ "apple_tick": {
+  "folder": "11_apple",
+  "sec": 0.2,
+  "peak": 0.11,
+  "tail": 0.13
+ }
+}

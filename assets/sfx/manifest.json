@@ -1,0 +1,2120 @@
+[
+ {
+  "name": "bed_beyond",
+  "folder": "00_bed",
+  "title": "тихая атмосферная подложка, 5 минут",
+  "sec": 300.07,
+  "url": "",
+  "bytes": 7202315
+ },
+ {
+  "name": "bed_drone",
+  "folder": "00_bed",
+  "title": "низкий дрон-подложка, 2:19",
+  "sec": 139.39,
+  "url": "",
+  "bytes": 3346015
+ },
+ {
+  "name": "bed_projector",
+  "folder": "00_bed",
+  "title": "гул кинопроектора петлёй",
+  "sec": 27.54,
+  "url": "",
+  "bytes": 211656
+ },
+ {
+  "name": "bed_tv_hum",
+  "folder": "00_bed",
+  "title": "гул старого телевизора петлёй",
+  "sec": 30.46,
+  "url": "",
+  "bytes": 488830
+ },
+ {
+  "name": "film_reel",
+  "folder": "01_transition",
+  "title": "Tape rewind cinematic transition",
+  "sec": 4.44,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1088/1088-preview.mp3",
+  "bytes": 135704
+ },
+ {
+  "name": "flash",
+  "folder": "01_transition",
+  "title": "Camera digital shutter",
+  "sec": 1.54,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3",
+  "bytes": 49898
+ },
+ {
+  "name": "soft_slide_side",
+  "folder": "01_transition",
+  "title": "мягкий боковой сдвиг панели",
+  "sec": 1.1,
+  "url": "",
+  "bytes": 27116
+ },
+ {
+  "name": "soft_slide_up",
+  "folder": "01_transition",
+  "title": "мягкий сдвиг вверх",
+  "sec": 0.96,
+  "url": "",
+  "bytes": 23660
+ },
+ {
+  "name": "soft_woosh",
+  "folder": "01_transition",
+  "title": "короткий тихий взмах",
+  "sec": 0.46,
+  "url": "",
+  "bytes": 11564
+ },
+ {
+  "name": "sweep_metal",
+  "folder": "01_transition",
+  "title": "Quick metal transition sweep",
+  "sec": 1.75,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2639/2639-preview.mp3",
+  "bytes": 51881
+ },
+ {
+  "name": "sweep_short",
+  "folder": "01_transition",
+  "title": "Short transition sweep",
+  "sec": 0.65,
+  "url": "https://assets.mixkit.co/active_storage/sfx/175/175-preview.mp3",
+  "bytes": 18057
+ },
+ {
+  "name": "tape_rewind",
+  "folder": "01_transition",
+  "title": "перемотка кассеты",
+  "sec": 2.64,
+  "url": "",
+  "bytes": 67254
+ },
+ {
+  "name": "tech_slide",
+  "folder": "01_transition",
+  "title": "Technology transition slide",
+  "sec": 1.7,
+  "url": "https://assets.mixkit.co/active_storage/sfx/3120/3120-preview.mp3",
+  "bytes": 26239
+ },
+ {
+  "name": "vcr_clunk",
+  "folder": "01_transition",
+  "title": "щелчок механики видеомагнитофона",
+  "sec": 0.55,
+  "url": "",
+  "bytes": 6560
+ },
+ {
+  "name": "vcr_snap",
+  "folder": "01_transition",
+  "title": "короткий щелчок VHS",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 5859
+ },
+ {
+  "name": "whoosh_air",
+  "folder": "01_transition",
+  "title": "synthesized airy whoosh, peak at 0.54 (Jerzy Orchard \"Whoosh\")",
+  "sec": 0.94,
+  "url": "synth:numpy 12.09.2026",
+  "bytes": 30764
+ },
+ {
+  "name": "whoosh_cine_fast",
+  "folder": "01_transition",
+  "title": "Cinematic Fast Whoosh",
+  "sec": 1.2,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 38065
+ },
+ {
+  "name": "whoosh_cine_long",
+  "folder": "01_transition",
+  "title": "Cinematic Long Whoosh",
+  "sec": 10.8,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 264431
+ },
+ {
+  "name": "whoosh_cine_low",
+  "folder": "01_transition",
+  "title": "Cinematic Low Whoosh",
+  "sec": 1.15,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 36889
+ },
+ {
+  "name": "whoosh_cine_low2",
+  "folder": "01_transition",
+  "title": "Cinematic Low Whoosh",
+  "sec": 1.9,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 54769
+ },
+ {
+  "name": "whoosh_cine_mid",
+  "folder": "01_transition",
+  "title": "Cinematic Mediam Whoosh",
+  "sec": 1.54,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 37659
+ },
+ {
+  "name": "whoosh_cine_norm",
+  "folder": "01_transition",
+  "title": "Cinematic Fast Normal Whoosh",
+  "sec": 0.86,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 21359
+ },
+ {
+  "name": "whoosh_cinematic",
+  "folder": "01_transition",
+  "title": "Cinematic whoosh fast transition",
+  "sec": 1.38,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1492/1492-preview.mp3",
+  "bytes": 44574
+ },
+ {
+  "name": "whoosh_cloth",
+  "folder": "01_transition",
+  "title": "heavy fabric swung fast past mic, real air movement",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "whoosh_cloth_b",
+  "folder": "01_transition",
+  "title": "тяжёлая ткань мимо микрофона, низ и воздух",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "whoosh_data",
+  "folder": "01_transition",
+  "title": "Data_Whoosh",
+  "sec": 1.12,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 27725
+ },
+ {
+  "name": "whoosh_deep",
+  "folder": "01_transition",
+  "title": "Vacuum swoosh transition",
+  "sec": 2.3,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1465/1465-preview.mp3",
+  "bytes": 73226
+ },
+ {
+  "name": "whoosh_deep_b",
+  "folder": "01_transition",
+  "title": "Zenix Motion \"Deep Whoosh\" — deep bodied whoosh 1.1 s, peak 0.38",
+  "sec": 1.13,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 36908
+ },
+ {
+  "name": "whoosh_deep_light",
+  "folder": "01_transition",
+  "title": "Whoosh Deep Light 2",
+  "sec": 3.21,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 78046
+ },
+ {
+  "name": "whoosh_deep_short",
+  "folder": "01_transition",
+  "title": "Whoosh Deep Short",
+  "sec": 1.83,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 44818
+ },
+ {
+  "name": "whoosh_epic_fast",
+  "folder": "01_transition",
+  "title": "epic-fast-whoosh-345469",
+  "sec": 0.5,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 12716
+ },
+ {
+  "name": "whoosh_fast",
+  "folder": "01_transition",
+  "title": "Fast sweep transition",
+  "sec": 1.04,
+  "url": "https://assets.mixkit.co/active_storage/sfx/174/174-preview.mp3",
+  "bytes": 30322
+ },
+ {
+  "name": "whoosh_fast_b",
+  "folder": "01_transition",
+  "title": "Fast Whoosh",
+  "sec": 1.44,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 35151
+ },
+ {
+  "name": "whoosh_fast_c",
+  "folder": "01_transition",
+  "title": "Fast Whoosh",
+  "sec": 0.89,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 29497
+ },
+ {
+  "name": "whoosh_high_fast",
+  "folder": "01_transition",
+  "title": "High And Fast Whoosh",
+  "sec": 1.27,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 39769
+ },
+ {
+  "name": "whoosh_high_fast2",
+  "folder": "01_transition",
+  "title": "High And Fast Woosh",
+  "sec": 2.25,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 54586
+ },
+ {
+  "name": "whoosh_long_b",
+  "folder": "01_transition",
+  "title": "Long Whoosh",
+  "sec": 4.31,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 104114
+ },
+ {
+  "name": "whoosh_overhead",
+  "folder": "01_transition",
+  "title": "Air woosh",
+  "sec": 2.35,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1489/1489-preview.mp3",
+  "bytes": 71724
+ },
+ {
+  "name": "whoosh_simple",
+  "folder": "01_transition",
+  "title": "Simple Whoosh",
+  "sec": 1.25,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 30700
+ },
+ {
+  "name": "whoosh_simple2",
+  "folder": "01_transition",
+  "title": "Simple Whoosh 2",
+  "sec": 1.1,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 27303
+ },
+ {
+  "name": "whoosh_slow_smooth",
+  "folder": "01_transition",
+  "title": "Slow And Smooth Whoosh",
+  "sec": 2.77,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 67361
+ },
+ {
+  "name": "whoosh_small",
+  "folder": "01_transition",
+  "title": "short low vacuum whoosh, moving air mass, deep body, clean decay",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "whoosh_smooth_fast",
+  "folder": "01_transition",
+  "title": "Smooth And Fast Whoosh",
+  "sec": 1.1,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 27330
+ },
+ {
+  "name": "whoosh_vac_a",
+  "folder": "01_transition",
+  "title": "короткий низкий вакуумный свуш, чистый спад",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "zoom_in",
+  "folder": "01_transition",
+  "title": "Air zoom vacuum",
+  "sec": 1.31,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2608/2608-preview.mp3",
+  "bytes": 41082
+ },
+ {
+  "name": "bass_hit",
+  "folder": "02_impact",
+  "title": "Short bass hit",
+  "sec": 1.15,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2299/2299-preview.mp3",
+  "bytes": 36222
+ },
+ {
+  "name": "bass_switch",
+  "folder": "02_impact",
+  "title": "Quick bass switch",
+  "sec": 2.04,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2301/2301-preview.mp3",
+  "bytes": 60182
+ },
+ {
+  "name": "charge",
+  "folder": "02_impact",
+  "title": "Electricity static power up",
+  "sec": 2.85,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2600/2600-preview.mp3",
+  "bytes": 99854
+ },
+ {
+  "name": "impact_boom",
+  "folder": "02_impact",
+  "title": "Movie trailer epic impact",
+  "sec": 4.91,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2908/2908-preview.mp3",
+  "bytes": 154441
+ },
+ {
+  "name": "impact_glass",
+  "folder": "02_impact",
+  "title": "Glass hitting a metal",
+  "sec": 0.6,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2183/2183-preview.mp3",
+  "bytes": 15551
+ },
+ {
+  "name": "impact_metal",
+  "folder": "02_impact",
+  "title": "Metal hammer hit",
+  "sec": 0.81,
+  "url": "https://assets.mixkit.co/active_storage/sfx/833/833-preview.mp3",
+  "bytes": 22338
+ },
+ {
+  "name": "impact_soft",
+  "folder": "02_impact",
+  "title": "Fast impact blow",
+  "sec": 1.38,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2655/2655-preview.mp3",
+  "bytes": 43325
+ },
+ {
+  "name": "projector_halt",
+  "folder": "02_impact",
+  "title": "проектор встал, плёнка замерла",
+  "sec": 3.32,
+  "url": "",
+  "bytes": 48836
+ },
+ {
+  "name": "punch_air",
+  "folder": "02_impact",
+  "title": "Blow breaking the air",
+  "sec": 1.23,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2057/2057-preview.mp3",
+  "bytes": 40032
+ },
+ {
+  "name": "punch_body",
+  "folder": "02_impact",
+  "title": "Body punch quick hit",
+  "sec": 0.5,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2153/2153-preview.mp3",
+  "bytes": 16077
+ },
+ {
+  "name": "synth_hit",
+  "folder": "02_impact",
+  "title": "Futuristic bass hit",
+  "sec": 2.8,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2303/2303-preview.mp3",
+  "bytes": 73486
+ },
+ {
+  "name": "soft_click",
+  "folder": "02_ui",
+  "title": "тихий мягкий клик",
+  "sec": 0.31,
+  "url": "",
+  "bytes": 8193
+ },
+ {
+  "name": "charge_up",
+  "folder": "03_riser",
+  "title": "synthesized charge-up sweep with a soft hit at 1.4 s (J.AD \"charge\")",
+  "sec": 1.78,
+  "url": "synth:numpy 12.09.2026",
+  "bytes": 57644
+ },
+ {
+  "name": "drop",
+  "folder": "03_riser",
+  "title": "Drum deep impact",
+  "sec": 5.54,
+  "url": "https://assets.mixkit.co/active_storage/sfx/563/563-preview.mp3",
+  "bytes": 139372
+ },
+ {
+  "name": "drum_roll",
+  "folder": "03_riser",
+  "title": "Drum Roll",
+  "sec": 5.98,
+  "url": "https://assets.mixkit.co/active_storage/sfx/566/566-preview.mp3",
+  "bytes": 187740
+ },
+ {
+  "name": "projector_start",
+  "folder": "03_riser",
+  "title": "запуск проектора, разгон 12 с",
+  "sec": 12.03,
+  "url": "",
+  "bytes": 153384
+ },
+ {
+  "name": "riser_b",
+  "folder": "03_riser",
+  "title": "Riser",
+  "sec": 0.77,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 19146
+ },
+ {
+  "name": "riser_glitch",
+  "folder": "03_riser",
+  "title": "Glitch sci fi rewind transition",
+  "sec": 3.74,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1093/1093-preview.mp3",
+  "bytes": 118114
+ },
+ {
+  "name": "riser_long",
+  "folder": "03_riser",
+  "title": "Cinematic drama riser",
+  "sec": 31.03,
+  "url": "https://assets.mixkit.co/active_storage/sfx/632/632-preview.mp3",
+  "bytes": 968328
+ },
+ {
+  "name": "riser_long_b",
+  "folder": "03_riser",
+  "title": "Riser 2",
+  "sec": 4.81,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 116026
+ },
+ {
+  "name": "riser_premium",
+  "folder": "03_riser",
+  "title": "Premium Riser",
+  "sec": 2.5,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 60524
+ },
+ {
+  "name": "riser_rjd",
+  "folder": "03_riser",
+  "title": "RJD Riser",
+  "sec": 0.73,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 18317
+ },
+ {
+  "name": "riser_short",
+  "folder": "03_riser",
+  "title": "short riser 1.2 s, Elzhan download 07.09.2026; re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 1.2,
+  "url": "download:elzhan",
+  "bytes": 115304
+ },
+ {
+  "name": "riser_smooth",
+  "folder": "03_riser",
+  "title": "Smooth Riser",
+  "sec": 2.26,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 54764
+ },
+ {
+  "name": "riser_space",
+  "folder": "03_riser",
+  "title": "Short space stutter intro riser",
+  "sec": 6.58,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1144/1144-preview.mp3",
+  "bytes": 210840
+ },
+ {
+  "name": "paper_page",
+  "folder": "04_object",
+  "title": "переворот страницы",
+  "sec": 0.37,
+  "url": "",
+  "bytes": 9447
+ },
+ {
+  "name": "paper_rustle",
+  "folder": "04_object",
+  "title": "шелест бумаги",
+  "sec": 1.03,
+  "url": "",
+  "bytes": 25388
+ },
+ {
+  "name": "button_a",
+  "folder": "04_ui",
+  "title": "Zenix Motion \"Button 1\" — soft UI press",
+  "sec": 0.55,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 18476
+ },
+ {
+  "name": "button_b",
+  "folder": "04_ui",
+  "title": "Zenix Motion \"Button 2\" — brighter UI press",
+  "sec": 0.5,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 16940
+ },
+ {
+  "name": "button_c",
+  "folder": "04_ui",
+  "title": "Zenix Motion \"Button 3\" — bodied confirm press",
+  "sec": 0.5,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 16940
+ },
+ {
+  "name": "button_mx",
+  "folder": "04_ui",
+  "title": "Ui button",
+  "sec": 0.29,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 7867
+ },
+ {
+  "name": "button_sel",
+  "folder": "04_ui",
+  "title": "Ui Granular, Button, Select",
+  "sec": 0.21,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 5986
+ },
+ {
+  "name": "button_sel2",
+  "folder": "04_ui",
+  "title": "Ui Granular, Button, Select   (9)",
+  "sec": 0.26,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 7240
+ },
+ {
+  "name": "click",
+  "folder": "04_ui",
+  "title": "Classic click",
+  "sec": 0.34,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1117/1117-preview.mp3",
+  "bytes": 7200
+ },
+ {
+  "name": "click_beat",
+  "folder": "04_ui",
+  "title": "UI Beatbox Click 01",
+  "sec": 0.22,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 5804
+ },
+ {
+  "name": "click_cine",
+  "folder": "04_ui",
+  "title": "Cinematic Click",
+  "sec": 0.13,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 55474
+ },
+ {
+  "name": "click_dig1",
+  "folder": "04_ui",
+  "title": "Uu Click Digital 01",
+  "sec": 0.48,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 12140
+ },
+ {
+  "name": "click_dig3",
+  "folder": "04_ui",
+  "title": "Ui Click Digital 03",
+  "sec": 0.24,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 6380
+ },
+ {
+  "name": "click_dig4",
+  "folder": "04_ui",
+  "title": "Ui Click Digital 04",
+  "sec": 0.19,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 5228
+ },
+ {
+  "name": "click_digital_b",
+  "folder": "04_ui",
+  "title": "Ui Digital Click",
+  "sec": 0.58,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 14538
+ },
+ {
+  "name": "click_glitch",
+  "folder": "04_ui",
+  "title": "Ui Glitch Click",
+  "sec": 0.34,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 9121
+ },
+ {
+  "name": "click_high",
+  "folder": "04_ui",
+  "title": "High Click",
+  "sec": 0.12,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 10318
+ },
+ {
+  "name": "click_hitech",
+  "folder": "04_ui",
+  "title": "synthesized hi-tech click with a low thump (J.AD \"Hi-Tech Click\")",
+  "sec": 0.29,
+  "url": "synth:numpy 12.09.2026",
+  "bytes": 10028
+ },
+ {
+  "name": "click_hollow",
+  "folder": "04_ui",
+  "title": "hollow click with a longer body, Elzhan download (\"Click\"); re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 1.39,
+  "url": "download:elzhan",
+  "bytes": 133736
+ },
+ {
+  "name": "click_mouse",
+  "folder": "04_ui",
+  "title": "Clear mouse clicks",
+  "sec": 1.1,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3",
+  "bytes": 36222
+ },
+ {
+  "name": "click_mx_a",
+  "folder": "04_ui",
+  "title": "Click  (1)",
+  "sec": 0.6,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 15408
+ },
+ {
+  "name": "click_mx_b",
+  "folder": "04_ui",
+  "title": "Click 2",
+  "sec": 0.21,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 5685
+ },
+ {
+  "name": "click_mx_c",
+  "folder": "04_ui",
+  "title": "Click_2",
+  "sec": 0.21,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 6014
+ },
+ {
+  "name": "click_mx_d",
+  "folder": "04_ui",
+  "title": "Ui Click",
+  "sec": 1.34,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 32876
+ },
+ {
+  "name": "click_pro",
+  "folder": "04_ui",
+  "title": "tight designer click 0.22 s, Elzhan download (\"5. Click\"); re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 0.22,
+  "url": "download:elzhan",
+  "bytes": 20840
+ },
+ {
+  "name": "click_snap",
+  "folder": "04_ui",
+  "title": "finger snap muffled with cloth, low thump, very short",
+  "sec": 0.53,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 13292
+ },
+ {
+  "name": "click_snap_b",
+  "folder": "04_ui",
+  "title": "щелчок пальцев, приглушённый тканью, низкий",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "click_soft",
+  "folder": "04_ui",
+  "title": "soft muted fingertip tap on thick paper, warm low body",
+  "sec": 0.53,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 13292
+ },
+ {
+  "name": "click_soft_a",
+  "folder": "04_ui",
+  "title": "подушечка пальца по плотной бумаге, тёплый низ",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "click_stone_c",
+  "folder": "04_ui",
+  "title": "камешек положили на фетр, глухой стук",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "click_ui",
+  "folder": "04_ui",
+  "title": "small smooth stone placed on felt, dull low knock, short decay",
+  "sec": 0.53,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 13292
+ },
+ {
+  "name": "counter_run",
+  "folder": "04_ui",
+  "title": "counter running 3.3 s, rising ticks, Elzhan download; re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 3.52,
+  "url": "download:elzhan",
+  "bytes": 337998
+ },
+ {
+  "name": "data_cine",
+  "folder": "04_ui",
+  "title": "Cinematic data",
+  "sec": 2.23,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 54351
+ },
+ {
+  "name": "data_collect",
+  "folder": "04_ui",
+  "title": "Data Collect",
+  "sec": 1.01,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 24812
+ },
+ {
+  "name": "data_collect2",
+  "folder": "04_ui",
+  "title": "Cinematic Data Collect 2",
+  "sec": 3.5,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 84716
+ },
+ {
+  "name": "data_collect_b",
+  "folder": "04_ui",
+  "title": "Data Collect",
+  "sec": 1.04,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 25747
+ },
+ {
+  "name": "gear",
+  "folder": "04_ui",
+  "title": "Gear metallic lock sound",
+  "sec": 1.15,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2858/2858-preview.mp3",
+  "bytes": 35603
+ },
+ {
+  "name": "glitch_short",
+  "folder": "04_ui",
+  "title": "Small electric glitch",
+  "sec": 1.07,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2595/2595-preview.mp3",
+  "bytes": 36538
+ },
+ {
+  "name": "glitch_static",
+  "folder": "04_ui",
+  "title": "Glitch static",
+  "sec": 1.44,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1457/1457-preview.mp3",
+  "bytes": 48177
+ },
+ {
+  "name": "key_single",
+  "folder": "04_ui",
+  "title": "Single key press in a laptop",
+  "sec": 0.31,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2541/2541-preview.mp3",
+  "bytes": 4903
+ },
+ {
+  "name": "key_tap",
+  "folder": "04_ui",
+  "title": "v4) type & delete (2)",
+  "sec": 0.13,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 3898
+ },
+ {
+  "name": "land_air_b",
+  "folder": "04_ui",
+  "title": "панель садится: саб плюс воздух на влёте",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "land_deep",
+  "folder": "04_ui",
+  "title": "cinematic UI panel settling, low sub thump with airy whoosh in",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "land_pad",
+  "folder": "04_ui",
+  "title": "padded leather book closing softly, deep body, gentle air",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "land_pad_c",
+  "folder": "04_ui",
+  "title": "кожаная книга мягко закрылась, глубокое тело",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "land_soft_a",
+  "folder": "04_ui",
+  "title": "тяжёлая карточка села на фетр, воздух и тёплый хвост",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "load",
+  "folder": "04_ui",
+  "title": "Opening software interface",
+  "sec": 1.18,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3",
+  "bytes": 38416
+ },
+ {
+  "name": "notif_error",
+  "folder": "04_ui",
+  "title": "Wrong answer fail notification",
+  "sec": 1.99,
+  "url": "https://assets.mixkit.co/active_storage/sfx/946/946-preview.mp3",
+  "bytes": 63781
+ },
+ {
+  "name": "notif_positive",
+  "folder": "04_ui",
+  "title": "Positive notification",
+  "sec": 2.85,
+  "url": "https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3",
+  "bytes": 87485
+ },
+ {
+  "name": "notif_soft",
+  "folder": "04_ui",
+  "title": "heavy card landing on felt, deep soft thud with air, short warm tail",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "page_turn_ui",
+  "folder": "04_ui",
+  "title": "Page turn chime",
+  "sec": 1.75,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1106/1106-preview.mp3",
+  "bytes": 54964
+ },
+ {
+  "name": "pop_med",
+  "folder": "04_ui",
+  "title": "Meadia Pop",
+  "sec": 0.52,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 13208
+ },
+ {
+  "name": "pop_normal",
+  "folder": "04_ui",
+  "title": "Normal Pop",
+  "sec": 3.12,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 62924
+ },
+ {
+  "name": "pop_premium",
+  "folder": "04_ui",
+  "title": "Premium And Smooth Pop",
+  "sec": 3.48,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 84476
+ },
+ {
+  "name": "pop_slow",
+  "folder": "04_ui",
+  "title": "Slow And Smooth Pop",
+  "sec": 0.36,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 9260
+ },
+ {
+  "name": "pop_smooth",
+  "folder": "04_ui",
+  "title": "Smooth Pop",
+  "sec": 0.1,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 3506
+ },
+ {
+  "name": "popup",
+  "folder": "04_ui",
+  "title": "pop-up notification 0.77 s, Elzhan download; re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 0.77,
+  "url": "download:elzhan",
+  "bytes": 73832
+ },
+ {
+  "name": "typing_loop",
+  "folder": "04_ui",
+  "title": "Fast keyboard typing",
+  "sec": 25.36,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1387/1387-preview.mp3",
+  "bytes": 837809
+ },
+ {
+  "name": "typing_short",
+  "folder": "04_ui",
+  "title": "Zenix Motion \"Typing\" — one keystroke, dry",
+  "sec": 0.36,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 12332
+ },
+ {
+  "name": "ui_backspace",
+  "folder": "04_ui",
+  "title": "Ui BackSpace",
+  "sec": 0.31,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 8202
+ },
+ {
+  "name": "ui_enter",
+  "folder": "04_ui",
+  "title": "Ui Enter",
+  "sec": 0.43,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 11082
+ },
+ {
+  "name": "ui_glitch_text",
+  "folder": "04_ui",
+  "title": "Ui Glitch, Flicker, Text  (2)",
+  "sec": 0.42,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 10954
+ },
+ {
+  "name": "ui_mx",
+  "folder": "04_ui",
+  "title": "Ui",
+  "sec": 0.78,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 19572
+ },
+ {
+  "name": "ui_open",
+  "folder": "04_ui",
+  "title": "Ui Open",
+  "sec": 1.54,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 37753
+ },
+ {
+  "name": "ui_open_premium",
+  "folder": "04_ui",
+  "title": "UI Premium Open",
+  "sec": 3.89,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 94026
+ },
+ {
+  "name": "ui_open_sweet",
+  "folder": "04_ui",
+  "title": "Sweet UI Open",
+  "sec": 0.18,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 5058
+ },
+ {
+  "name": "ui_stretch",
+  "folder": "04_ui",
+  "title": "Ui stretch",
+  "sec": 1.27,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 31242
+ },
+ {
+  "name": "ui_typing_b",
+  "folder": "04_ui",
+  "title": "Ui Typing",
+  "sec": 2.09,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 50732
+ },
+ {
+  "name": "drone_low",
+  "folder": "05_cinematic",
+  "title": "Deep cinematic wind hum",
+  "sec": 54.05,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1177/1177-preview.mp3",
+  "bytes": 1614136
+ },
+ {
+  "name": "heartbeat",
+  "folder": "05_cinematic",
+  "title": "Human single heart beat",
+  "sec": 1.15,
+  "url": "https://assets.mixkit.co/active_storage/sfx/490/490-preview.mp3",
+  "bytes": 36640
+ },
+ {
+  "name": "heartbeat_fast",
+  "folder": "05_cinematic",
+  "title": "Fast Heartbeat",
+  "sec": 9.9,
+  "url": "https://assets.mixkit.co/active_storage/sfx/493/493-preview.mp3",
+  "bytes": 312040
+ },
+ {
+  "name": "horn",
+  "folder": "05_cinematic",
+  "title": "Warfare horn",
+  "sec": 4.99,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2289/2289-preview.mp3",
+  "bytes": 156379
+ },
+ {
+  "name": "ping",
+  "folder": "05_cinematic",
+  "title": "Digital quick tone",
+  "sec": 1.33,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3",
+  "bytes": 43375
+ },
+ {
+  "name": "sub_drop",
+  "folder": "05_cinematic",
+  "title": "Knocking sub bass",
+  "sec": 3.06,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2300/2300-preview.mp3",
+  "bytes": 98442
+ },
+ {
+  "name": "achievement",
+  "folder": "06_game",
+  "title": "Achievement completed",
+  "sec": 3.63,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2068/2068-preview.mp3",
+  "bytes": 86633
+ },
+ {
+  "name": "bleep_bloop",
+  "folder": "06_game",
+  "title": "bleep bloop UI jingle, Elzhan download; re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 2.05,
+  "url": "download:elzhan",
+  "bytes": 197236
+ },
+ {
+  "name": "bonus",
+  "folder": "06_game",
+  "title": "Bonus earned in video game",
+  "sec": 1.7,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2058/2058-preview.mp3",
+  "bytes": 54803
+ },
+ {
+  "name": "coin",
+  "folder": "06_game",
+  "title": "Clinking coins",
+  "sec": 1.07,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1993/1993-preview.mp3",
+  "bytes": 34658
+ },
+ {
+  "name": "coin_win",
+  "folder": "06_game",
+  "title": "Coin win notification",
+  "sec": 2.53,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1992/1992-preview.mp3",
+  "bytes": 81263
+ },
+ {
+  "name": "game_over",
+  "folder": "06_game",
+  "title": "Long game over notification",
+  "sec": 5.77,
+  "url": "https://assets.mixkit.co/active_storage/sfx/276/276-preview.mp3",
+  "bytes": 141205
+ },
+ {
+  "name": "level_up",
+  "folder": "06_game",
+  "title": "Completion of a level",
+  "sec": 3.03,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2063/2063-preview.mp3",
+  "bytes": 95779
+ },
+ {
+  "name": "unlock",
+  "folder": "06_game",
+  "title": "Unlock game notification",
+  "sec": 1.44,
+  "url": "https://assets.mixkit.co/active_storage/sfx/253/253-preview.mp3",
+  "bytes": 44163
+ },
+ {
+  "name": "boing",
+  "folder": "07_cartoon",
+  "title": "Boing hit sound",
+  "sec": 1.28,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2894/2894-preview.mp3",
+  "bytes": 41858
+ },
+ {
+  "name": "bubble_pop",
+  "folder": "07_cartoon",
+  "title": "Soap bubble sound",
+  "sec": 1.18,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2925/2925-preview.mp3",
+  "bytes": 38311
+ },
+ {
+  "name": "fail_tone",
+  "folder": "07_cartoon",
+  "title": "Funny fail low tone",
+  "sec": 1.57,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2876/2876-preview.mp3",
+  "bytes": 50581
+ },
+ {
+  "name": "joke_drums",
+  "folder": "07_cartoon",
+  "title": "Bad joke drums",
+  "sec": 2.06,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2893/2893-preview.mp3",
+  "bytes": 44354
+ },
+ {
+  "name": "pop",
+  "folder": "07_cartoon",
+  "title": "Hard pop click",
+  "sec": 1.2,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2364/2364-preview.mp3",
+  "bytes": 39145
+ },
+ {
+  "name": "splat",
+  "folder": "07_cartoon",
+  "title": "Funny cartoon fast splat",
+  "sec": 1.07,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2889/2889-preview.mp3",
+  "bytes": 34867
+ },
+ {
+  "name": "trombone_sad",
+  "folder": "07_cartoon",
+  "title": "Trombone disappoint",
+  "sec": 2.69,
+  "url": "https://assets.mixkit.co/active_storage/sfx/744/744-preview.mp3",
+  "bytes": 87376
+ },
+ {
+  "name": "whistle_fall",
+  "folder": "07_cartoon",
+  "title": "Cartoon falling whistle",
+  "sec": 2.72,
+  "url": "https://assets.mixkit.co/active_storage/sfx/395/395-preview.mp3",
+  "bytes": 85912
+ },
+ {
+  "name": "camera_button",
+  "folder": "08_foley",
+  "title": "кнопка фотоаппарата",
+  "sec": 0.34,
+  "url": "",
+  "bytes": 6094
+ },
+ {
+  "name": "camera_shutter",
+  "folder": "08_foley",
+  "title": "Camera shutter hard click",
+  "sec": 0.68,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1430/1430-preview.mp3",
+  "bytes": 18370
+ },
+ {
+  "name": "cash_register",
+  "folder": "08_foley",
+  "title": "кассовый аппарат",
+  "sec": 1.52,
+  "url": "",
+  "bytes": 37032
+ },
+ {
+  "name": "engine_start_keys",
+  "folder": "08_foley",
+  "title": "ключи и запуск двигателя",
+  "sec": 3.43,
+  "url": "",
+  "bytes": 82988
+ },
+ {
+  "name": "gear_fast",
+  "folder": "08_foley",
+  "title": "Fast Gear",
+  "sec": 2.87,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 69633
+ },
+ {
+  "name": "gear_fast_b",
+  "folder": "08_foley",
+  "title": "Fast Gear 2",
+  "sec": 2.19,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 53431
+ },
+ {
+  "name": "gear_mid",
+  "folder": "08_foley",
+  "title": "middle gear",
+  "sec": 0.72,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 17999
+ },
+ {
+  "name": "gear_premium",
+  "folder": "08_foley",
+  "title": "Smooth And Premium Gear",
+  "sec": 1.37,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 1562217
+ },
+ {
+  "name": "gear_soft",
+  "folder": "08_foley",
+  "title": "Soft Gear 1",
+  "sec": 0.44,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 11328
+ },
+ {
+  "name": "gear_soft_b",
+  "folder": "08_foley",
+  "title": "Soft Gear 2",
+  "sec": 1.44,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 35319
+ },
+ {
+  "name": "gear_speed",
+  "folder": "08_foley",
+  "title": "long speed gear",
+  "sec": 0.48,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 12240
+ },
+ {
+  "name": "glass_clink",
+  "folder": "08_foley",
+  "title": "Wine glass clink",
+  "sec": 1.23,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2936/2936-preview.mp3",
+  "bytes": 18987
+ },
+ {
+  "name": "ice_drop",
+  "folder": "08_foley",
+  "title": "Dropping ice into a glass",
+  "sec": 2.09,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2834/2834-preview.mp3",
+  "bytes": 65352
+ },
+ {
+  "name": "marker_write",
+  "folder": "08_foley",
+  "title": "Writing scribble on paper",
+  "sec": 1.23,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2369/2369-preview.mp3",
+  "bytes": 37585
+ },
+ {
+  "name": "money_cine",
+  "folder": "08_foley",
+  "title": "Cinematic Money 1",
+  "sec": 1.51,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 37090
+ },
+ {
+  "name": "money_cine_b",
+  "folder": "08_foley",
+  "title": "Cinematic Money 2",
+  "sec": 1.15,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 28255
+ },
+ {
+  "name": "money_high",
+  "folder": "08_foley",
+  "title": "High Volume Money",
+  "sec": 1.49,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 36498
+ },
+ {
+  "name": "money_med",
+  "folder": "08_foley",
+  "title": "Mediam Volume Mone",
+  "sec": 2.71,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 74806
+ },
+ {
+  "name": "paper_crumple",
+  "folder": "08_foley",
+  "title": "Quick paper crumple sound",
+  "sec": 1.36,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2996/2996-preview.mp3",
+  "bytes": 42178
+ },
+ {
+  "name": "paper_cut",
+  "folder": "08_foley",
+  "title": "Paper quick slice",
+  "sec": 0.39,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2384/2384-preview.mp3",
+  "bytes": 13962
+ },
+ {
+  "name": "paper_pull_a",
+  "folder": "08_foley",
+  "title": "плотный картон едет по деревянному столу",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "paper_slide",
+  "folder": "08_foley",
+  "title": "thick cardstock sliding across wooden desk, real paper foley",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "paper_tear",
+  "folder": "08_foley",
+  "title": "slow tear of heavy textured paper, rich low fibers",
+  "sec": 0.84,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 20780
+ },
+ {
+  "name": "paper_tear_b",
+  "folder": "08_foley",
+  "title": "медленный разрыв плотной бумаги, низкие волокна",
+  "sec": 0.81,
+  "url": "",
+  "bytes": 77922
+ },
+ {
+  "name": "paper_turn",
+  "folder": "08_foley",
+  "title": "Page turn single",
+  "sec": 0.5,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1104/1104-preview.mp3",
+  "bytes": 18060
+ },
+ {
+  "name": "pencil_write",
+  "folder": "08_foley",
+  "title": "Writing pencil",
+  "sec": 1.91,
+  "url": "https://assets.mixkit.co/active_storage/sfx/3194/3194-preview.mp3",
+  "bytes": 49001
+ },
+ {
+  "name": "photo_shutter",
+  "folder": "08_foley",
+  "title": "затвор фотоаппарата",
+  "sec": 0.89,
+  "url": "",
+  "bytes": 13556
+ },
+ {
+  "name": "projector_feed",
+  "folder": "08_foley",
+  "title": "протяжка плёнки",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 15177
+ },
+ {
+  "name": "scissors",
+  "folder": "08_foley",
+  "title": "Scissors cutting paper",
+  "sec": 2.98,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2378/2378-preview.mp3",
+  "bytes": 60324
+ },
+ {
+  "name": "shutter_hard",
+  "folder": "08_foley",
+  "title": "Little Bit Hard Cammera Shutter",
+  "sec": 0.44,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 11328
+ },
+ {
+  "name": "shutter_smooth",
+  "folder": "08_foley",
+  "title": "Smooth Cammera Shutter",
+  "sec": 0.52,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 13208
+ },
+ {
+  "name": "sip",
+  "folder": "08_foley",
+  "title": "Sip of water",
+  "sec": 2.82,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1307/1307-preview.mp3",
+  "bytes": 94793
+ },
+ {
+  "name": "slide_carousel",
+  "folder": "08_foley",
+  "title": "карусель слайдов",
+  "sec": 1.23,
+  "url": "",
+  "bytes": 12320
+ },
+ {
+  "name": "slide_change",
+  "folder": "08_foley",
+  "title": "смена слайда",
+  "sec": 0.94,
+  "url": "",
+  "bytes": 9426
+ },
+ {
+  "name": "truck_engine_rev",
+  "folder": "08_foley",
+  "title": "рёв двигателя грузовика",
+  "sec": 2.42,
+  "url": "",
+  "bytes": 58796
+ },
+ {
+  "name": "water_pour",
+  "folder": "08_foley",
+  "title": "Pouring water to glass",
+  "sec": 7.94,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1324/1324-preview.mp3",
+  "bytes": 273609
+ },
+ {
+  "name": "chime",
+  "folder": "09_accent",
+  "title": "Bell notification",
+  "sec": 3.4,
+  "url": "https://assets.mixkit.co/active_storage/sfx/933/933-preview.mp3",
+  "bytes": 105280
+ },
+ {
+  "name": "combo_ui",
+  "folder": "09_accent",
+  "title": "Zenix Motion \"Combo\" — press + rising shimmer 1.3 s",
+  "sec": 1.34,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 43820
+ },
+ {
+  "name": "ding",
+  "folder": "09_accent",
+  "title": "Page forward single chime",
+  "sec": 1.72,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1107/1107-preview.mp3",
+  "bytes": 54909
+ },
+ {
+  "name": "ding_soft",
+  "folder": "09_accent",
+  "title": "soft metallic ding, Elzhan download (\"6.\"); re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 1.15,
+  "url": "download:elzhan",
+  "bytes": 110696
+ },
+ {
+  "name": "magic_sparkle",
+  "folder": "09_accent",
+  "title": "Magic sparkle touch",
+  "sec": 2.38,
+  "url": "https://assets.mixkit.co/active_storage/sfx/3083/3083-preview.mp3",
+  "bytes": 73387
+ },
+ {
+  "name": "shimmer_deep_a",
+  "folder": "09_accent",
+  "title": "глубокий воздушный шиммер, длинный хвост",
+  "sec": 1.2,
+  "url": "",
+  "bytes": 115538
+ },
+ {
+  "name": "shimmer_glass",
+  "folder": "09_accent",
+  "title": "soft glass harmonic bloom, gentle rise, long airy tail",
+  "sec": 1.25,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 30572
+ },
+ {
+  "name": "shimmer_glass_b",
+  "folder": "09_accent",
+  "title": "стеклянный гармонический расцвет, длинный реверб",
+  "sec": 1.2,
+  "url": "",
+  "bytes": 115538
+ },
+ {
+  "name": "shine",
+  "folder": "09_accent",
+  "title": "Choir magic shine",
+  "sec": 0.65,
+  "url": "https://assets.mixkit.co/active_storage/sfx/658/658-preview.mp3",
+  "bytes": 16172
+ },
+ {
+  "name": "shine_a",
+  "folder": "09_accent",
+  "title": "короткий блик-акцент",
+  "sec": 0.6,
+  "url": "",
+  "bytes": 57860
+ },
+ {
+  "name": "shine_long",
+  "folder": "09_accent",
+  "title": "long bright metallic shine, sustained, Elzhan download (\"4.\"); re-imported 13.09.2026 from Elzhan's originals, peak -1 dBFS — Elzhan: \"звучат дороже и современнее, использовать почаще\"",
+  "sec": 2.59,
+  "url": "download:elzhan",
+  "bytes": 248936
+ },
+ {
+  "name": "snap",
+  "folder": "09_accent",
+  "title": "Short slap or clap",
+  "sec": 3.13,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2167/2167-preview.mp3",
+  "bytes": 63505
+ },
+ {
+  "name": "sparkle",
+  "folder": "09_accent",
+  "title": "cinematic magical shimmer swell, deep warm sub, wide airy tail",
+  "sec": 1.25,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 30572
+ },
+ {
+  "name": "sparkle_soft",
+  "folder": "09_accent",
+  "title": "Zenix Motion \"Sparkle\" — soft sparkle with tail",
+  "sec": 1.85,
+  "url": "instagram:DcMOQJpgxak",
+  "bytes": 59948
+ },
+ {
+  "name": "sparkle_sweep",
+  "folder": "09_accent",
+  "title": "Sweeping sparkle presentation intro",
+  "sec": 3.03,
+  "url": "https://assets.mixkit.co/active_storage/sfx/2633/2633-preview.mp3",
+  "bytes": 94788
+ },
+ {
+  "name": "stopwatch",
+  "folder": "09_accent",
+  "title": "MA_Tuttkile_Stopwatch_3",
+  "sec": 5.66,
+  "url": "pack:Sound Effects By Motionix",
+  "bytes": 136750
+ },
+ {
+  "name": "tick",
+  "folder": "09_accent",
+  "title": "deep hollow wooden tick, close-mic, soft low thump, no ring",
+  "sec": 0.53,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 13292
+ },
+ {
+  "name": "tick_body_c",
+  "folder": "09_accent",
+  "title": "войлочная колотушка по деревянному бруску, тёплый низ",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "tick_mech_b",
+  "folder": "09_accent",
+  "title": "механический тик затвора, сухой хвост",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "tick_metal",
+  "folder": "09_accent",
+  "title": "heavy analog camera shutter tick, mechanical body, dry short tail",
+  "sec": 0.53,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 13292
+ },
+ {
+  "name": "tick_wood",
+  "folder": "09_accent",
+  "title": "muted felt mallet on solid wooden block, warm low end",
+  "sec": 0.53,
+  "url": "elevenlabs:sound-generation",
+  "bytes": 13292
+ },
+ {
+  "name": "tick_wood_a",
+  "folder": "09_accent",
+  "title": "глухой деревянный тик с телом, без звона",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "icon_bleep_bloop",
+  "folder": "10_icon_refs",
+  "title": "интерфейсный блип",
+  "sec": 1.8,
+  "url": "",
+  "bytes": 172878
+ },
+ {
+  "name": "icon_camera_charge",
+  "folder": "10_icon_refs",
+  "title": "зарядка вспышки",
+  "sec": 1.6,
+  "url": "",
+  "bytes": 153678
+ },
+ {
+  "name": "icon_camera_flash",
+  "folder": "10_icon_refs",
+  "title": "вспышка",
+  "sec": 0.6,
+  "url": "",
+  "bytes": 57678
+ },
+ {
+  "name": "icon_click",
+  "folder": "10_icon_refs",
+  "title": "клик",
+  "sec": 0.9,
+  "url": "",
+  "bytes": 86478
+ },
+ {
+  "name": "icon_counter",
+  "folder": "10_icon_refs",
+  "title": "бег счётчика 3.4 с",
+  "sec": 3.4,
+  "url": "",
+  "bytes": 326478
+ },
+ {
+  "name": "icon_data_analysis",
+  "folder": "10_icon_refs",
+  "title": "обработка данных",
+  "sec": 1.0,
+  "url": "",
+  "bytes": 96078
+ },
+ {
+  "name": "icon_enter",
+  "folder": "10_icon_refs",
+  "title": "ввод",
+  "sec": 0.8,
+  "url": "",
+  "bytes": 76878
+ },
+ {
+  "name": "icon_gears_cycle",
+  "folder": "10_icon_refs",
+  "title": "цикл шестерён",
+  "sec": 0.9,
+  "url": "",
+  "bytes": 86478
+ },
+ {
+  "name": "icon_impact_cinematic",
+  "folder": "10_icon_refs",
+  "title": "киношный удар",
+  "sec": 1.2,
+  "url": "",
+  "bytes": 115278
+ },
+ {
+  "name": "icon_interface",
+  "folder": "10_icon_refs",
+  "title": "интерфейс",
+  "sec": 2.3,
+  "url": "",
+  "bytes": 220878
+ },
+ {
+  "name": "icon_pop_up",
+  "folder": "10_icon_refs",
+  "title": "всплытие",
+  "sec": 0.8,
+  "url": "",
+  "bytes": 76878
+ },
+ {
+  "name": "icon_radio_beep",
+  "folder": "10_icon_refs",
+  "title": "радиобип",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 48078
+ },
+ {
+  "name": "icon_riser",
+  "folder": "10_icon_refs",
+  "title": "подъём",
+  "sec": 1.25,
+  "url": "",
+  "bytes": 120078
+ },
+ {
+  "name": "icon_riser_hook",
+  "folder": "10_icon_refs",
+  "title": "подъём под хук",
+  "sec": 1.95,
+  "url": "",
+  "bytes": 187278
+ },
+ {
+  "name": "icon_slide_whoosh",
+  "folder": "10_icon_refs",
+  "title": "свуш слайда",
+  "sec": 0.65,
+  "url": "",
+  "bytes": 62478
+ },
+ {
+  "name": "icon_tic_tac",
+  "folder": "10_icon_refs",
+  "title": "тик-так",
+  "sec": 1.25,
+  "url": "",
+  "bytes": 120078
+ },
+ {
+  "name": "apple_click",
+  "folder": "11_apple",
+  "title": "клик",
+  "sec": 0.26,
+  "url": "",
+  "bytes": 3441
+ },
+ {
+  "name": "apple_click_hi",
+  "folder": "11_apple",
+  "title": "клик верхний",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 6572
+ },
+ {
+  "name": "apple_open",
+  "folder": "11_apple",
+  "title": "раскрытие панели",
+  "sec": 0.57,
+  "url": "",
+  "bytes": 17170
+ },
+ {
+  "name": "apple_pop",
+  "folder": "11_apple",
+  "title": "поп",
+  "sec": 0.24,
+  "url": "",
+  "bytes": 8455
+ },
+ {
+  "name": "apple_switch",
+  "folder": "11_apple",
+  "title": "переключатель",
+  "sec": 0.37,
+  "url": "",
+  "bytes": 8244
+ },
+ {
+  "name": "apple_tap",
+  "folder": "11_apple",
+  "title": "тап",
+  "sec": 0.39,
+  "url": "",
+  "bytes": 14406
+ },
+ {
+  "name": "apple_thud",
+  "folder": "11_apple",
+  "title": "глухая посадка",
+  "sec": 0.29,
+  "url": "",
+  "bytes": 5008
+ },
+ {
+  "name": "apple_tick",
+  "folder": "11_apple",
+  "title": "тик",
+  "sec": 0.24,
+  "url": "",
+  "bytes": 3285
+ },
+ {
+  "name": "whip_fast",
+  "folder": "01_transition",
+  "title": "резкий короткий хлыст, вход плана",
+  "sec": 2.02,
+  "url": "",
+  "bytes": 193872
+ },
+ {
+  "name": "slowmo_pull",
+  "folder": "03_riser",
+  "title": "замедление, тянущийся подъём под отъезд камеры",
+  "sec": 3.46,
+  "url": "",
+  "bytes": 332078
+ },
+ {
+  "name": "camera_flash",
+  "folder": "09_accent",
+  "title": "вспышка фотоаппарата, сухой акцент",
+  "sec": 2.65,
+  "url": "",
+  "bytes": 254058
+ },
+ {
+  "name": "camera_click_ring",
+  "folder": "09_accent",
+  "title": "щелчок затвора с послезвоном",
+  "sec": 2.18,
+  "url": "",
+  "bytes": 209476
+ },
+ {
+  "name": "click_crispy",
+  "folder": "02_ui",
+  "title": "очень короткий сухой щелчок интерфейса",
+  "sec": 0.14,
+  "url": "",
+  "bytes": 13986
+ },
+ {
+  "name": "ui_soft_05",
+  "folder": "02_ui",
+  "title": "мягкий интерфейсный тик",
+  "sec": 0.43,
+  "url": "",
+  "bytes": 41038
+ },
+ {
+  "name": "stamp_rubber",
+  "folder": "08_foley",
+  "title": "резиновая печать по бумаге на столе, один удар (ElevenLabs, 04.10.2026)",
+  "sec": 0.71,
+  "url": "",
+  "bytes": 67890
+ },
+ {
+  "name": "tokens_drop",
+  "folder": "08_foley",
+  "title": "горсть деревянных фишек падает и рассыпается по столу — «часть людей отсеивается» (ElevenLabs, 04.10.2026)",
+  "sec": 1.02,
+  "url": "",
+  "bytes": 97984
+ },
+ {
+  "name": "pen_strike",
+  "folder": "08_foley",
+  "title": "маркер быстро зачёркивает слово (ElevenLabs, 04.10.2026)",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "window_snap",
+  "folder": "08_foley",
+  "title": "крышка ноутбука мягко закрывается, плотный стук (ElevenLabs, 04.10.2026)",
+  "sec": 0.5,
+  "url": "",
+  "bytes": 47828
+ },
+ {
+  "name": "bed_clinic_room",
+  "folder": "00_bed",
+  "title": "тон приёмной клиники: далёкий гул голосов, шаги по плитке, 4 с (ElevenLabs, 04.10.2026)",
+  "sec": 4.02,
+  "url": "",
+  "bytes": 386376
+ },
+ {
+  "name": "crispy_bite",
+  "folder": "04_object",
+  "title": "хрустящий укус, Freesound 718593 CC0",
+  "sec": 1.28,
+  "url": "https://freesound.org/s/718593",
+  "bytes": 31390
+ },
+ {
+  "name": "phone_vibrate",
+  "folder": "04_object",
+  "title": "вибрация телефона на деревянном столе, Freesound 384485 CC0",
+  "sec": 3.07,
+  "url": "https://freesound.org/s/384485",
+  "bytes": 74348
+ },
+ {
+  "name": "plane_flyby",
+  "folder": "04_object",
+  "title": "пролёт винтового самолёта, Freesound 157334 CC0",
+  "sec": 4.52,
+  "url": "https://freesound.org/s/157334",
+  "bytes": 109130
+ },
+ {
+  "name": "stove_sizzle",
+  "folder": "04_object",
+  "title": "шипение воды на плите, Freesound 170235 CC0",
+  "sec": 2.85,
+  "url": "https://freesound.org/s/170235",
+  "bytes": 69006
+ },
+ {
+  "name": "nk_shutter",
+  "folder": "01_transition",
+  "title": "затвор фотоаппарата, сухой щелчок (пак клиента Nikolai, 07.10.2026)",
+  "sec": 0.24,
+  "url": "",
+  "bytes": 5540
+ },
+ {
+  "name": "nk_shutter_click",
+  "folder": "01_transition",
+  "title": "затвор, щелчок с механикой (пак клиента Nikolai, 07.10.2026)",
+  "sec": 0.53,
+  "url": "",
+  "bytes": 5564
+ },
+ {
+  "name": "nk_click_fast",
+  "folder": "01_transition",
+  "title": "быстрый щелчок камеры (пак клиента Nikolai, 07.10.2026)",
+  "sec": 0.19,
+  "url": "",
+  "bytes": 18843
+ },
+ {
+  "name": "nk_tap",
+  "folder": "01_transition",
+  "title": "короткий тап (пак клиента Nikolai, 07.10.2026)",
+  "sec": 0.19,
+  "url": "",
+  "bytes": 60483
+ },
+ {
+  "name": "nk_flash",
+  "folder": "01_transition",
+  "title": "вспышка фотоаппарата с заводкой (пак клиента Nikolai, 07.10.2026)",
+  "sec": 1.73,
+  "url": "",
+  "bytes": 42375
+ },
+ {
+  "name": "nk_type",
+  "folder": "01_transition",
+  "title": "ввод текста, короткая очередь (пак клиента Nikolai, 07.10.2026)",
+  "sec": 0.38,
+  "url": "",
+  "bytes": 8682
+ },
+ {
+  "name": "kettle_boil",
+  "folder": "04_object",
+  "title": "чайник закипает, бульканье с нарастанием 3 с (Mixkit «Kettle boiling», 19.5–22.5 с оригинала); eldana Рентген 14.10.2026",
+  "sec": 3.0,
+  "url": "https://assets.mixkit.co/active_storage/sfx/1817/1817-preview.mp3"
+ },
+ {
+  "name": "bed_street_walk",
+  "folder": "00_bed",
+  "title": "улица днём: прохожие, шаги, город вдали (Mixkit «Street ambience with walking people»); eldana Рентген 14.10.2026",
+  "sec": null,
+  "url": "https://assets.mixkit.co/active_storage/sfx/375/375-preview.mp3"
+ }
+]

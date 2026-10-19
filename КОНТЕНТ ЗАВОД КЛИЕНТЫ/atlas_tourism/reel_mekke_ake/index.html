@@ -133,6 +133,23 @@ html body #stage{background:radial-gradient(120% 80% at 50% 28%,#1B2228 0%,#1015
 <script src="work/plate.js"></script>
 <script src="assets/vo/words.js"></script>
 <script type="module" src="spec.js"></script>
+<style>
+/* reel_mekke_ake: формы схемы и иконки (рисуются кодом — библиотеки картинок в облаке нет) */
+#stage .pin i{width:58px;height:58px}#stage .pin b{font-size:38px}
+#stage .ico{width:100%;height:100%}#stage .ico svg{display:block;width:100%;height:100%;overflow:visible}
+#stage .lbl.c{text-align:center}#stage .lbl.big{font-size:44px;letter-spacing:.2em}#stage .lbl.g{color:#7FD1B0}#stage .lbl.w{color:rgba(244,237,224,.86)}
+#stage .hookpanel{width:1080px;height:1920px;background:radial-gradient(86% 52% at 50% 40%,rgba(201,168,106,.16),rgba(201,168,106,0) 70%),linear-gradient(180deg,#171D23 0%,#0C1014 100%)}
+#stage .mini{position:relative;width:220px;height:80px;background:rgba(10,13,16,.72);box-shadow:inset 0 0 0 2px rgba(201,168,106,.55);display:flex;align-items:center;justify-content:space-between;padding:0 28px 18px}
+#stage .mini i{display:block;width:22px;height:22px;border-radius:50%;background:rgba(201,168,106,.30);position:relative;z-index:1}
+#stage .mini i.on{background:#E3C98F;box-shadow:0 0 0 7px rgba(201,168,106,.25)}#stage .mini i.on.g{background:#7FD1B0;box-shadow:0 0 0 7px rgba(127,209,176,.25)}
+#stage .mini s{position:absolute;left:50px;right:50px;top:30px;border-top:3px dashed rgba(244,237,224,.45)}
+#stage .mini b{position:absolute;bottom:8px;font:800 15px Inter,sans-serif;letter-spacing:.12em;color:rgba(244,237,224,.85)}#stage .mini b:nth-of-type(1){left:14px}#stage .mini b:nth-of-type(2){right:12px}
+#stage .lst{width:100%;height:100%;box-sizing:border-box;padding:30px 40px;background:linear-gradient(180deg,rgba(244,237,224,.10),rgba(244,237,224,.03));box-shadow:inset 0 0 0 2px rgba(201,168,106,.55),0 30px 80px rgba(0,0,0,.45)}
+#stage .lst p{height:110px;display:flex;align-items:center;border-bottom:2px solid rgba(244,237,224,.14);font:700 54px Oswald,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#F4EDE0}
+#stage .cell{width:104px;height:104px;display:flex;align-items:center;justify-content:center;font:700 50px Oswald,sans-serif}
+#stage .cell.gold{background:linear-gradient(180deg,#E3C98F,#A8864B);color:#0A0D10}
+#stage .cell.green{background:linear-gradient(180deg,#1E6B58,#0E3A31);color:#F4EDE0;box-shadow:inset 0 0 0 2px rgba(127,209,176,.55)}
+</style>
 </head>
 <body></body>
 </html>

@@ -9,3 +9,5 @@ engine/node_modules/
 **/renders/
 **/work/voice16.wav
 **/assets/vo/voice.wav
+**/work/voice_raw.wav
+**/work/*.log
