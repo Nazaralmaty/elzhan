@@ -104,9 +104,10 @@ Figures: 5–8 parts (torso, head, helm/hood, weapon arm, shield/staff arm, stub
 Illustrations (events, hero portraits, title): flat SVG placeholders now, later Flux (see below). Mockup: `game/mockup/index.html`.
 
 ## Tech
-Phaser 3 vendored in `game/vendor/`, plain JS ES modules, no build (keeps Pages branch deploy; don't touch resume/astana). Rules as pure functions over state, no Phaser (enables autobattle, AI, saves, `node --test`). Data tables in `js/data/*.js`. Seeded RNG. Local: `python3 -m http.server 8000` → `/game/`.
-Layout: `game/{index.html, vendor/, js/{main.js, core/{hex,rng,state,save}, rules/{economy,combat,skirmish,map,diplomacy,events}, ai/{skirmish-ai,kingdom-ai,morven-ai}, data/{units,buildings,terrain,heroes,events,art-manifest}, view/{scenes,figures,ui}}, assets/art/, tests/}`.
-Note: root `.gitignore` ignores `DESIGN.md`/`PRODUCT.md` — that's why this file is GDD.md.
+Plain SVG DOM + CSS/WAAPI animations (switched from Phaser: reuses mockup art 1:1, no vendor, enough perf). ES modules, no build (keeps Pages branch deploy; don't touch resume/astana). Rules = pure functions over state returning event lists; view plays events. Tests: `node --test game/tests/*.test.js` (`game/package.json` type=module). Seeded RNG. Local: `python3 -m http.server 8000` → `/game/`.
+Built (stage 1): `index.html`, `css/game.css`, `js/{main.js, core/{hex,rng}.js, data/units.js, rules/skirmish.js, ai/skirmish-ai.js, view/{board,art}.js}`, `tests/skirmish.test.js`. Arena artifact: claude.ai/artifact/9aTYKegqhJqCXSiqt4uHzA (entry page = index.html without skeleton, root game/). Mockup artifact: claude.ai/artifact/P8odCGBipo3HdAXZi1z62p.
+Arena specifics: player squad = hero + 4 (or 5 without hero); enemy by budget per difficulty 13/17/21/25, red mirror budget ×0.8; attack/ability ends unit turn (except Disengage → free 2-hex move); ZoC only from melee units; corpses enable Raise dead; arena mana 20 per side. AI-vs-AI balance at budget 17: undead ~68% player win, red 53–83%.
+Later stages: add `rules/{economy,map,diplomacy,events}.js`, `ai/{kingdom,morven}-ai.js`, `data/{buildings,terrain,heroes,events,art-manifest}.js`.
 
 ## Stages (each ends with a playable Pages link + owner feedback)
 1. Arena: pick squad vs AI, all units/heroes, all skirmish rules, forecast, autobattle, animated figures. Done = 10 fights in a row feel positional, AI not dumb.
