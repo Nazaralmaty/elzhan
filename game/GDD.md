@@ -1,447 +1,120 @@
-# Пробуждение источников — дизайн-документ
+# Awakening of the Sources — GDD (agent notes)
 
-Пошаговая стратегия на гексах про рыцарей и магов. Делается для себя: играть с MacBook (трекпад), в браузере, публикация через GitHub Pages из этого репозитория (`https://nazaralmaty.github.io/elzhan/game/`).
+Owner plays solo on MacBook trackpad, browser, GitHub Pages (`/game/`). UI language: Russian. All numbers are starting values, tune after playtests. Principle: solid base first, details after playtests; simplify RPG/graphics, never tactics/economy.
 
-Документ — итог планирования. Все цифры — **стартовые**, их правим после того, как поиграем. Сюжет и события со спойлерами лежат отдельно в [`STORY.md`](STORY.md), чтобы этот файл можно было читать, не портя себе игру.
+## Pillars
+- Map = core (~70%), Polytopia-like, hex, turn-based.
+- Economy = Cossacks logic, turn-based.
+- Skirmish = small-squad hex tactics (Legend of the Void / Battle Brothers). Positioning is the point.
+- Lane battle (Stick War) = greybox prototype only.
+- Tribe prologue (Spore) = greybox prototype only.
 
-**Принцип разработки:** крепкий базис сразу, детали — после пары сыгранных партий. Упрощаем RPG и графику, но не тактику и экономику: именно они — ради чего игра.
+## Controls
+Click everything, no required right-click. Two-finger swipe or WASD pan; pinch or Q/E zoom; Enter end turn; Tab next idle unit; Esc cancel; 1/2/3 abilities; hover = path, damage forecast, tile yield. No precision drag. Targets ≥32px. Autosave every turn + 3 slots + file export/import (localStorage).
 
----
+## Game settings (independent)
+Length: short 12×12 map, 1 AI, 6 villages, 3 mana sources, 4–5 events, buildings −30%, growth ×1.5 · medium 20×20, 2–3 AI, 14 villages, 6 sources, 8–12 events · long 30×30, 4–5 AI, 26 villages, 10 sources, 15+ events.
+Difficulty (same AI, different bonuses): Squire/Knight/Lord/King → AI income −25/0/+25/+50%; first AI attack turn ≥25/15/10/6; AI gang up on leader no/no/sometimes/yes; Morven growth ×0.7/1/1.2/1.5; player autobattle damage penalty 0/10/15/20%.
+Hardcore checkbox: losing hero dies. Seed field.
 
-## 1. Ядро игры
+## Map
+Pointy-top hex, axial (q,r), slight vertical squash. Fog of war. Seeded gen: equidistant capitals, Morven on north edge, each capital has forest+hill+1 mana source within 4.
+Terrain (move): plain 1, forest 2 (blocks sight), hill 2 (+1 sight), mountain ∞, water ∞, ore vein (hill) 2, gold vein (hill) 2, mana source 1, ruins 1 (story), neutral village 1.
+Cities: capture neutral village by standing 1 turn. Territory radius 1 (7), radius 2 at city lvl 3. City lvl by pop: 8/15/25. Captured city keeps buildings at −1 level.
 
-| Слой | Вдохновение | Роль |
-|---|---|---|
-| **Карта королевства** | The Battle of Polytopia | Ядро, ~70% времени: города, застройка, армии, дипломатия |
-| **Экономика** | Казаки: Снова война | Крестьяне, 5 ресурсов + мана, содержание армии, рынок — но пошагово |
-| **Стычка** | Legend of the Void, Battle Brothers | Тактический бой малых отрядов на гекс-арене. Главное — позиционирование |
-| **Сражение стенка на стенку** | Stick War: Legacy / Empires | Армия на армию, вид сбоку, бой раундами с приказами. *Сначала серая болванка* |
-| **Пролог племени** | Spore, этап племени | Объединение племён миром или силой, задаёт уклон королевства. *Сначала серая болванка* |
+## Economy
+Resources (kingdom-wide, no logistics): food, wood, stone, gold, iron, mana.
+Peasants: pop = peasants, each eats 1 food/turn. Production buildings have slots 2/4/6 (lvl1–3, upgrade costs wood+stone). Manual +/− or per-city auto (priority: no starvation → upkeep shortfall → even). Idle peasant +1 food.
+Growth: surplus food → city growth store; at `10 + 2×pop` → +1 pop, needs housing (town hall 4, house +4 / lvl2 +6). Starving: no growth, −1 pop/turn in largest city.
+Upkeep per turn. Shortfall: turn 1 "unrest" −25% atk; then 1 unit deserts per turn (most expensive unpaid).
+Market: any→any 3:1, lvl2 2:1. Mana not tradeable.
+Start: capital pop 3, town hall + farm, 1 hero, 2 militia; food 20, wood 15, stone 5, gold 10.
 
-Цикл хода: собрать доход → распределить крестьян / построить / нанять → двинуть отряды → встреча с врагом = стычка (вручную или автобой) → `Enter` — конец хода → ходят ИИ и злодей → срабатывают сюжетные события.
+Buildings (cost wood/stone/gold · tile · effect · adjacency):
+- Town hall · center · +2 food +1 gold, housing 4, recruits militia
+- House 8/2/0 · plain,hill · housing +4
+- Farm 6/0/0 · plain · +2 food/peasant · +1 per adjacent mill
+- Mill 10/6/0 · plain · no slots
+- Sawmill 4/0/0 · forest · +2 wood/peasant · +1 if ≥2 adjacent forest
+- Quarry 8/0/0 · hill · +2 stone/peasant
+- Iron mine 10/6/0 · ore · +1 iron/peasant · +1 if adjacent forge
+- Gold mine 10/8/0 · gold vein · +1 gold/peasant
+- Market (1/city) 12/8/0 · plain · trade · +1 gold per adjacent house
+- Barracks 12/6/0 · plain · swordsman, archer
+- Forge 10/10/0 · any · required for swordsman/knight · next to iron mine: steel recruit −25% iron
+- Stable 14/4/4 · plain, must touch farm · knight
+- Mage tower 8/12/4 · mana source · +3 mana, 2 adept slots (+2 each), apprentice; lvl2 battle mage · +1 per adjacent source
+- Walls (town hall upgrade) 0/20/0 · skirmish walls on arena edge, defenders +2 def
+- Tavern (1/kingdom) 10/4/10 · new hero candidate every 8 turns
 
----
-
-## 2. Платформа и управление
-
-- **Устройство:** MacBook, только трекпад, мыши нет. Телефон — когда-нибудь потом.
-- **Браузер:** Chrome / Safari, окно от 1280×720, интерфейс на русском.
-- **Сохранения:** автосохранение в `localStorage` каждый ход + 3 ручных слота. Экспорт/импорт сохранения файлом (на случай очистки браузера).
-
-| Действие | Ввод |
-|---|---|
-| Выбрать / сходить / атаковать | клик (тап) — правый клик нигде не обязателен |
-| Двигать карту | свайп двумя пальцами (как прокрутка сайта, во все стороны) или `W` `A` `S` `D` |
-| Приблизить / отдалить | щипок или `Q` / `E` |
-| Конец хода | `Enter` |
-| Следующий юнит без приказа | `Tab` |
-| Отмена / закрыть окно | `Esc` |
-| Умения бойца в стычке | `1` `2` `3` |
-| Подсказка, путь, прогноз урона | наведение курсора |
-
-Никакого перетаскивания мелких элементов на точность. Все кнопки не меньше 32 px.
-
----
-
-## 3. Настройки партии
-
-Длина и сложность — **две независимые настройки**.
-
-### Длина
-
-| | Короткая | Средняя | Длинная |
-|---|---|---|---|
-| Время | 0.5–1.5 ч | 2–4 ч | 5+ ч |
-| Ходов (ориентир) | 30–45 | 60–100 | 120+ |
-| Карта (гексов) | 12×12 | 20×20 | 30×30 |
-| ИИ-королевства | 1 | 2–3 | 4–5 |
-| Нейтральные деревни | 6 | 14 | 26 |
-| Источники маны | 3 | 6 | 10 |
-| Сюжетных событий | 4–5 | 8–12 | 15+ (побочные ветки) |
-| Экономика | постройки −30% цены, рост ×1.5 | стандарт | все улучшения 3-го уровня доступны |
-| Сложность по умолчанию | Рыцарь | Рыцарь | Лорд |
-
-### Сложность
-
-ИИ один и тот же, меняются его бонусы и характер.
-
-| | Оруженосец | Рыцарь | Лорд | Король |
-|---|---|---|---|---|
-| Доход ИИ | −25% | 0 | +25% | +50% |
-| Первая атака ИИ не раньше хода | 25 | 15 | 10 | 6 |
-| ИИ объединяются против лидера | нет | нет | иногда | да |
-| Рост силы Морвена | ×0.7 | ×1 | ×1.2 | ×1.5 |
-| Штраф автобоя игрока | 0% | 10% | 15% | 20% |
-
-### Прочее
-
-- **Жёсткий режим** (галочка): проигравший стычку герой погибает навсегда.
-- **Сид карты:** поле для числа; одинаковый сид = одинаковая карта.
-
----
-
-## 4. Карта
-
-- **Гексы**, ориентация «острой вершиной вверх», осевые координаты (q, r).
-- **Вид:** сверху, с лёгким наклоном (гексы чуть сплющены по вертикали), фигурки стоят «вертикально».
-- **Туман войны:** неразведанное — скрыто; разведанное, но вне обзора — видно без юнитов.
-- **Генерация:** по сиду; столицы игроков на равном удалении; земли Морвена — на краю карты («север»); у каждой столицы в радиусе 4 гарантированы лес, холм и 1 источник маны.
-
-### Местность
-
-| Тип | Движение | Обзор | Что строится | Арена стычки |
-|---|---|---|---|---|
-| Равнина | 1 | — | ферма, мельница, дом, рынок, казарма, конюшня | поле |
-| Лес | 2 | блокирует обзор | лесопилка | лес |
-| Холм | 2 | +1 обзор | каменоломня, дом | холмы |
-| Гора | непроходима | блокирует | каменоломня (у подножия — с соседнего гекса нельзя) | — |
-| Вода | непроходима | — | — | — |
-| Рудная жила (на холме) | 2 | — | шахта железа | холмы |
-| Золотая жила (на холме) | 2 | — | золотой рудник | холмы |
-| **Источник маны** | 1 | — | башня магов | руины с кристаллом |
-| Руины | 1 | — | — (сюжетная точка) | руины |
-| Нейтральная деревня | 1 | — | — (захват → новый город) | деревня |
-
-### Города
-
-- **Новые города — захватом нейтральных деревень** (как в Polytopia): отряд стоит на деревне 1 ход → деревня становится городом.
-- **Территория:** радиус 1 (7 гексов). На 3-м уровне города — радиус 2 (19 гексов).
-- **Уровень города** растёт от населения: ур.2 — 8 жителей, ур.3 — 15, ур.4 — 25.
-- **Захват чужого города** забирает и всю застройку (здания теряют 1 уровень).
-
----
-
-## 5. Экономика
-
-### Ресурсы
-
-| Ресурс | Откуда | На что |
-|---|---|---|
-| 🌾 Еда | фермы | еда жителям и армии, рост населения |
-| 🪵 Дерево | лесопилки | постройки, лучники |
-| 🪨 Камень | каменоломни | постройки, стены, улучшения |
-| 🪙 Золото | золотые рудники, рынок, ратуша | рыцари, боевые маги, герои, содержание |
-| ⚙️ Железо | шахты железа | мечники, рыцари |
-| ✨ Мана | башни магов на источниках | маги, их содержание, **заклинания в стычках** |
-
-Ресурсы общие на всё королевство (без логистики доставки — это кандидат на потом).
-
-### Крестьяне
-
-- Каждый житель города = 1 крестьянин. **Каждый житель съедает 1 еду в ход.**
-- У производящих зданий есть **места**: уровень 1 — 2 места, уровень 2 — 4, уровень 3 — 6. Улучшение стоит камня и дерева.
-- Крестьян распределяешь кнопками `+` / `−` на здании либо включаешь **автораспределение** для города (приоритет: не голодать → нехватка для содержания → поровну).
-- Свободный крестьянин даёт +1 еды (собирательство) — чтобы безработица не была полным нулём.
-
-### Рост населения
-
-- Избыток еды за ход копится в «амбар роста» города. Когда в амбаре `10 + 2 × население` — рождается житель.
-- Нужен свободный лимит жилья: ратуша даёт 4, каждый **дом** +4 (ур.2 — +6). Дома строятся на гексах и отнимают место у производства — вечная дилемма.
-- Еда кончилась и баланс минусовой → население не растёт, каждый ход голода −1 житель в самом большом городе.
-
-### Содержание армии
-
-Списывается каждый ход. Если какого-то ресурса не хватает:
-1. 1-й ход нехватки — неоплаченные юниты получают **«ропот»**: −25% атаки.
-2. Каждый следующий ход — **дезертирует 1 юнит** (самый дорогой из неоплаченных).
-
-### Рынок
-
-- Обмен любого ресурса на любой **3 : 1**, рынок 2-го уровня — **2 : 1**. Мана не продаётся и не покупается.
-
-### Здания
-
-Цены — дерево / камень / золото, если не указано иное.
-
-| Здание | Гекс | Цена | Эффект | Соседство |
-|---|---|---|---|---|
-| **Ратуша** | центр города | — | +2 еды, +1 золото, жильё 4, найм ополченцев | — |
-| **Дом** | равнина, холм | 8 / 2 / 0 | жильё +4 (ур.2: +6) | — |
-| **Ферма** | равнина | 6 / 0 / 0 | +2 еды за крестьянина | +1 еды за каждую соседнюю мельницу |
-| **Мельница** | равнина | 10 / 6 / 0 | мест нет | см. ферму |
-| **Лесопилка** | лес | 4 / 0 / 0 | +2 дерева за крестьянина | +1 дерева, если рядом ≥2 гекса леса |
-| **Каменоломня** | холм, гора-сосед | 8 / 0 / 0 | +2 камня за крестьянина | — |
-| **Шахта железа** | рудная жила | 10 / 6 / 0 | +1 железо за крестьянина | +1 железа, если рядом кузница |
-| **Золотой рудник** | золотая жила | 10 / 8 / 0 | +1 золото за крестьянина | — |
-| **Рынок** (1 на город) | равнина | 12 / 8 / 0 | обмен 3:1 (ур.2: 2:1) | +1 золото за каждый соседний дом |
-| **Казарма** | равнина | 12 / 6 / 0 | найм мечников, лучников | — |
-| **Кузница** | любой | 10 / 10 / 0 | без неё мечников и рыцарей не нанять | рядом с шахтой железа: найм «стали» −25% железа |
-| **Конюшня** | равнина | 14 / 4 / 4 | найм рыцарей | должна стоять рядом с фермой |
-| **Башня магов** | источник маны | 8 / 12 / 4 | +3 маны; 2 места для адептов (+2 маны каждый); найм учеников-магов, ур.2 — боевых магов | +1 маны за каждый соседний источник |
-| **Стены** | улучшение ратуши | 0 / 20 / 0 | в стычке за город — стены по краю арены, защитникам +2 Защ | — |
-| **Таверна** (1 на королевство) | любой | 10 / 4 / 10 | найм героев (новый кандидат раз в 8 ходов) | — |
-
-### Старт партии
-
-Столица (население 3, ратуша, ферма), 1 герой, 2 ополченца. Склад: еда 20, дерево 15, камень 5, золото 10, железо 0, мана 0.
-
----
-
-## 6. Юниты
-
-Две ветки под развилку «рыцари или маги».
-
-### Характеристики (стартовые)
-
-| Юнит | Ветка | ОЗ | Атк | Защ | Движ (арена) | Дальн | Найм | Содержание / ход |
+## Units
+| unit | branch | HP | atk | def | move | rng | cost | upkeep |
 |---|---|---|---|---|---|---|---|---|
-| Ополченец | ⚔️ Сталь | 15 | 5 | 1 | 3 | 1 | 10 еды, 4 дерева | 1 еда |
-| Мечник | ⚔️ Сталь | 20 | 7 | 4 | 3 | 1 | 12 еды, 8 железа | 1 еда, 1 железо |
-| Рыцарь | ⚔️ Сталь | 22 | 9 | 3 | 5 | 1 | 15 еды, 10 золота, 8 железа | 2 еды, 1 золото, 1 железо |
-| Лучник | ✨ Мана | 12 | 6 | 0 | 3 | 4 | 10 еды, 8 дерева | 1 еда |
-| Ученик-маг | ✨ Мана | 11 | 5 ✦ | 0 | 3 | 3 | 10 еды, 8 маны | 1 еда, 1 мана |
-| Боевой маг | ✨ Мана | 12 | 8 ✦ | 0 | 3 | 3 | 10 золота, 15 маны | 1 золото, 2 маны |
-
-✦ — магический урон: учитывает только половину Защ цели (вниз).
-
-**Камень–ножницы–бумага:** рыцарь рвёт лучников и магов → мечник со «Стеной щитов» держит рыцаря → маги жгут плотный строй мечников → лучники и всадники достают магов.
-
-### Умения (по одному у юнита)
-
-| Юнит | Умение | Эффект | Перезарядка |
-|---|---|---|---|
-| Ополченец | **Копья вперёд** | до своего хода: удар вдогонку по входящему в зону ×1.5, против рыцарей ×2 | 2 |
-| Мечник | **Стена щитов** | до своего хода: +2 Защ себе и соседним союзникам, иммунитет к отбрасыванию, рыцари бьют его вдвое слабее | 2 |
-| Рыцарь | **Таран** | рывок по прямой на 2–4 гекса к врагу, игнорирует зону контроля, удар ×1.5 + отбрасывание | 3 |
-| Лучник | **Прицельный выстрел** | +1 дальность, игнорирует укрытие | 2 |
-| Ученик-маг | **Лечение** | союзник в радиусе 2: +6 ОЗ | 2 |
-| Боевой маг | **Огненный шар** | дальн 4, гекс + 6 соседей, 7 магического урона **всем, и своим тоже**. Стоит **5 маны из казны** | 3 |
-
-Связка с экономикой: мощные заклинания тратят ману королевства. Маны мало — магам нечем колдовать.
-
-### Карта: перемещение отрядов
-
-- **Отряд** = стек на одном гексе: до 5 юнитов (герой + 4 или 5 юнитов без героя).
-- Очки движения по карте: пехота и маги 2, рыцари 3; отряд идёт со скоростью самого медленного.
-- Входишь на гекс вражеского отряда или города → **стычка**.
-
----
-
-## 7. Герои
-
-Без экипировки — только уровни.
-
-- На старте 1 герой, максимум 3. Новые — из таверны (за золото) или из сюжетных событий.
-- Герой — главная фигура стычки: сильнее юнита и с 2 умениями.
-- **Опыт:** +1 за убитого врага, +2 за выигранную стычку, +1 за участие. Уровень N+1 стоит `3 × N` опыта. Максимум — 8-й уровень.
-- **Каждый уровень:** +3 ОЗ, +1 Атк. **На уровнях 3, 5, 7** — выбор одного умения из двух. Два одинаковых героя вырастают разными.
-- **Поражение:** герой ранен → возвращается в столицу, 4 хода лечится, опыт сохраняется. В жёстком режиме — гибнет.
-
-### Стартовые архетипы
-
-| Герой | Роль | ОЗ | Атк | Защ | Движ | Дальн | Умения |
-|---|---|---|---|---|---|---|---|
-| **Сэр Альден** | рыцарь-командор | 26 | 8 | 3 | 4 | 1 | **Вызов** — враги в радиусе 2 в свой ход обязаны атаковать его (2 хода перезарядки, нужна Защ, чтобы пережить); **Рассекающий удар** — бьёт 3 соседних гекса дугой |
-| **Ирена** | боевая чародейка | 16 | 7 ✦ | 0 | 3 | 3 | **Ледяная стена** — 3 гекса стены в линию на 2 хода (перекрывает проход и обзор); **Цепная молния** — 3 цели, каждая не дальше 2 гексов от предыдущей, 3 маны |
-| **Корвин** | следопыт | 18 | 7 | 1 | 4 | 4 | **Отход** — после выстрела отойти на 2 гекса без ударов вдогонку; **Метка** — цель до конца хода получает +25% урона от всех |
-
-Примеры выбора на уровне 3: Альден — «Знамя» (соседи +1 Атк) / «Несокрушимый» (+3 Защ, когда ОЗ < половины); Ирена — «Обжигающий холод» (Ледяная стена ранит тех, кто рядом) / «Источник» (−1 маны на заклинания); Корвин — «Двойной выстрел» / «Ловушка» (гекс, наступивший теряет ход).
-
----
-
-## 8. Стычка — центр первой версии
-
-### Поле
-
-- **Арена 8×6 гексов.** Шаблон по местности гекса, где идёт бой (поле, лес, холмы, руины, деревня, город со стенами), + случайная расстановка препятствий по сиду.
-- Игрок расставляет отряд в своей зоне (2 ближних столбца), затем бой.
-
-| Клетка арены | Движение | Эффект |
-|---|---|---|
-| Трава | 1 | — |
-| Лес | 2 | стоящий в лесу получает −25% урона от выстрелов и заклинаний |
-| Холм | 2 (подъём) | стрелок на холме: +1 дальность; удар с холма по низине +25% |
-| Камень (низкое укрытие) | непроходим | стрелять через можно; цель **прямо за камнем** (камень — последний гекс линии перед ней) получает −50% |
-| Скала / стена (высокое) | непроходима | **блокирует линию огня** полностью |
-| Вода | непроходима | — |
-
-### Ход
-
-- **Ходы по сторонам** (как в XCOM): все твои бойцы в любом порядке → все враги.
-- **2 действия на бойца:** шаг + атака, два шага, шаг + умение, атака + умение нельзя (атака или умение — одно из двух за ход).
-- Шаг = до «Движ» очков по клеткам.
-
-### Позиционные механики
-
-1. **Зона контроля.** Шесть гексов вокруг бойца ближнего боя. Вошёл в зону врага — движение заканчивается. Вышел из зоны — каждый враг, чью зону покидаешь, бьёт **вдогонку** на 50% Атк. Таран рыцаря и «Отход» Корвина игнорируют.
-2. **Фланги и окружение.** За каждого *другого* твоего бойца, стоящего рядом с целью, удар +25% (максимум +50%). Если твои бойцы стоят с **противоположных сторон** цели («клещи») — ещё +25%.
-3. **Укрытия.** См. таблицу: камень −50%, лес −25%, стена блокирует.
-4. **Высота.** Холм: +1 дальность стрелку, +25% удару сверху вниз.
-5. **Отбрасывание.** Таран и некоторые умения толкают цель на 1 гекс прочь. Если сзади препятствие, край арены или другой боец — цель получает **+4 урона**, а боец, в которого она врезалась, +2.
-6. *(Отложено)* Направление взгляда.
-
-### Урон
-
-```
-урон = max(1, округл( Атк × (1 + бонусы) × (1 − укрытие) ) − Защ_цели)
-```
-
-- **Урон детерминированный, без промахов и случайностей** — как в Polytopia и Into the Breach. Позиционная тактика честнее, когда всё предсказуемо.
-- Бонусы складываются: фланги, клещи, высота, умения. Магия режет Защ вдвое.
-- **Ответный удар:** цель ближнего боя, пережившая удар ближнего боя, отвечает на 50% Атк (1 раз за ход противника). Стрелки и маги не отвечают.
-- **Прогноз:** при наведении на цель — «нанесёшь 9 → у него останется 6; ответ: 3», плюс иконки бонусов (фланг, клещи, высота, укрытие).
-
-### Итог стычки
-
-- Победа — все враги убиты или бежали. Поражение — все твои пали или ты нажал «Отступить» (отряд отходит на соседний гекс, теряет 1 юнит).
-- Выжившие **сохраняют ранения**. Лечение: +3 ОЗ за ход стоя на месте, +6 в своём городе.
-
-### Автобой
-
-Та же модель боя, но решения принимает ИИ за обе стороны. Чтобы ручной бой оставался выгоднее, у игрока штраф −X% урона по таблице сложности. Перед автобоем — прогноз исхода («≈ победа, потери 1–2 юнита»).
-
-### ИИ в стычке
-
-Оценивает варианты ходов по очкам: урон нанесённый − урон полученный, бонус за убийство, за фланг/клещи, за прикрытие своих магов, штраф за выход из зоны контроля, за подставленных стрелков. Добивает раненых, бьёт магов первыми, если может дотянуться.
-
----
-
-## 9. Сражение стенка на стенку — серая болванка (этап 1б)
-
-Цель — пощупать механику дёшево. Никакой графики, только прямоугольники с цифрами.
-
-- Вид сбоку, линия из 12 позиций. Слева твоя армия, справа враг.
-- Армия = до 6 **групп** (группа = 1–10 одинаковых юнитов из таблицы раздела 6, ОЗ суммируются).
-- **Раунд:** каждой группе выбираешь приказ — *Наступать / Держать строй / Отступить / Залп (стрелки) / Заклинание (маги)* → «В бой!» → 4 секунды автосимуляции → следующий раунд.
-- Те же Атк/Защ, те же камень–ножницы–бумага; «Держать строй» = Стена щитов, рыцари наступают быстрее.
-- Победа — враг сломлен (потерял 70% ОЗ) или отступил.
-
-Если понравится — сражения заменяют стычку для боёв «армия на армию» и «осада города».
-
----
-
-## 10. Пролог племени — серая болванка (этап 3б)
-
-- Маленькая карта в тумане, шатёр, вождь, 3–4 соплеменника. Ресурсы: только еда и дерево.
-- 3–4 соседних племени. Каждое можно объединить:
-  - **миром:** дары (еда, дерево), обряд у костра (мини-задача), выполнить просьбу племени;
-  - **силой:** стычка (та же система, только дубины и пращи).
-- Все объединены → вождь основывает королевство, карта раскрывается, начинается основная игра.
-- **Последствие:** больше миром → уклон в магов (мана −20% на найм, маги +2 ОЗ); больше силой → уклон в рыцарей (железо −20% на найм, «сталь» +1 Атк); поровну — сбалансированный старт.
-
----
-
-## 11. Соперники
-
-### ИИ-королевства
-
-- Играют по тем же правилам: строят, нанимают, захватывают деревни и источники.
-- **Дипломатия:** отношение −100…+100. Состояния: война, мир, торговый договор (обмен ресурсами), союз (общая война против злодея). Отношение растёт от подарков и общих врагов, падает от близких границ, захвата «их» деревень и силы игрока.
-- Характеры (случайно): Завоеватель, Купец, Чародей (любит источники маны).
-
-### Морвен (злодей)
-
-- Не ведёт переговоров. Начинает в своих землях с цитаделью.
-- **Сила Морвена** = 1 + число захваченных им источников маны. Каждые 10 ходов (с учётом множителя сложности) выпускает армию нежити размером по силе.
-- Его армии идут к ближайшим источникам маны, затем к городам.
-- Нежить **не ест и не получает ропот**, но не лечится.
-
-| Юнит нежити | Аналог | Особенность |
-|---|---|---|
-| Скелет | ополченец | дешёвая масса |
-| Гуль | — | Движ 5, слабая Защ, рвёт стрелков |
-| Рыцарь смерти | рыцарь | Таран |
-| Некромант-послушник | ученик-маг | **Поднять мёртвых**: павший рядом боец (любой стороны) встаёт скелетом. Убивать первым |
-
----
-
-## 12. Победа и поражение
-
-| Путь | Условие |
-|---|---|
-| **Сюжетная** (основная) | пройти цепочку событий и взять цитадель Морвена |
-| **Завоевание** | захватить столицы всех ИИ-королевств (Морвен при этом всё равно должен пасть) |
-| **Союз** | заключить союз со всеми уцелевшими королевствами и вместе взять цитадель |
-| Поражение | пала твоя столица или Морвен владеет половиной источников маны на карте |
-
----
-
-## 13. Визуальный стиль
-
-**Плоский минимализм** в духе *The Battle of Polytopia*, *Dorfromantik*, *Bad North*, *Islanders*.
-
-- **Всё игровое — SVG в коде:** гексы, здания, юниты, иконки, интерфейс. Чётко при любом зуме, перекрашивается в цвет фракции.
-- Без градиентов и текстур, мягкая плоская тень под объектами, скругления, ограниченная палитра.
-- **Палитра (стартовая):** земля `#E9DFC4` (равнина), `#7FB069` (луг), `#3E7C59` (лес), `#B9A27A` (холм), `#8A8F98` (гора), `#5AA9E6` (вода), источник маны `#7B5CFF` с мягким свечением. Фракции: игрок `#2F6FDB`, ИИ `#D64545` / `#E0A526` / `#3BA55C` / `#8E44AD`, Морвен `#1F2A2E` с ядовито-зелёным `#7CFFB2`.
-- **Фигурки:** собраны из 5–8 деталей (туловище, голова, шлем/капюшон, рука с оружием, рука со щитом/посохом, ноги-«пенёк»), каждая деталь вращается на шарнире. Цвет фракции — плащ и флажок.
-- **Анимации (твины, без кадров):** дыхание (лёгкое покачивание), ходьба — подпрыгивание с гекса на гекс как в Polytopia, удар — замах и рывок вперёд, попадание — вздрагивание + всплывающее число, смерть — падение набок + растворение, заклинание — руки вверх + расходящийся круг.
-- **Иллюстрации** (события, портреты героев, титульник) — сейчас плоские SVG-заглушки нужного размера в той же палитре; позже заменяются картинками из Flux (см. раздел 16).
-
----
-
-## 14. Техническая основа
-
-- **Phaser 3** (файлом в `game/vendor/`, без CDN) + **обычный JavaScript, ES-модули, без сборки** — как `astana/`. GitHub Pages продолжает раздавать сайт из ветки, резюме и Байтерек не затрагиваются.
-- **Модель отдельно от отрисовки.** Правила (карта, экономика, бой, ИИ) — чистые функции над состоянием, без Phaser. Это даёт автобой, ИИ, сохранения и тесты (`node --test`, без зависимостей).
-- **Данные отдельно от кода:** юниты, здания, местность, события — в `game/js/data/*.js`, чтобы балансировать правкой таблиц.
-- **Детерминированный RNG по сиду** — партию и баг можно воспроизвести.
-- Запуск локально: `python3 -m http.server 8000` из корня репозитория → `http://localhost:8000/game/`.
-
-```
-game/
-  index.html
-  GDD.md, STORY.md
-  vendor/phaser.min.js
-  js/
-    main.js                 — запуск Phaser, сцены
-    core/   hex.js rng.js state.js save.js
-    rules/  economy.js combat.js skirmish.js map.js diplomacy.js events.js
-    ai/     skirmish-ai.js kingdom-ai.js morven-ai.js
-    data/   units.js buildings.js terrain.js heroes.js events.js
-    view/   scenes/ (menu, map, city, skirmish, battle-proto, tribe-proto)
-            figures/ (SVG-детали и сборка фигурок)  ui/
-  assets/art/              — иллюстрации (сейчас заглушки)
-  tests/
-```
-
----
-
-## 15. Этапы
-
-После каждого этапа — рабочая ссылка на GitHub Pages, ты играешь, правки, дальше.
-
-| Этап | Что получаешь | Готово, когда |
-|---|---|---|
-| **1. Арена** | Режим «Арена»: выбираешь отряд (герой + 4 юнита) против ИИ на случайной арене. Все 6 юнитов, 3 героя, механики раздела 8, прогноз урона, автобой, SVG-фигурки с анимацией | можно сыграть 10 боёв подряд, позиционирование решает исход, ИИ не делает глупостей |
-| **1б. Болванка «стенка на стенку»** | Серые группы, раунды с приказами | понятно, нравится или нет |
-| **2. Карта и экономика** | Генерация карты, туман, города, застройка по гексам, соседство, крестьяне + автораспределение, ресурсы, рынок, содержание, найм, отряды на карте → стычка | можно 50 ходов строить королевство и драться с нейтральными монстрами |
-| **3. Полная партия (бета)** | ИИ-королевства, дипломатия, Морвен, события, 3 пути к победе, длина и сложность, сохранения, меню | можно пройти партию от начала до победы |
-| **3б. Болванка пролога** | Серое племя, мир или сила | понятно, добавлять или нет |
-
-### Отложено
-
-Направление взгляда; дороги, караваны, логистика ресурсов; ручная кампания из миссий; адаптация под телефон; звук и музыка; полноценные сражения и пролог (если болванки понравятся).
-
----
-
-## 16. Иллюстрации через Flux — промпт для локального Claude Code
-
-Использовать **после этапа 3**, когда все места для картинок определены. Открыть Claude Code в терминале на MacBook в клоне этого репозитория и дать ему текст ниже целиком.
-
-```text
-Задача: сгенерировать иллюстрации для браузерной игры «Пробуждение источников»
-(папка game/ этого репозитория) с помощью локальной модели Flux на этом MacBook
-и заменить ими SVG-заглушки.
-
-1. Найди, как на этой машине запускается Flux: проверь `which mflux-generate`,
-   `pip show mflux`, `pip show diffusers`, приложения Draw Things / DiffusionBee,
-   кэш ~/.cache/huggingface. Если не нашёл — спроси меня, как я его запускаю, и
-   ничего не устанавливай без моего согласия.
-2. Прочитай game/js/data/art-manifest.js — там список всех картинок: id, путь,
-   размер, описание сцены. Если файла нет — собери список сам по game/js/data/
-   events.js и heroes.js (поле art) и game/GDD.md раздел 13.
-3. Для каждой картинки собери промпт:
-   «flat vector illustration, minimalist, The Battle of Polytopia and Dorfromantik
-   style, limited palette (#E9DFC4, #7FB069, #3E7C59, #B9A27A, #8A8F98, #5AA9E6,
-   #7B5CFF, #2F6FDB, #D64545, #1F2A2E, #7CFFB2), soft flat shadows, no gradients,
-   no text, no letters, clean shapes, medieval fantasy, » + описание сцены из манифеста.
-   Портреты: «bust portrait, centered, plain background #E9DFC4». Титульник: 16:9.
-4. Генерируй по 2 варианта на картинку с фиксированным seed, сначала 3 тестовые
-   (1 событие, 1 портрет, титульник) — покажи мне и дождись «ок» на стиль.
-5. После «ок» прогони весь список. Сохраняй в webp (качество 85) по путям из
-   манифеста, размеры: события 1024×576, портреты 512×512, титульник 1920×1080.
-   Второй вариант — рядом с суффиксом -b, я выберу.
-6. Не трогай код игры, кроме поля ready: true в манифесте для готовых картинок.
-   Закоммить картинки отдельным коммитом в текущую ветку, не пушь без моего слова.
-Следи за памятью: генерируй по одной картинке, при нехватке памяти уменьши шаги.
-```
+| Militia | steel | 15 | 5 | 1 | 3 | 1 | 10f 4w | 1f |
+| Swordsman | steel | 20 | 7 | 4 | 3 | 1 | 12f 8i | 1f 1i |
+| Knight | steel | 22 | 9 | 3 | 5 | 1 | 15f 10g 8i | 2f 1g 1i |
+| Archer | mana | 12 | 6 | 0 | 3 | 4 | 10f 8w | 1f |
+| Apprentice | mana | 11 | 5m | 0 | 3 | 3 | 10f 8mana | 1f 1mana |
+| Battle mage | mana | 12 | 8m | 0 | 3 | 3 | 10g 15mana | 1g 2mana |
+m = magic: halves target def (floor). RPS: knight > archer/mage, shield-wall swordsman > knight, mages > swordsman blobs.
+Abilities (cd): Militia "Spears forward" (2) opportunity strike ×1.5, ×2 vs knights · Swordsman "Shield wall" (2) +2 def self+adjacent allies, knockback immune, knights deal half · Knight "Charge" (3) straight 2–4 hexes, ignores ZoC, ×1.5 + knockback · Archer "Aimed shot" (2) +1 range, ignores cover · Apprentice "Heal" (2) ally r2 +6 · Battle mage "Fireball" (3) rng 4, hex+6 neighbors, 7 magic dmg incl. allies, costs 5 kingdom mana.
+Map: stack ≤5 per hex (hero+4 or 5 units). Move: infantry/mages 2, knights 3, stack = slowest. Enter enemy hex/city → skirmish.
+
+## Heroes
+No equipment. 1 at start, max 3 (tavern, events). XP: +1 kill, +2 win, +1 participation; next lvl = 3×lvl; cap 8. Per lvl +3 HP +1 atk; lvls 3/5/7 pick 1 of 2 abilities. Defeat → wounded, back to capital 4 turns (hardcore: dies).
+- Sir Alden (knight-commander) 26/8/3, mv4 r1: Challenge (enemies r2 must attack him), Cleave (3 adjacent arc). L3: Banner (+1 atk neighbors) / Unbreakable (+3 def below half HP).
+- Irena (battle mage) 16/7m/0, mv3 r3: Ice wall (3 hexes line, 2 turns, blocks move+sight), Chain lightning (3 targets ≤2 apart, 3 mana). L3: Biting frost / Wellspring (−1 mana cost).
+- Corvin (ranger) 18/7/1, mv4 r4: Disengage (after shot move 2, no opportunity), Mark (+25% dmg taken this turn). L3: Double shot / Trap.
+
+## Skirmish (stage 1 focus)
+Arena 8×6 hex, template by map terrain (field, forest, hills, ruins, village, walled city) + seeded obstacles. Deploy in own 2 columns.
+Cells: grass 1; forest 2, −25% ranged/magic taken; hill 2, shooter +1 range, melee/ranged downhill +25%; rock (low cover) impassable, shoot over, target directly behind rock −50%; cliff/wall impassable, blocks LOS; water impassable.
+Turns by side (XCOM). 2 actions/fighter: move+attack, move+move, move+ability; attack and ability exclusive per turn.
+Positioning: (1) ZoC: entering adjacent-to-enemy hex ends move; leaving provokes 50% atk from each such enemy (Charge, Disengage ignore). (2) Flank: +25% per other ally adjacent to target (max +50%), pincer (opposite sides) +25%. (3) Cover as above. (4) Height. (5) Knockback 1 hex; blocked → +4 dmg target, +2 to unit hit. Facing deferred.
+Damage: `max(1, round(atk × (1+bonuses) × (1−cover)) − def)`. Deterministic, no misses. Melee retaliation 50% atk once per enemy turn (ranged/mages don't). Hover forecast shows dmg, remaining HP, retaliation, bonus icons.
+End: all enemies dead/fled; retreat = move back 1 hex, lose 1 unit. Wounds persist; heal +3/turn idle, +6 in own city.
+Autobattle: same sim, AI for both sides, player dmg penalty by difficulty, pre-battle outcome estimate.
+Skirmish AI: score moves = dmg dealt − taken + kill bonus + flank/pincer + mage protection − ZoC exits − exposed shooters; focus wounded, mages first.
+
+## Lane battle greybox (1b)
+Side view, 12 positions. ≤6 groups/side (1–10 same units, pooled HP). Round: order per group Advance/Hold/Retreat/Volley/Spell → 4 s auto-sim. Same stats/RPS; Hold = shield wall. Win when enemy loses 70% HP or retreats. If liked: replaces skirmish for army-vs-army and sieges.
+
+## Tribe prologue greybox (3b)
+Small fogged map, tent, chief, 3–4 tribesmen, food+wood only. 3–4 tribes, unify by peace (gifts, fire ritual minigame, request quest) or force (skirmish, clubs/slings). All unified → found kingdom. Peace-lean: mana recruit −20%, mages +2 HP. Force-lean: iron recruit −20%, steel +1 atk. Even: balanced.
+
+## Rivals
+AI kingdoms same rules. Relation −100..100; states war/peace/trade/alliance. Personalities: Conqueror, Merchant, Sorcerer.
+Morven: no diplomacy. Power = 1 + mana sources held. Every 10 turns (× difficulty) spawns undead army sized by power, targets sources then cities. Undead: no food, no unrest, no healing. Skeleton (militia), Ghoul (mv5, low def, hunts shooters), Death knight (Charge), Necro-acolyte (Raise dead: fallen adjacent fighter of any side → skeleton).
+
+## Victory / defeat
+Story (main): event chain + take Morven's citadel. Conquest: all AI capitals (Morven must still fall). Alliance: ally all surviving kingdoms + take citadel. Defeat: capital lost or Morven holds half of all mana sources.
+
+## Story (spoilers, owner wants surprise — don't show in UI copy prematurely)
+Magic slept 100 years; sources reawaken. Morven, exiled court mage, raises dead in north. Advisor Meir narrates events. Twist: Meir framed Morven; Morven learned sources drain the land's life force; Meir hid it to keep magic and power. Exiled, Morven became the necromancer he was accused of being.
+Chain (★ = short game): 1★ Light in stone (t3: build tower hint, −30% first tower / +10 stone) · 2★ Wounded messenger (t8: reveal Morven lands / neighbor +20) · 3 Northern refugees (t12: +3 pop −15 food / nearest AI takes them) · 4 Envoy's price (alliance for a mana source / −15 rel / 30 gold peace) · 5 Morven's apprentice Tarn (t18: hero Tarn w/ Raise dead / execute +10 all AI / release) · 6★ Academy ruins (story skirmish: skeletons + Stone guardian; +30 mana + Morven's diary) · 7★ North awakens (t30: Morven marches, power meter shown) · 8 Meir's confession (after 6: execute −1 gold/turn, Tarn loyal / forgive / hand to Morven: 10 turns safe, all AI −20) · 9 Tarn's choice (t40: if Meir forgiven Tarn defects with 2 units; else ritual 3 skeletons AI −10 / refuse Tarn +2 lvl) · 10 Council of kings (power ≥4: alliance with rel ≥20, unlocks alliance win) · 11 Drained source (Morven 3rd source: −1 food to my buildings near his sources) · 12★ Citadel (gate skirmish, throne skirmish).
+Morven boss: 60 HP, 9m atk, 3 def, mv3, r3. Raise dead each turn; Ice crown (adjacent move ×2); phase 2 at <30 HP: 2 sources open on arena, heal 4/turn while lit, occupy to stop.
+Epilogue choice: seal sources (magic sleeps, land heals) / keep (magic stays, land darkens, sequel hint). One line each on Meir, Tarn, each kingdom.
+Side events (long): wandering knight duel → free hero; famine; wolves at sawmill; fair (1.5:1 market 3 turns); source heresy; old map → treasure ruins; mage duel; defector sells city.
+Random small events all lengths: harvest, mine collapse, trader 2:1 once, gifted child +1 xp, sawmill fire, treasure.
+
+## Visual
+Flat minimal (Polytopia, Dorfromantik, Bad North, Islanders). All game graphics SVG in code, faction-recolorable. No gradients/textures, soft flat shadow, rounded shapes.
+Palette: plain #E9DFC4, grass #7FB069, forest #3E7C59, hill #B9A27A, mountain #8A8F98, water #5AA9E6, mana #7B5CFF. Factions: player #2F6FDB, AI #D64545 #E0A526 #3BA55C #8E44AD, Morven #1F2A2E + #7CFFB2.
+Figures: 5–8 parts (torso, head, helm/hood, weapon arm, shield/staff arm, stub legs) on pivots; faction color = tabard + flag. Tween anims: idle bob, hop between hexes, attack windup+lunge, hit flinch + floating number, death tip over + fade, cast arms up + ring.
+Illustrations (events, hero portraits, title): flat SVG placeholders now, later Flux (see below). Mockup: `game/mockup/index.html`.
+
+## Tech
+Phaser 3 vendored in `game/vendor/`, plain JS ES modules, no build (keeps Pages branch deploy; don't touch resume/astana). Rules as pure functions over state, no Phaser (enables autobattle, AI, saves, `node --test`). Data tables in `js/data/*.js`. Seeded RNG. Local: `python3 -m http.server 8000` → `/game/`.
+Layout: `game/{index.html, vendor/, js/{main.js, core/{hex,rng,state,save}, rules/{economy,combat,skirmish,map,diplomacy,events}, ai/{skirmish-ai,kingdom-ai,morven-ai}, data/{units,buildings,terrain,heroes,events,art-manifest}, view/{scenes,figures,ui}}, assets/art/, tests/}`.
+Note: root `.gitignore` ignores `DESIGN.md`/`PRODUCT.md` — that's why this file is GDD.md.
+
+## Stages (each ends with a playable Pages link + owner feedback)
+1. Arena: pick squad vs AI, all units/heroes, all skirmish rules, forecast, autobattle, animated figures. Done = 10 fights in a row feel positional, AI not dumb.
+1b. Lane battle greybox.
+2. Map + economy, neutral monsters, map→skirmish. Done = 50 turns of building + fighting.
+3. Full game (beta): AI kingdoms, diplomacy, Morven, events, 3 wins, settings, saves, menu.
+3b. Tribe greybox.
+Deferred: facing, roads/caravans/logistics, handcrafted campaign, mobile, audio, full lane battles/prologue.
+
+## Flux handoff (after stage 3)
+Owner runs local Claude Code on the MacBook with Flux (no ComfyUI). Give it a self-contained prompt: locate Flux runner (mflux / diffusers / Draw Things), ask owner if not found, no installs without consent; read `js/data/art-manifest.js` (id, path, size, scene); style prefix "flat vector illustration, minimalist, Polytopia + Dorfromantik, palette above, soft flat shadows, no gradients, no text"; portraits bust on #E9DFC4; 3 test images first, wait for OK; then all, webp q85 (events 1024×576, portraits 512×512, title 1920×1080), variant -b; only flip `ready:true` in manifest; commit, don't push.

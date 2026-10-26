@@ -1,0 +1,906 @@
+<title>Пробуждение источников</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: a field manual for the game — tokens and pieces first, then full screens on a dark "table", then the build order. */
+:root{
+  --bg:#EDF0EB; --panel:#F7F9F5; --fg:#1B2523; --muted:#5D6A64; --line:#D3DBD4;
+  --accent:#6B4FF0; --accent-ink:#FFFFFF; --table:#1E2C33;
+  --display:'Unbounded','Arial Black',system-ui,sans-serif;
+  --body:'Nunito','Segoe UI',system-ui,sans-serif;
+  /* game UI is one fixed look in both themes */
+  --hud:#14212A; --hud-2:#1D2D38; --hud-line:#2E4150; --hud-fg:#EAF1F4; --hud-muted:#93A8B5;
+  --gold:#F2C14E; --good:#5BC97A; --bad:#FF6B6B;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111816; --panel:#18211F; --fg:#E3EAE5; --muted:#93A19A; --line:#29342F;
+  --accent:#9D88FF; --accent-ink:#120D2B; --table:#0D161A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111816; --panel:#18211F; --fg:#E3EAE5; --muted:#93A19A; --line:#29342F;
+  --accent:#9D88FF; --accent-ink:#120D2B; --table:#0D161A; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h2{font-size:clamp(22px,3vw,30px);font-weight:700}
+h3{font-size:15px;font-weight:500}
+p{margin:0}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+section{display:grid;gap:20px;padding-block:44px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:8px;max-width:68ch}
+.sec-head p{color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:center;padding-block:40px 32px}
+.hero h1{font-size:clamp(34px,6vw,64px);font-weight:700;letter-spacing:-.01em}
+.hero h1 span{color:var(--accent)}
+.hero .lede{font-size:18px;color:var(--muted);max-width:52ch;margin-top:14px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{font-size:13px;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel)}
+.hero-scene{background:var(--table);border-radius:20px;padding:12px;min-width:0}
+.hero-scene svg{display:block;width:100%;height:auto}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;padding-block:6px 20px;font-weight:700;font-size:14px}
+nav.toc a{color:var(--fg);text-decoration:none;border-bottom:2px solid transparent}
+nav.toc a:hover{border-color:var(--accent)}
+
+/* palette */
+.swatch-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.swatch-group{display:grid;gap:10px;align-content:start}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.sw{display:grid;gap:6px;font-size:13px}
+.sw i{display:block;height:46px;border-radius:10px;border:1px solid rgba(0,0,0,.08)}
+.sw b{font-weight:700}
+.sw code{font-size:12px;color:var(--muted)}
+
+/* type */
+.type-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.type-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:8px}
+.type-card .sample-d{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1}
+.type-card .sample-b{font-size:17px}
+.type-card .sample-n{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:14px}
+.tile{display:grid;gap:4px;justify-items:center;text-align:center}
+.tile svg{width:100%;max-width:120px;height:auto}
+.tile b{font-size:14px}
+.tile small{font-size:12px;color:var(--muted);line-height:1.35}
+
+/* units */
+.unit-controls{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ctl > span{font-size:13px;font-weight:800;color:var(--muted);margin-right:4px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:700}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.dot{width:28px;height:28px;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line);padding:0}
+.dot[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+.ucard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px 14px;display:grid;gap:6px}
+.ucard .stage{background:var(--table);border-radius:12px;display:grid;place-items:center;height:132px}
+.ucard .stage svg{height:120px;width:auto}
+.ucard h3{font-size:14px}
+.ucard .branch{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;font-size:12px;text-align:center}
+.stats div{display:grid;background:var(--bg);border-radius:6px;padding:3px 0}
+.stats b{font-size:15px;font-variant-numeric:tabular-nums}
+.stats span{color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase}
+.ability{font-size:13px;color:var(--muted);line-height:1.4}
+.ability b{color:var(--fg)}
+.subhead{font-family:var(--display);font-size:15px;font-weight:500;margin-top:8px}
+
+/* UI kit */
+.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.kit-cell{background:var(--table);border-radius:16px;padding:18px;display:grid;gap:12px;align-content:start;color:var(--hud-fg)}
+.kit-cell > .label{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--hud-muted)}
+
+/* game UI atoms (fixed look) */
+.hud-bar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;background:var(--hud);color:var(--hud-fg);padding:8px 14px;border-radius:12px;font-size:14px}
+.res{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-variant-numeric:tabular-nums}
+.res svg{width:18px;height:18px}
+.res small{font-weight:700;font-size:12px}
+.res small.up{color:var(--good)} .res small.down{color:var(--bad)}
+.hud-sep{width:1px;height:20px;background:var(--hud-line)}
+.turn{font-family:var(--display);font-size:13px;font-weight:500}
+.gbtn{background:var(--hud-2);color:var(--hud-fg);border:1px solid var(--hud-line);border-radius:10px;padding:8px 14px;font-weight:800;font-size:14px;display:inline-flex;gap:8px;align-items:center;min-height:36px}
+.gbtn:hover{border-color:var(--hud-muted)}
+.gbtn.primary{background:#2F6FDB;border-color:#4C86EA;color:#fff}
+.gbtn.mana{background:#7B5CFF;border-color:#9A82FF;color:#fff}
+.gbtn[disabled]{opacity:.45;cursor:not-allowed}
+kbd{font:700 11px/1 var(--body);padding:3px 6px;border-radius:5px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18)}
+.slots{display:inline-flex;gap:3px}
+.slots i{width:10px;height:10px;border-radius:50%;background:var(--hud-line)}
+.slots i.on{background:var(--gold)}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper button{width:26px;height:26px;border-radius:8px;border:1px solid var(--hud-line);background:var(--hud-2);color:var(--hud-fg);font-weight:800;line-height:1;padding:0}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer}
+.toggle input{appearance:none;width:34px;height:20px;border-radius:999px;background:var(--hud-line);position:relative;margin:0;cursor:pointer;transition:background .2s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle input:checked{background:#2F6FDB}
+.toggle input:checked::after{transform:translateX(14px)}
+.forecast{background:var(--hud);border:1px solid var(--hud-line);border-radius:12px;padding:10px 12px;display:grid;gap:6px;font-size:13px;max-width:260px}
+.forecast .big{font-family:var(--display);font-size:22px}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--hud-2);border:1px solid var(--hud-line)}
+.tag.plus{color:var(--good)} .tag.minus{color:var(--bad)}
+.hpbar{height:8px;border-radius:999px;background:var(--hud-line);overflow:hidden}
+.hpbar i{display:block;height:100%;background:var(--good)}
+.pips{display:inline-flex;gap:4px} .pips i{width:12px;height:12px;border-radius:3px;background:var(--gold);transform:rotate(45deg)} .pips i.used{background:var(--hud-line)}
+
+/* screens */
+.screen{background:var(--table);border-radius:20px;overflow:hidden;color:var(--hud-fg);display:grid}
+.screen-cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;align-items:baseline}
+.screen-cap p{color:var(--muted);font-size:14px;max-width:72ch}
+.map-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px}
+.map-area{position:relative;min-width:0;padding:10px}
+.map-area svg{display:block;width:100%;height:auto}
+.side{background:var(--hud);border-left:1px solid var(--hud-line);padding:14px;display:grid;gap:12px;align-content:start}
+.side h3{font-size:15px}
+.city-meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--hud-muted)}
+.brow{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--hud-line);font-size:13px}
+.brow svg{width:28px;height:28px}
+.brow b{display:block;font-size:13px}
+.brow small{color:var(--hud-muted);font-size:12px}
+.brow .bonus{color:var(--gold);font-weight:800}
+.screen-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--hud);border-top:1px solid var(--hud-line);font-size:13px;color:var(--hud-muted)}
+.skirm-foot{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:12px 14px;background:var(--hud);border-top:1px solid var(--hud-line)}
+.who{display:flex;gap:10px;align-items:center}
+.who .ava{width:52px;height:52px;border-radius:12px;background:var(--hud-2);display:grid;place-items:center;overflow:hidden}
+.who .ava svg{height:60px;width:auto;margin-top:8px}
+.who b{display:block;font-size:14px}
+.abil{display:flex;flex-wrap:wrap;gap:8px}
+.abil .gbtn{flex-direction:column;align-items:flex-start;gap:2px;min-width:118px}
+.abil .gbtn small{font-weight:600;color:var(--hud-muted);font-size:11px}
+.abil .gbtn.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.ends{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+/* menu screen */
+.menu-layout{display:grid;grid-template-columns:1fr 1.1fr}
+.menu-art{position:relative;min-height:320px;background:#2B3F5C}
+.menu-art svg{position:absolute;inset:0;width:100%;height:100%}
+.menu-form{padding:22px;display:grid;gap:18px;align-content:start;background:var(--hud)}
+.menu-form h3{font-size:20px;font-weight:700}
+.field{display:grid;gap:8px}
+.field > span{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--hud-muted)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--hud-2);padding:4px;border-radius:12px;border:1px solid var(--hud-line)}
+.seg label{display:grid;text-align:center;padding:8px 4px;border-radius:9px;cursor:pointer;font-weight:800;font-size:13px}
+.seg label small{font-weight:600;color:var(--hud-muted);font-size:11px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:#2F6FDB;color:#fff}
+.seg label:has(input:checked) small{color:#D6E4FF}
+.seg label:has(input:focus-visible){outline:2px solid var(--gold)}
+.seed{display:flex;gap:8px}
+.seed input{flex:1;min-width:0;background:var(--hud-2);border:1px solid var(--hud-line);border-radius:10px;color:var(--hud-fg);padding:8px 10px;font:800 14px var(--body);font-variant-numeric:tabular-nums}
+
+/* event modal */
+.event-stage{position:relative;padding:28px;display:grid;place-items:center;background:
+  repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 10px,transparent 10px 20px),var(--table)}
+.modal{width:min(640px,100%);background:var(--hud);border:1px solid var(--hud-line);border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.modal .ill{position:relative;aspect-ratio:16/9;max-width:100%;background:#2B3F5C}
+.modal .ill svg{position:absolute;inset:0;width:100%;height:100%}
+.modal .ill .ph{position:absolute;right:10px;bottom:8px;font-size:11px;font-weight:800;color:rgba(255,255,255,.7);background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px}
+.modal .body{padding:18px 20px 20px;display:grid;gap:12px}
+.modal .who-says{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--hud-muted)}
+.modal h3{font-size:22px;font-weight:700}
+.modal p{color:#C9D6DD;max-width:60ch}
+.choices{display:grid;gap:8px}
+.choice{text-align:left;background:var(--hud-2);border:1px solid var(--hud-line);border-radius:12px;padding:10px 12px;color:var(--hud-fg);display:grid;gap:2px}
+.choice:hover{border-color:var(--gold)}
+.choice b{font-size:15px}
+.choice small{color:var(--hud-muted);font-size:12px}
+
+/* lane greybox */
+.grey{background:#3A4045;color:#E6E8EA}
+.grey .screen-foot{background:#2F3438;border-color:#4A5157;color:#B7BDC2}
+.grey svg{display:block;width:100%;height:auto}
+.orders{display:grid;gap:8px;padding:12px 14px;background:#2F3438;border-top:1px solid #4A5157}
+.order-row{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center;font-size:13px;font-weight:800}
+.order-row .seg{background:#262A2E;border-color:#4A5157}
+.order-row .seg label:has(input:checked){background:#C9CED2;color:#1E2124}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;list-style:none;padding:0;margin:0;counter-reset:st}
+.road li{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:6px;align-content:start}
+.road .st{font-family:var(--display);font-size:13px;color:var(--accent)}
+.road b{font-size:15px}
+.road p{font-size:14px;color:var(--muted)}
+.road .kind{justify-self:start;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+
+/* figure animation */
+.fig .rig,.fig .upper,.fig .armR,.fig .armL,.fig .ring,.fig .dmg{transform-box:view-box}
+.fig .rig{transform-origin:32px 74px}
+.fig .upper{animation:bob 2.6s ease-in-out infinite}
+.fig .armR{transform-origin:39px 44px}
+.fig .armL{transform-origin:25px 44px}
+.fig .ring{opacity:0;transform-origin:32px 40px}
+.fig .dmg{opacity:0}
+@keyframes bob{50%{transform:translateY(-1.3px)}}
+.fig.walk .rig{animation:hop .55s ease-in-out infinite}
+@keyframes hop{0%,100%{transform:translateY(0)}45%{transform:translateY(-8px) rotate(-3deg)}}
+.fig.attack .armR{animation:swing 1s ease-in-out infinite}
+.fig.attack .rig{animation:lunge 1s ease-in-out infinite}
+@keyframes swing{0%,100%{transform:rotate(0)}35%{transform:rotate(-75deg)}55%{transform:rotate(35deg)}}
+@keyframes lunge{0%,30%,100%{transform:translateX(0)}55%{transform:translateX(5px)}}
+.fig.hit .rig{animation:flinch 1s ease-out infinite}
+.fig.hit .dmg{animation:dmg 1s ease-out infinite}
+@keyframes flinch{0%,100%{transform:none}8%{transform:translateX(-4px) rotate(-7deg)}22%{transform:translateX(2px) rotate(2deg)}36%{transform:none}}
+@keyframes dmg{0%{opacity:0;transform:translateY(0)}10%{opacity:1}70%{opacity:1;transform:translateY(-14px)}100%{opacity:0;transform:translateY(-18px)}}
+.fig.die .rig{animation:die 2.4s ease-in infinite}
+@keyframes die{0%,12%{transform:none;opacity:1}40%,78%{transform:rotate(84deg);opacity:.35}92%{transform:rotate(84deg);opacity:0}100%{transform:none;opacity:1}}
+.fig.cast .armR{animation:raiseR 1.6s ease-in-out infinite}
+.fig.cast .armL{animation:raiseL 1.6s ease-in-out infinite}
+.fig.cast .ring{animation:ring 1.6s ease-out infinite}
+@keyframes raiseR{0%,100%{transform:rotate(0)}30%,60%{transform:rotate(-135deg)}}
+@keyframes raiseL{0%,100%{transform:rotate(0)}30%,60%{transform:rotate(135deg)}}
+@keyframes ring{0%,30%{opacity:0;transform:scale(.4)}40%{opacity:1}100%{opacity:0;transform:scale(4)}}
+.spin{animation:spin 6s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{50%{opacity:.08;transform:scale(1.25)}}
+.marching{animation:march 1.2s linear infinite}
+@keyframes march{to{stroke-dashoffset:-16}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+@media (max-width:900px){
+  .hero,.map-layout,.menu-layout{grid-template-columns:1fr}
+  .side{border-left:0;border-top:1px solid var(--hud-line)}
+  .skirm-foot{grid-template-columns:1fr}
+  .ends{justify-content:flex-start}
+  .menu-art{min-height:200px}
+  .order-row{grid-template-columns:1fr}
+}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Макет визуальной системы · v0</p>
+      <h1>Пробуждение <span>источников</span></h1>
+      <p class="lede">Пошаговая стратегия на гексах: королевство с экономикой как в Казаках, тактические стычки малых отрядов и некромант, который растёт, пока ты медлишь.</p>
+      <div class="pills"><span class="pill">Гексы</span><span class="pill">Пошагово</span><span class="pill">5 ресурсов + мана</span><span class="pill">Позиционная тактика</span><span class="pill">Трекпад MacBook</span></div>
+    </div>
+    <div class="hero-scene" id="heroScene"></div>
+  </header>
+
+  <nav class="toc" aria-label="Разделы">
+    <a href="#palette">Палитра</a><a href="#type">Шрифты</a><a href="#terrain">Местность</a><a href="#buildings">Здания</a><a href="#units">Юниты</a><a href="#kit">Интерфейс</a><a href="#menu">Новая партия</a><a href="#map">Карта</a><a href="#skirmish">Стычка</a><a href="#event">Событие</a><a href="#lane">Стенка на стенку</a><a href="#roadmap">Этапы</a>
+  </nav>
+
+  <section id="palette">
+    <div class="sec-head"><p class="eyebrow">Цвет</p><h2>Палитра</h2><p>Плоские цвета без градиентов и текстур. Земля приглушённая, фракции яркие, чтобы на карте сразу было видно, кто где стоит. Мана — единственный фиолетовый в мире.</p></div>
+    <div class="swatch-groups" id="swatches"></div>
+  </section>
+
+  <section id="type">
+    <div class="sec-head"><p class="eyebrow">Шрифты</p><h2>Две гарнитуры и цифры</h2><p>Широкий геометричный шрифт для заголовков и названий, округлый — для текста и интерфейса. Цифры моноширинные, чтобы ресурсы и урон не прыгали.</p></div>
+    <div class="type-grid">
+      <div class="type-card"><span class="eyebrow">Заголовки · Unbounded</span><div class="sample-d">Цитадель Морвена</div><span class="muted">Названия экранов, событий, героев</span></div>
+      <div class="type-card"><span class="eyebrow">Текст · Nunito</span><div class="sample-b">Гонец едва держится в седле. «Мёртвые встают у северных болот, милорд».</div><span class="muted">События, подсказки, кнопки</span></div>
+      <div class="type-card"><span class="eyebrow">Цифры · Nunito 800</span><div class="sample-n">128 +12 · 11/20</div><span class="muted">Ресурсы, ОЗ, прогноз урона</span></div>
+    </div>
+  </section>
+
+  <section id="terrain">
+    <div class="sec-head"><p class="eyebrow">Карта</p><h2>Местность</h2><p>Гекс «острой вершиной вверх», чуть сплющен под наклон камеры, с боковой гранью: карта выглядит как стол с плитками. Под названием — стоимость движения и что можно построить.</p></div>
+    <div class="tiles" id="terrainTiles"></div>
+  </section>
+
+  <section id="buildings">
+    <div class="sec-head"><p class="eyebrow">Экономика</p><h2>Здания</h2><p>Каждое здание стоит на своём гексе. Крыши окрашены в цвет фракции, поэтому чужой город узнаётся издалека. Под названием — где ставить и бонус соседства.</p></div>
+    <div class="tiles" id="buildingTiles"></div>
+  </section>
+
+  <section id="units">
+    <div class="sec-head"><p class="eyebrow">Фигурки</p><h2>Юниты и герои</h2><p>Каждая фигурка собрана из 5–8 деталей на шарнирах, анимация — повороты и сдвиги этих деталей. Переключи цвет фракции и движение, чтобы увидеть, как это будет выглядеть в игре.</p></div>
+    <div class="unit-controls">
+      <div class="ctl" id="facCtl"><span>Фракция</span></div>
+      <div class="ctl" id="animCtl"><span>Движение</span></div>
+    </div>
+    <h3 class="subhead">Сталь и мана</h3>
+    <div class="units" id="unitCards"></div>
+    <h3 class="subhead">Герои</h3>
+    <div class="units" id="heroCards"></div>
+    <h3 class="subhead">Нежить Морвена</h3>
+    <div class="units" id="undeadCards"></div>
+  </section>
+
+  <section id="kit">
+    <div class="sec-head"><p class="eyebrow">Интерфейс</p><h2>Детали интерфейса</h2><p>Тёмные панели одного вида в обеих темах, крупные цели под трекпад, у каждой частой кнопки — горячая клавиша.</p></div>
+    <div class="kit">
+      <div class="kit-cell"><span class="label">Ресурсы и ход</span><div class="hud-bar" id="kitBar"></div></div>
+      <div class="kit-cell"><span class="label">Кнопки</span>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="gbtn primary" type="button">Конец хода <kbd>Enter</kbd></button>
+          <button class="gbtn" type="button">Следующий <kbd>Tab</kbd></button>
+          <button class="gbtn mana" type="button">Огненный шар <kbd>2</kbd></button>
+          <button class="gbtn" type="button" disabled>Таран · 2 хода</button>
+        </div></div>
+      <div class="kit-cell"><span class="label">Крестьяне в здании</span>
+        <div class="brow" style="border:0;padding:0"><span id="kitFarm"></span><div><b>Ферма · ур. 2</b><small>+2 еды за крестьянина</small></div>
+          <div class="stepper"><button type="button" aria-label="Убрать крестьянина">−</button><span class="slots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><button type="button" aria-label="Добавить крестьянина">+</button></div></div>
+        <label class="toggle"><input type="checkbox" checked id="kitAuto"> Автораспределение</label>
+      </div>
+      <div class="kit-cell"><span class="label">Прогноз урона при наведении</span>
+        <div class="forecast"><span class="muted" style="color:var(--hud-muted)">Мечник → Скелет</span><span class="big num">−11</span>
+          <div class="hpbar"><i style="width:13%"></i></div><span class="num">Останется 2 из 15 · ответ −1</span>
+          <div class="tags"><span class="tag plus">Фланг +50%</span><span class="tag plus">Клещи +25%</span></div></div></div>
+      <div class="kit-cell"><span class="label">Боец в стычке</span>
+        <div style="display:grid;gap:8px"><div style="display:flex;justify-content:space-between;font-weight:800"><span>Мечник</span><span class="num">16 / 20</span></div><div class="hpbar"><i style="width:80%"></i></div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--hud-muted)">Действия <span class="pips"><i></i><i class="used"></i></span></div></div></div>
+      <div class="kit-cell"><span class="label">Метки на гексах</span><div id="kitMarks"></div></div>
+    </div>
+  </section>
+
+  <section id="menu">
+    <div class="screen-cap"><div class="sec-head"><p class="eyebrow">Экран 1</p><h2>Новая партия</h2></div><p>Длина и сложность — две независимые настройки. Сид повторяет ту же карту.</p></div>
+    <div class="screen"><div class="menu-layout">
+      <div class="menu-art" id="menuArt"></div>
+      <form class="menu-form" id="newGame">
+        <h3>Новая партия</h3>
+        <div class="field"><span>Длина</span><div class="seg">
+          <label><input type="radio" name="len" id="len-s"> Короткая<small>0.5–1.5 ч</small></label>
+          <label><input type="radio" name="len" id="len-m" checked> Средняя<small>2–4 ч</small></label>
+          <label><input type="radio" name="len" id="len-l"> Длинная<small>5+ ч</small></label></div></div>
+        <div class="field"><span>Сложность</span><div class="seg">
+          <label><input type="radio" name="dif" id="dif-1"> Оруженосец</label>
+          <label><input type="radio" name="dif" id="dif-2" checked> Рыцарь</label>
+          <label><input type="radio" name="dif" id="dif-3"> Лорд</label>
+          <label><input type="radio" name="dif" id="dif-4"> Король</label></div></div>
+        <label class="toggle"><input type="checkbox" id="hardcore"> Жёсткий режим: павший герой не возвращается</label>
+        <div class="field"><span>Сид карты</span><div class="seed"><input id="seed" value="40217" inputmode="numeric" aria-label="Сид карты"><button class="gbtn" type="button" id="reseed">Случайный</button></div></div>
+        <button class="gbtn primary" type="submit" style="justify-self:start">Начать партию <kbd>Enter</kbd></button>
+      </form>
+    </div></div>
+  </section>
+
+  <section id="map">
+    <div class="screen-cap"><div class="sec-head"><p class="eyebrow">Экран 2</p><h2>Карта королевства</h2></div><p>Город «Белый Брод» с территорией в 2 гекса. Выбран отряд Альдена: светлые гексы — куда он дойдёт, пунктир — путь. Справа туман. Крестьян в панели города можно двигать.</p></div>
+    <div class="screen">
+      <div class="hud-bar" id="mapBar" style="border-radius:0"></div>
+      <div class="map-layout">
+        <div class="map-area" id="mapArea"></div>
+        <aside class="side" id="cityPanel"></aside>
+      </div>
+      <div class="screen-foot"><span>Два пальца или <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> — карта · щипок или <kbd>Q</kbd><kbd>E</kbd> — масштаб</span><button class="gbtn primary" type="button">Конец хода <kbd>Enter</kbd></button></div>
+    </div>
+  </section>
+
+  <section id="skirmish">
+    <div class="screen-cap"><div class="sec-head"><p class="eyebrow">Экран 3</p><h2>Стычка</h2></div><p>Арена 8×6 у руин. Выбран мечник, курсор на скелете. Альден и рыцарь стоят рядом с целью, рыцарь — напротив мечника: это фланг и клещи. Красный пунктир — зона контроля врагов, войдёшь — остановишься.</p></div>
+    <div class="screen">
+      <div style="padding:10px" id="arena"></div>
+      <div class="skirm-foot">
+        <div class="who"><div class="ava" id="whoAva"></div><div><b>Мечник</b><span class="num" style="display:block;font-size:13px;color:var(--hud-muted)">16 / 20 ОЗ</span><div class="pips" style="margin-top:6px;margin-left:2px"><i></i><i class="used"></i></div></div></div>
+        <div class="abil">
+          <button class="gbtn active" type="button"><span>Удар <kbd>1</kbd></span><small>7 урона, ближний бой</small></button>
+          <button class="gbtn" type="button"><span>Стена щитов <kbd>2</kbd></span><small>+2 Защ себе и соседям</small></button>
+        </div>
+        <div class="ends"><button class="gbtn" type="button">Автобой</button><button class="gbtn primary" type="button">Конец хода <kbd>Enter</kbd></button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="event">
+    <div class="screen-cap"><div class="sec-head"><p class="eyebrow">Экран 4</p><h2>Сюжетное событие</h2></div><p>Окно с иллюстрацией и выбором. Пока на месте картинки плоская заглушка, позже её заменит иллюстрация из Flux того же размера.</p></div>
+    <div class="screen"><div class="event-stage">
+      <div class="modal">
+        <div class="ill" id="eventIll"><span class="ph">Заглушка 1024×576</span></div>
+        <div class="body">
+          <span class="who-says">Ход 8 · советник Мейр</span>
+          <h3>Раненый гонец</h3>
+          <p>К воротам прискакал всадник в изорванном плаще. Он едва держится в седле: «Мёртвые встают у северных болот, милорд. Деревни пустеют».</p>
+          <div class="choices">
+            <button class="choice" type="button"><b>Приютить гонца</b><small>Земли на севере откроются на карте</small></button>
+            <button class="choice" type="button"><b>Отправить его к соседу</b><small>Отношение с Красным королевством +20</small></button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section id="lane">
+    <div class="screen-cap"><div class="sec-head"><p class="eyebrow">Прототип 1б</p><h2>Стенка на стенку</h2></div><p>Серая болванка: без графики, только механика. Раунд — приказ каждой группе, затем 4 секунды боя. Если понравится, получит такой же стиль, как всё остальное.</p></div>
+    <div class="screen grey">
+      <div style="padding:10px" id="laneSvg"></div>
+      <div class="orders" id="orders"></div>
+      <div class="screen-foot"><span>Раунд 2 из ~6 · противник сломлен при потере 70% ОЗ</span><button class="gbtn" type="button" style="background:#C9CED2;color:#1E2124;border-color:#C9CED2">В бой! · 4 с</button></div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="sec-head"><p class="eyebrow">Порядок</p><h2>Этапы</h2><p>После каждого этапа — рабочая ссылка на GitHub Pages и правки по итогам игры.</p></div>
+    <ol class="road">
+      <li><span class="st">Этап 1</span><b>Арена</b><p>Стычки целиком: все юниты, герои, позиционка, прогноз, автобой, анимация.</p><span class="kind">Полностью</span></li>
+      <li><span class="st">Этап 1б</span><b>Стенка на стенку</b><p>Раунды с приказами на серых болванках.</p><span class="kind">Болванка</span></li>
+      <li><span class="st">Этап 2</span><b>Карта и экономика</b><p>Генерация, города, застройка, крестьяне, содержание, переход в стычку.</p><span class="kind">Полностью</span></li>
+      <li><span class="st">Этап 3</span><b>Полная партия · бета</b><p>ИИ-королевства, Морвен, события, победы, настройки, сохранения.</p><span class="kind">Полностью</span></li>
+      <li><span class="st">Этап 3б</span><b>Пролог племени</b><p>Объединение племён миром или силой.</p><span class="kind">Болванка</span></li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(() => {
+const SQ = 0.8, R3 = Math.sqrt(3);
+const FAC = [
+  {id:'blue', name:'Игрок', c:'#2F6FDB'}, {id:'red', name:'Алые', c:'#D64545'},
+  {id:'gold', name:'Золотые', c:'#E0A526'}, {id:'green', name:'Зелёные', c:'#3BA55C'},
+  {id:'violet', name:'Лиловые', c:'#8E44AD'}
+];
+const MORVEN = '#2E3B3F', TOXIC = '#7CFFB2', MANA = '#7B5CFF', SKIN = '#F2C9A0';
+
+function shade(hex, f){
+  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255;
+  const t = f < 0 ? 0 : 255, p = Math.abs(f);
+  r = Math.round((t - r) * p + r); g = Math.round((t - g) * p + g); b = Math.round((t - b) * p + b);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+const pts = (cx, cy, s, sq = SQ) => Array.from({length:6}, (_, i) => {
+  const a = Math.PI / 180 * (60 * i + 30);
+  return (cx + s * Math.cos(a)).toFixed(1) + ',' + (cy + s * Math.sin(a) * sq).toFixed(1);
+}).join(' ');
+const corner = (cx, cy, s, i) => { const a = Math.PI / 180 * (60 * i + 30); return [cx + s * Math.cos(a), cy + s * Math.sin(a) * SQ]; };
+
+/* ---------- terrain ---------- */
+const TER = {
+  grass:{top:'#7FB069', side:'#5E8F4C', name:'Равнина', move:'1', note:'ферма, дом, рынок'},
+  forest:{top:'#6FA35B', side:'#4F7E43', name:'Лес', move:'2', note:'лесопилка · закрывает обзор'},
+  hill:{top:'#C4AE80', side:'#9E8960', name:'Холм', move:'2', note:'каменоломня · +1 обзор'},
+  mountain:{top:'#9CA2AA', side:'#767C84', name:'Гора', move:'нет', note:'непроходима'},
+  water:{top:'#5AA9E6', side:'#3F87C2', name:'Вода', move:'нет', note:'непроходима'},
+  ore:{top:'#C4AE80', side:'#9E8960', name:'Рудная жила', move:'2', note:'шахта железа'},
+  gold:{top:'#C4AE80', side:'#9E8960', name:'Золотая жила', move:'2', note:'золотой рудник'},
+  mana:{top:'#7FB069', side:'#5E8F4C', name:'Источник маны', move:'1', note:'башня магов'},
+  ruins:{top:'#D8CCAB', side:'#B3A684', name:'Руины', move:'1', note:'сюжетная точка'},
+  village:{top:'#7FB069', side:'#5E8F4C', name:'Деревня', move:'1', note:'захват → новый город'},
+  field:{top:'#E9DFC4', side:'#C9BC9A'},
+  rock:{top:'#7FB069', side:'#5E8F4C'}, wall:{top:'#7FB069', side:'#5E8F4C'}
+};
+const tree = (x, y, k) => `<rect x="${x-1.2*k}" y="${y}" width="${2.4*k}" height="${4*k}" fill="#6B4E2E"/><polygon points="${x},${y-14*k} ${x+7*k},${y+1*k} ${x-7*k},${y+1*k}" fill="#3E7C59"/><polygon points="${x},${y-14*k} ${x+7*k},${y+1*k} ${x},${y+1*k}" fill="#356C4D"/>`;
+const humps = (x, y, k, c) => `<path d="M${x-15*k} ${y+6*k} Q${x-7*k} ${y-9*k} ${x+1*k} ${y+6*k} Z" fill="${c}"/><path d="M${x-2*k} ${y+7*k} Q${x+6*k} ${y-4*k} ${x+14*k} ${y+7*k} Z" fill="${shade(c,-.08)}"/>`;
+const hut = (x, y, k, roof) => `<rect x="${x-5*k}" y="${y-4*k}" width="${10*k}" height="${7*k}" fill="#EFE3C8"/><polygon points="${x-7*k},${y-4*k} ${x},${y-11*k} ${x+7*k},${y-4*k}" fill="${roof}"/><rect x="${x-1.4*k}" y="${y-1*k}" width="${2.8*k}" height="${4*k}" fill="#8A6A48"/>`;
+function decor(type, x, y, s){
+  const k = s / 30;
+  switch(type){
+    case 'grass': return `<path d="M${x-9*k} ${y+5*k} l${2*k} ${-4*k} l${2*k} ${4*k} M${x+6*k} ${y-3*k} l${2*k} ${-4*k} l${2*k} ${4*k}" stroke="#5E8F4C" stroke-width="${1.6*k}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    case 'forest': return tree(x-9*k, y+1*k, k*.85) + tree(x+9*k, y+3*k, k*.8) + tree(x, y-4*k, k);
+    case 'hill': return humps(x, y, k, '#A48E64');
+    case 'mountain': return `<polygon points="${x-14*k},${y+7*k} ${x-6*k},${y-6*k} ${x+1*k},${y+7*k}" fill="#7E848C"/><polygon points="${x-7*k},${y+7*k} ${x+2*k},${y-15*k} ${x+13*k},${y+7*k}" fill="#878D95"/><polygon points="${x+2*k},${y-15*k} ${x+6*k},${y-8*k} ${x+3*k},${y-9*k} ${x},${y-7*k} ${x-2*k},${y-9*k}" fill="#F2F4F6"/>`;
+    case 'water': return `<path d="M${x-10*k} ${y-2*k} q${3*k} ${-3*k} ${6*k} 0 t${6*k} 0 M${x-2*k} ${y+5*k} q${3*k} ${-3*k} ${6*k} 0 t${6*k} 0" stroke="#8CC7F0" stroke-width="${2*k}" fill="none" stroke-linecap="round"/>`;
+    case 'ore': return humps(x, y, k, '#A48E64') + `<polygon points="${x-6*k},${y+2*k} ${x-2*k},${y-3*k} ${x+2*k},${y+2*k}" fill="#4B4F57"/><polygon points="${x+3*k},${y+4*k} ${x+6*k},${y} ${x+9*k},${y+4*k}" fill="#5A5F68"/><circle cx="${x-2*k}" cy="${y}" r="${1.1*k}" fill="#B5652B"/>`;
+    case 'gold': return humps(x, y, k, '#A48E64') + `<polygon points="${x-6*k},${y+2*k} ${x-2*k},${y-3*k} ${x+2*k},${y+2*k}" fill="#F2C14E"/><polygon points="${x+3*k},${y+4*k} ${x+6*k},${y} ${x+9*k},${y+4*k}" fill="#D9A632"/>`;
+    case 'mana': return `<ellipse class="pulse" cx="${x}" cy="${y-2*k}" rx="${13*k}" ry="${11*k}" fill="${MANA}" opacity=".22"/><polygon points="${x},${y-16*k} ${x+6*k},${y-4*k} ${x},${y+5*k} ${x-6*k},${y-4*k}" fill="${MANA}"/><polygon points="${x},${y-16*k} ${x+6*k},${y-4*k} ${x},${y-2*k}" fill="#A28BFF"/>`;
+    case 'ruins': return `<rect x="${x-10*k}" y="${y-8*k}" width="${4*k}" height="${12*k}" fill="#EFE8D6"/><polygon points="${x+3*k},${y+4*k} ${x+3*k},${y-12*k} ${x+5*k},${y-14*k} ${x+7*k},${y-11*k} ${x+7*k},${y+4*k}" fill="#EFE8D6"/><rect x="${x-4*k}" y="${y+2*k}" width="${7*k}" height="${3*k}" rx="${1*k}" fill="#D9D0BA"/>`;
+    case 'village': return hut(x-6*k, y+3*k, k*.85, '#A0704A') + hut(x+6*k, y-1*k, k*.75, '#8B6142') + `<line x1="${x+1*k}" y1="${y+6*k}" x2="${x+1*k}" y2="${y-12*k}" stroke="#6B4E2E" stroke-width="${1.2*k}"/><polygon points="${x+1*k},${y-12*k} ${x+7*k},${y-10*k} ${x+1*k},${y-8*k}" fill="#C9CDD2"/>`;
+    case 'field': return [-6,0,6].map(d => `<line x1="${x-12*k+d*k}" y1="${y+6*k}" x2="${x-2*k+d*k}" y2="${y-8*k}" stroke="#D3BF83" stroke-width="${2.2*k}" stroke-linecap="round"/>`).join('') + `<line x1="${x+6*k}" y1="${y+6*k}" x2="${x+12*k}" y2="${y-2*k}" stroke="#D3BF83" stroke-width="${2.2*k}" stroke-linecap="round"/>`;
+    case 'rock': return `<path d="M${x-10*k} ${y+6*k} Q${x-9*k} ${y-6*k} ${x-1*k} ${y-6*k} Q${x+8*k} ${y-6*k} ${x+9*k} ${y+6*k} Z" fill="#9BA1A8"/><path d="M${x-1*k} ${y-6*k} Q${x+8*k} ${y-6*k} ${x+9*k} ${y+6*k} L${x+2*k} ${y+6*k} Z" fill="#878D95"/>`;
+    case 'wall': return `<rect x="${x-13*k}" y="${y-14*k}" width="${26*k}" height="${20*k}" fill="#B9B2A4"/><rect x="${x-13*k}" y="${y+2*k}" width="${26*k}" height="${4*k}" fill="#9C9588"/>` + [-13,-6,1,8].map(d => `<rect x="${x+d*k}" y="${y-18*k}" width="${5*k}" height="${4*k}" fill="#B9B2A4"/>`).join('') + `<line x1="${x-13*k}" y1="${y-7*k}" x2="${x+13*k}" y2="${y-7*k}" stroke="#A39C8F" stroke-width="${1*k}"/>`;
+  }
+  return '';
+}
+function tile(type, cx, cy, s, extra = ''){
+  const t = TER[type] || TER.grass, d = s * .2;
+  return `<polygon points="${pts(cx, cy + d, s)}" fill="${t.side}"/><polygon points="${pts(cx, cy, s)}" fill="${t.top}"/>${decor(type, cx, cy, s)}${extra}`;
+}
+
+/* ---------- buildings ---------- */
+const BLD = {
+  townhall:{name:'Ратуша', base:'grass', note:'центр города · найм ополченцев'},
+  house:{name:'Дом', base:'grass', note:'жильё +4'},
+  farm:{name:'Ферма', base:'field', note:'+1 еды за соседнюю мельницу'},
+  mill:{name:'Мельница', base:'grass', note:'усиливает фермы рядом'},
+  sawmill:{name:'Лесопилка', base:'forest', note:'+1, если рядом 2 леса'},
+  quarry:{name:'Каменоломня', base:'hill', note:'камень'},
+  iron:{name:'Шахта железа', base:'ore', note:'+1 рядом с кузницей'},
+  goldmine:{name:'Золотой рудник', base:'gold', note:'золото'},
+  market:{name:'Рынок', base:'grass', note:'+1 золото за соседний дом'},
+  barracks:{name:'Казарма', base:'grass', note:'мечники, лучники'},
+  forge:{name:'Кузница', base:'grass', note:'у шахты: сталь −25% железа'},
+  stable:{name:'Конюшня', base:'grass', note:'рыцари · только у фермы'},
+  tower:{name:'Башня магов', base:'mana', note:'+1 маны за соседний источник'},
+  walls:{name:'Стены', base:'grass', note:'+2 Защ защитникам'},
+  tavern:{name:'Таверна', base:'grass', note:'найм героев'}
+};
+function building(id, x, y, s, c){
+  const k = s / 30, W = '#F3EAD6', roof = c;
+  const box = (bx, by, w, h, f = W) => `<rect x="${x+bx*k}" y="${y+by*k}" width="${w*k}" height="${h*k}" fill="${f}"/>`;
+  const poly = (arr, f) => `<polygon points="${arr.map(p => (x+p[0]*k).toFixed(1)+','+(y+p[1]*k).toFixed(1)).join(' ')}" fill="${f}"/>`;
+  const shadow = `<ellipse cx="${x}" cy="${y+7*k}" rx="${14*k}" ry="${3.5*k}" fill="rgba(0,0,0,.14)"/>`;
+  switch(id){
+    case 'townhall': return shadow + box(-12,-6,24,13) + poly([[-14,-6],[0,-15],[14,-6]], roof) + box(4,-22,7,14,'#E6DCC4') + poly([[3,-22],[7.5,-28],[12,-22]], roof) + `<line x1="${x+7.5*k}" y1="${y-28*k}" x2="${x+7.5*k}" y2="${y-36*k}" stroke="#6B4E2E" stroke-width="${1.2*k}"/>` + poly([[7.5,-36],[14,-34],[7.5,-32]], roof) + box(-3,0,5,7,'#8A6A48');
+    case 'house': return shadow + box(-7,-4,14,10) + poly([[-9,-4],[0,-13],[9,-4]], roof) + box(-1.5,1,3,5,'#8A6A48');
+    case 'farm': return `<rect x="${x+2*k}" y="${y-6*k}" width="${8*k}" height="${7*k}" fill="${W}"/>` + poly([[1,-6],[6,-11],[11,-6]], roof);
+    case 'mill': return shadow + poly([[-5,6],[-3.5,-10],[3.5,-10],[5,6]], W) + poly([[-5,-10],[0,-15],[5,-10]], roof) + `<g class="spin" style="transform-origin:${x}px ${y-9*k}px">${[0,90,180,270].map(a => `<rect x="${x-1.2*k}" y="${y-21*k}" width="${2.4*k}" height="${12*k}" fill="#8A6A48" transform="rotate(${a} ${x} ${y-9*k})"/>`).join('')}</g><circle cx="${x}" cy="${y-9*k}" r="${1.6*k}" fill="#5A4430"/>`;
+    case 'sawmill': return shadow + box(-9,-3,14,9,'#C89A6A') + poly([[-10,-3],[6,-8],[6,-3]], roof) + [0,1,2].map(i => `<circle cx="${x+(8)*k}" cy="${y+(4-i*3.2)*k}" r="${1.8*k}" fill="#8A5A33"/><circle cx="${x+8*k}" cy="${y+(4-i*3.2)*k}" r="${.7*k}" fill="#D6AE7E"/>`).join('');
+    case 'quarry': return shadow + box(-10,-1,8,7,'#D9DCE0') + box(-2,-1,8,7,'#C3C7CD') + box(-6,-8,8,7,'#B5BAC1') + box(6,1,5,5,'#D9DCE0');
+    case 'iron': case 'goldmine': return `<path d="M${x-7*k} ${y+6*k} V${y-2*k} A${7*k} ${7*k} 0 0 1 ${x+7*k} ${y-2*k} V${y+6*k} Z" fill="#8A6A48"/><path d="M${x-4.5*k} ${y+6*k} V${y-1*k} A${4.5*k} ${4.5*k} 0 0 1 ${x+4.5*k} ${y-1*k} V${y+6*k} Z" fill="#2B3036"/>` + (id === 'goldmine' ? `<circle cx="${x+9*k}" cy="${y+5*k}" r="${2*k}" fill="#F2C14E"/>` : `<circle cx="${x+9*k}" cy="${y+5*k}" r="${2*k}" fill="#5A5F68"/>`);
+    case 'market': return shadow + box(-10,0,20,6,'#C89A6A') + [0,1,2,3,4].map(i => box(-11+i*4.4,-7,4.4,6, i%2 ? '#FFFFFF' : roof)).join('') + box(-10,-1,2,7,'#8A6A48') + box(8,-1,2,7,'#8A6A48');
+    case 'barracks': return shadow + poly([[-11,6],[0,-12],[11,6]], roof) + poly([[-3,6],[0,-2],[3,6]], shade(roof,-.35)) + `<line x1="${x+12*k}" y1="${y+7*k}" x2="${x+12*k}" y2="${y-14*k}" stroke="#6B4E2E" stroke-width="${1.2*k}"/>` + poly([[12,-17],[13.6,-13],[10.4,-13]], '#C9D1DA');
+    case 'forge': return shadow + box(-10,-4,18,10,'#6A6F78') + poly([[-11,-4],[-1,-10],[9,-4]], roof) + box(4,-15,4,8,'#575C64') + `<circle cx="${x-4*k}" cy="${y+1*k}" r="${2.6*k}" fill="#FF9A3C"/>` + poly([[9,4],[15,4],[14,1],[10,1]], '#3A3F46');
+    case 'stable': return shadow + box(-11,-3,22,9,'#B5653A') + poly([[-12,-3],[0,-11],[12,-3]], roof) + `<path d="M${x-3*k} ${y+6*k} V${y-1*k} H${x+3*k} V${y+6*k} M${x-3*k} ${y-1*k} L${x+3*k} ${y+6*k} M${x+3*k} ${y-1*k} L${x-3*k} ${y+6*k}" stroke="#F3EAD6" stroke-width="${1*k}" fill="none"/>`;
+    case 'tower': return shadow + box(-4.5,-20,9,26,'#E6E0D2') + poly([[-6.5,-20],[0,-32],[6.5,-20]], MANA) + box(-1.5,-15,3,5,'#A28BFF') + `<circle class="pulse" cx="${x}" cy="${y-30*k}" r="${4*k}" fill="${MANA}" opacity=".35"/>`;
+    case 'walls': return box(-13,-7,26,13,'#B9B2A4') + [-13,-6.5,0,6.5].map(d => box(d,-11,4.5,4,'#B9B2A4')).join('') + box(-3,-1,6,7,'#6B4E2E') + `<line x1="${x-13*k}" y1="${y-1*k}" x2="${x+13*k}" y2="${y-1*k}" stroke="#A39C8F" stroke-width="${1*k}"/>`;
+    case 'tavern': return shadow + box(-9,-4,16,10) + poly([[-11,-4],[-1,-12],[9,-4]], roof) + `<line x1="${x+9*k}" y1="${y-4*k}" x2="${x+13*k}" y2="${y-4*k}" stroke="#6B4E2E" stroke-width="${1*k}"/><circle cx="${x+13*k}" cy="${y-0.5*k}" r="${3*k}" fill="#F2C14E"/><rect x="${x+11.5*k}" y="${y-2*k}" width="${3*k}" height="${3.4*k}" fill="#FFFFFF" opacity=".85"/>` + box(-3,1,4,5,'#8A6A48');
+  }
+  return '';
+}
+
+/* ---------- figures ---------- */
+const UNITS = {
+  militia:{name:'Ополченец', br:'Сталь', st:[15,5,1,3,1], ab:['Копья вперёд','удар вдогонку ×1.5, по рыцарям ×2']},
+  swordsman:{name:'Мечник', br:'Сталь', st:[20,7,4,3,1], ab:['Стена щитов','+2 Защ себе и соседям, рыцари бьют вдвое слабее']},
+  knight:{name:'Рыцарь', br:'Сталь', st:[22,9,3,5,1], ab:['Таран','рывок на 2–4 гекса сквозь зону контроля, ×1.5 и отбрасывание']},
+  archer:{name:'Лучник', br:'Мана', st:[12,6,0,3,4], ab:['Прицельный выстрел','+1 дальность, игнорирует укрытие']},
+  apprentice:{name:'Ученик-маг', br:'Мана', st:[11,'5✦',0,3,3], ab:['Лечение','союзник в радиусе 2: +6 ОЗ']},
+  battlemage:{name:'Боевой маг', br:'Мана', st:[12,'8✦',0,3,3], ab:['Огненный шар','7 урона по гексу и 6 соседям, своим тоже · 5 маны']},
+  alden:{name:'Сэр Альден', br:'Рыцарь-командор', st:[26,8,3,4,1], ab:['Вызов · Рассекающий удар','враги рядом обязаны бить его; удар дугой по 3 гексам']},
+  irena:{name:'Ирена', br:'Боевая чародейка', st:[16,'7✦',0,3,3], ab:['Ледяная стена · Цепная молния','3 гекса стены на 2 хода; молния по 3 целям']},
+  corvin:{name:'Корвин', br:'Следопыт', st:[18,7,1,4,4], ab:['Отход · Метка','отойти после выстрела; цель получает +25% урона']},
+  skeleton:{name:'Скелет', br:'Нежить', st:[15,5,1,3,1], ab:['Не ест','дешёвая масса, не получает ропот'], undead:1},
+  ghoul:{name:'Гуль', br:'Нежить', st:[14,6,0,5,1], ab:['Охотник','быстрый, рвёт стрелков и магов'], undead:1},
+  deathknight:{name:'Рыцарь смерти', br:'Нежить', st:[24,9,3,5,1], ab:['Таран','как у рыцаря, но не лечится'], undead:1},
+  acolyte:{name:'Некромант-послушник', br:'Нежить', st:[11,'5✦',0,3,3], ab:['Поднять мёртвых','павший рядом встаёт скелетом · бей первым'], undead:1}
+};
+const armRect = (x) => `<rect x="${x}" y="43" width="5" height="14" rx="2.5" fill="SLEEVE"/>`;
+function humanoid(kind, c){
+  const dark = shade(c, -.32), light = shade(c, .35), u = UNITS[kind] || {};
+  const undead = !!u.undead, robe = ['apprentice','battlemage','irena','acolyte'].includes(kind);
+  const body = undead ? MORVEN : c, sleeve = undead ? '#3B4B50' : dark;
+  const legs = robe ? '' : `<rect x="25" y="60" width="5.5" height="12" rx="2" fill="${undead ? '#E9E4D6' : '#4A3B30'}"/><rect x="33.5" y="60" width="5.5" height="12" rx="2" fill="${undead ? '#E9E4D6' : '#4A3B30'}"/>`;
+  const torso = robe
+    ? `<path d="M23 42 Q32 37 41 42 L45 72 Q32 75 19 72 Z" fill="${body}"/><path d="M30 42 L34 42 L35 72 L29 72 Z" fill="${undead ? TOXIC : light}" opacity="${undead ? .5 : .45}"/>`
+    : `<path d="M22 42 Q32 37 42 42 L44 63 Q32 66 20 63 Z" fill="${body}"/><rect x="21" y="54" width="22" height="3" fill="${undead ? TOXIC : dark}" opacity="${undead ? .7 : 1}"/>`;
+  let head = undead
+    ? `<circle cx="32" cy="32" r="8.5" fill="#E9E4D6"/><circle cx="29" cy="31" r="2.2" fill="${MORVEN}"/><circle cx="35" cy="31" r="2.2" fill="${MORVEN}"/><circle cx="29" cy="31" r=".8" fill="${TOXIC}"/><circle cx="35" cy="31" r=".8" fill="${TOXIC}"/><rect x="29" y="36" width="6" height="2.5" rx="1" fill="#CFC8B6"/>`
+    : `<circle cx="32" cy="32" r="8.5" fill="${SKIN}"/><circle cx="35" cy="32" r="1.1" fill="#3A2A20"/>`;
+  let hat = '', back = '', armL = armRect(22), armR = armRect(37), offhand = '', weapon = '';
+  const sword = `<rect x="38.8" y="34" width="2.6" height="22" rx="1" fill="#DDE3EA"/><rect x="36" y="52" width="8.4" height="2.2" rx="1" fill="#8A6A48"/>`;
+  const shield = (f) => `<path d="M17 47 h14 v8 q0 7 -7 10 q-7 -3 -7 -10 Z" fill="${f}"/><path d="M24 49 v13" stroke="${shade(f,.45)}" stroke-width="2"/>`;
+  const staff = (orb, big) => `<line x1="41" y1="${big ? 22 : 26}" x2="41" y2="70" stroke="#8A6A48" stroke-width="2.2" stroke-linecap="round"/>` + (big ? `<polygon points="41,12 45,20 41,27 37,20" fill="${orb}"/><circle cx="41" cy="20" r="7" fill="${orb}" opacity=".25"/>` : `<circle cx="41" cy="24" r="3.2" fill="${orb}"/>`);
+  switch(kind){
+    case 'militia': hat = `<path d="M23.5 31 A8.5 8.5 0 0 1 40.5 31 Z" fill="#8A6A48"/>`; offhand = `<circle cx="22" cy="54" r="6.5" fill="#A97C50"/><circle cx="22" cy="54" r="2" fill="#7A5634"/>`; weapon = `<line x1="40" y1="18" x2="40" y2="68" stroke="#8A6A48" stroke-width="2"/><polygon points="40,12 42.6,19 37.4,19" fill="#C9D1DA"/>`; break;
+    case 'swordsman': hat = `<path d="M23 30 A9 9 0 0 1 41 30 Z" fill="#AEB6BF"/><rect x="20.5" y="28.5" width="23" height="2.6" rx="1.2" fill="#8F98A2"/>`; offhand = shield(c); weapon = sword; break;
+    case 'archer': hat = `<path d="M22 37 Q22 21 32 21 Q42 21 42 37 L39 35 Q39 26 32 26 Q25 26 25 35 Z" fill="${dark}"/>`; offhand = `<path d="M19 36 Q10 52 19 68" stroke="#8A5A33" stroke-width="2.4" fill="none"/><line x1="19" y1="36" x2="19" y2="68" stroke="#E9E4D6" stroke-width=".8"/>`; weapon = `<line x1="40" y1="48" x2="40" y2="60" stroke="#8A6A48" stroke-width="1.4"/>`; break;
+    case 'apprentice': hat = `<polygon points="21,29.5 43,29.5 35,9" fill="${light}"/><rect x="19.5" y="28" width="25" height="3" rx="1.5" fill="${light}"/>`; weapon = staff('#A28BFF'); break;
+    case 'battlemage': hat = `<polygon points="20,29.5 44,29.5 29,3" fill="${dark}"/><rect x="18.5" y="28" width="27" height="3" rx="1.5" fill="${dark}"/><circle cx="31" cy="20" r="1.8" fill="#FFD86B"/>`; weapon = staff(MANA, true); break;
+    case 'alden': back = `<path d="M22 41 Q32 37 42 41 L46 68 Q32 71 18 68 Z" fill="${dark}"/>`; hat = `<path d="M23 25 Q32 19 41 25 L41 37 Q32 40 23 37 Z" fill="#B8C0C8"/><rect x="27" y="30" width="12" height="2" fill="#2B3138"/><path d="M23 25 l3 -5 l3 3 l3 -5 l3 5 l3 -3 l3 5 Z" fill="#F2C14E"/>`; offhand = shield(c); weapon = sword; break;
+    case 'irena': back = `<path d="M24 30 Q22 44 25 48 L28 34 Z M40 30 Q42 44 39 48 L36 34 Z" fill="#7A3B2E"/>`; hat = `<polygon points="20,29.5 44,29.5 33,4" fill="${dark}"/><rect x="18.5" y="28" width="27" height="3" rx="1.5" fill="${dark}"/><polygon points="32,22 34.5,25.5 32,29 29.5,25.5" fill="${MANA}"/>`; weapon = staff(MANA, true); break;
+    case 'corvin': hat = `<path d="M22 37 Q22 20 32 20 Q42 20 42 37 L39 35 Q39 26 32 26 Q25 26 25 35 Z" fill="#3E5A3E"/><path d="M24 39 Q32 44 40 39 L40 43 Q32 47 24 43 Z" fill="${c}"/>`; offhand = `<path d="M18 34 Q8 52 18 70" stroke="#6B4E2E" stroke-width="2.8" fill="none"/><line x1="18" y1="34" x2="18" y2="70" stroke="#E9E4D6" stroke-width=".8"/>`; break;
+    case 'skeleton': offhand = `<circle cx="22" cy="54" r="6" fill="#4B4F57"/>`; weapon = `<rect x="38.8" y="36" width="2.6" height="20" rx="1" fill="#A7ADB4"/>`; break;
+    case 'ghoul': head = `<circle cx="34" cy="35" r="8" fill="#8FA38A"/><circle cx="37" cy="34" r="1.6" fill="${TOXIC}"/><path d="M32 40 l2 2 l2 -2 l2 2" stroke="#2B3036" stroke-width="1" fill="none"/>`; weapon = `<path d="M40 56 l4 4 M40 57 l2 6 M39 57 l-1 6" stroke="#E9E4D6" stroke-width="1.4"/>`; offhand = `<path d="M24 56 l-4 4 M24 57 l-2 6" stroke="#E9E4D6" stroke-width="1.4"/>`; break;
+    case 'acolyte': hat = `<path d="M22 38 Q22 20 32 20 Q42 20 42 38 L39 36 Q39 26 32 26 Q25 26 25 36 Z" fill="#1A2326"/>`; weapon = staff(TOXIC, true); break;
+  }
+  const L = armL.replace('SLEEVE', sleeve), R = armR.replace('SLEEVE', sleeve);
+  const tilt = kind === 'ghoul' ? ' transform="rotate(10 32 60)"' : '';
+  return `${legs}<g class="upper"${tilt}>${back}<g class="armL">${L}${offhand}</g>${torso}${head}${hat}<g class="armR">${R}${weapon}</g></g>`;
+}
+function rider(kind, c){
+  const undead = kind === 'deathknight';
+  const horse = undead ? '#3B4B50' : '#8A5A3A', cloth = undead ? MORVEN : c, hem = undead ? TOXIC : shade(c, .4);
+  const legs = [17,23,37,43].map(x => `<rect x="${x}" y="60" width="4" height="13" rx="1.5" fill="${shade(horse,-.2)}"/>`).join('');
+  const body = `<path d="M10 56 q-4 6 -2 12" stroke="${shade(horse,-.25)}" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="30" cy="57" rx="18" ry="7.5" fill="${horse}"/><polygon points="41,55 49,39 55,41 48,58" fill="${horse}"/><ellipse cx="54" cy="42" rx="5.5" ry="3.6" fill="${horse}" transform="rotate(25 54 42)"/>` + (undead ? `<circle cx="55" cy="41" r="1" fill="${TOXIC}"/>` : `<circle cx="55" cy="41" r="1" fill="#1E1A16"/>`) + `<path d="M15 52 h30 v8 q-15 5 -30 0 Z" fill="${cloth}"/><path d="M15 59 q15 5 30 0" stroke="${hem}" stroke-width="1.6" fill="none"/>`;
+  const helm = undead
+    ? `<path d="M23 25 Q32 19 41 25 L41 37 Q32 40 23 37 Z" fill="#46545A"/><rect x="27" y="30" width="12" height="2" fill="${TOXIC}"/>`
+    : `<path d="M23 25 Q32 19 41 25 L41 37 Q32 40 23 37 Z" fill="#B8C0C8"/><rect x="27" y="30" width="12" height="2" fill="#2B3138"/><path d="M32 21 Q26 12 20 15 Q26 17 30 22 Z" fill="${c}"/>`;
+  const torso = `<path d="M22 42 Q32 37 42 42 L43 56 Q32 58 21 56 Z" fill="${undead ? MORVEN : c}"/>`;
+  const sleeve = undead ? '#3B4B50' : shade(c, -.32);
+  const lance = `<polygon points="39,53 64,38 64,40.5 40,55.5" fill="${undead ? '#5A666C' : '#C9A26A'}"/><polygon points="38,49 44,49 44,57 38,57" fill="#8F98A2"/>`;
+  const up = `<g class="upper" transform="translate(-2 -10)"><g class="armL"><rect x="22" y="43" width="5" height="12" rx="2.5" fill="${sleeve}"/><path d="M17 45 h12 v7 q0 6 -6 8 q-6 -2 -6 -8 Z" fill="${undead ? '#46545A' : c}"/></g>${torso}<circle cx="32" cy="32" r="8.5" fill="${SKIN}"/>${helm}<g class="armR"><rect x="37" y="43" width="5" height="12" rx="2.5" fill="${sleeve}"/>${lance}</g></g>`;
+  return legs + body + up;
+}
+function figBody(kind, c){ return (kind === 'knight' || kind === 'deathknight') ? rider(kind, c) : humanoid(kind, c); }
+function figInner(kind, c, flip){
+  const inner = `<ellipse cx="32" cy="74" rx="15" ry="3.5" fill="rgba(0,0,0,.22)"/><g class="rig">${figBody(kind, c)}</g><circle class="ring" cx="32" cy="40" r="5" fill="none" stroke="${UNITS[kind]?.undead ? TOXIC : MANA}" stroke-width="1.5"/><text class="dmg" x="32" y="14" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="11" fill="#FF6B6B" stroke="#14212A" stroke-width="2.5" paint-order="stroke">−7</text>`;
+  return flip ? `<g transform="translate(64 0) scale(-1 1)">${inner}</g>` : inner;
+}
+function figSVG(kind, c, anim = '', flip = false){
+  return `<svg class="fig ${anim}" viewBox="0 0 64 80" role="img" aria-label="${UNITS[kind]?.name || kind}">${figInner(kind, c, flip)}</svg>`;
+}
+function figAt(kind, c, x, y, k, flip, anim = ''){
+  return `<g class="fig ${anim}" transform="translate(${(x - 32*k).toFixed(1)} ${(y + 4 - 74*k).toFixed(1)}) scale(${k})">${figInner(kind, c, flip)}</g>`;
+}
+
+/* ---------- resource icons ---------- */
+const RES = {
+  food:`<svg viewBox="0 0 20 20"><path d="M10 18 V6" stroke="#C99A2E" stroke-width="1.6"/><ellipse cx="10" cy="5" rx="2" ry="3" fill="#F2C14E"/><ellipse cx="7" cy="9" rx="1.8" ry="2.8" fill="#F2C14E" transform="rotate(-30 7 9)"/><ellipse cx="13" cy="9" rx="1.8" ry="2.8" fill="#F2C14E" transform="rotate(30 13 9)"/><ellipse cx="7" cy="13" rx="1.8" ry="2.8" fill="#E2B53E" transform="rotate(-30 7 13)"/><ellipse cx="13" cy="13" rx="1.8" ry="2.8" fill="#E2B53E" transform="rotate(30 13 13)"/></svg>`,
+  wood:`<svg viewBox="0 0 20 20"><rect x="2" y="7" width="13" height="7" rx="3.5" fill="#A0704A"/><circle cx="15" cy="10.5" r="3.5" fill="#D6AE7E"/><circle cx="15" cy="10.5" r="1.4" fill="#A0704A"/></svg>`,
+  stone:`<svg viewBox="0 0 20 20"><polygon points="3,15 5,7 11,4 17,8 16,15" fill="#B5BAC1"/><polygon points="11,4 17,8 16,15 11,12" fill="#959BA3"/></svg>`,
+  gold:`<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#F2C14E"/><circle cx="10" cy="10" r="4.8" fill="none" stroke="#C99A2E" stroke-width="1.4"/></svg>`,
+  iron:`<svg viewBox="0 0 20 20"><polygon points="2,15 5,8 15,8 18,15" fill="#8E98A3"/><polygon points="5,8 15,8 13.5,11 6.5,11" fill="#B4BCC5"/></svg>`,
+  mana:`<svg viewBox="0 0 20 20"><polygon points="10,1.5 15.5,9 10,18.5 4.5,9" fill="#7B5CFF"/><polygon points="10,1.5 15.5,9 10,10.5" fill="#A28BFF"/></svg>`,
+  pop:`<svg viewBox="0 0 20 20"><circle cx="10" cy="6" r="3.4" fill="#EAF1F4"/><path d="M3.5 18 Q4 10.5 10 10.5 Q16 10.5 16.5 18 Z" fill="#EAF1F4"/></svg>`,
+  skull:`<svg viewBox="0 0 20 20"><circle cx="10" cy="9" r="7" fill="#E9E4D6"/><circle cx="7.4" cy="9" r="1.9" fill="#1F2A2E"/><circle cx="12.6" cy="9" r="1.9" fill="#1F2A2E"/><rect x="7" y="14" width="6" height="3.5" rx="1" fill="#CFC8B6"/></svg>`
+};
+const resItem = (k, v, d, cls = 'up', label) => `<span class="res" title="${label}">${RES[k]}<span>${v}</span>${d ? `<small class="${cls}">${d}</small>` : ''}</span>`;
+function hudBar(){
+  return `<span class="turn">Ход 14</span><span class="hud-sep"></span>`
+    + resItem('food', 86, '+12', 'up', 'Еда') + resItem('wood', 41, '+6', 'up', 'Дерево') + resItem('stone', 23, '+4', 'up', 'Камень')
+    + resItem('gold', 37, '−2', 'down', 'Золото') + resItem('iron', 14, '+1', 'up', 'Железо') + resItem('mana', 19, '+5', 'up', 'Мана')
+    + `<span class="hud-sep"></span>` + resItem('pop', 17, '', 'up', 'Жители') + `<span class="hud-sep"></span>`
+    + `<span class="res" title="Сила Морвена">${RES.skull}<span>Сила Морвена 2</span></span>`;
+}
+
+/* ---------- hex grid helpers (odd-r offset) ---------- */
+const center = (r, c, s, ox, oy) => [ox + c * R3 * s + (r & 1 ? R3 * s / 2 : 0), oy + r * 1.5 * s * SQ];
+const cube = (r, c) => { const x = c - (r - (r & 1)) / 2; return [x, -x - r, r]; };
+const dist = (a, b) => { const p = cube(...a), q = cube(...b); return Math.max(Math.abs(p[0]-q[0]), Math.abs(p[1]-q[1]), Math.abs(p[2]-q[2])); };
+function neighbor(r, c, edge){ // edge 0..5 = SE, SW, W, NW, NE, E
+  const odd = r & 1;
+  return [[r+1, c+odd],[r+1, c-1+odd],[r, c-1],[r-1, c-1+odd],[r-1, c+odd],[r, c+1]][edge];
+}
+
+/* ---------- hero scene ---------- */
+function heroScene(){
+  const s = 40, cells = [
+    [0,1,'grass'],[0,2,'forest'],[0,3,'mana'],[0,4,'hill'],
+    [1,0,'water'],[1,1,'grass'],[1,2,'grass'],[1,3,'grass'],[1,4,'mountain'],
+    [2,1,'field'],[2,2,'grass'],[2,3,'grass'],[2,4,'forest']
+  ];
+  const ox = 10, oy = 46;
+  let g = '', figs = '';
+  cells.forEach(([r, c, t]) => { const [x, y] = center(r, c, s, ox, oy); g += tile(t, x, y, s); });
+  let [x, y] = center(2, 1, s, ox, oy); g += building('mill', x - 8, y + 2, s * .8, FAC[0].c) + building('farm', x + 2, y + 2, s * .9, FAC[0].c);
+  [x, y] = center(1, 1, s, ox, oy); figs += figAt('alden', FAC[0].c, x, y, .62);
+  [x, y] = center(1, 2, s, ox, oy); figs += figAt('irena', FAC[0].c, x, y, .62, false, 'cast');
+  [x, y] = center(2, 3, s, ox, oy); figs += figAt('corvin', FAC[0].c, x, y, .62);
+  [x, y] = center(1, 3, s, ox, oy); figs += figAt('skeleton', MORVEN, x + 4, y, .6, true);
+  const w = ox * 2 + 5.5 * R3 * s, h = oy + 2 * 1.5 * s * SQ + s * SQ + 14;
+  return `<svg viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" role="img" aria-label="Альден, Ирена и Корвин у источника маны">${g}${figs}</svg>`;
+}
+
+/* ---------- palette ---------- */
+function swatches(){
+  const groups = [
+    ['Земля', [['Равнина','#7FB069'],['Лес','#3E7C59'],['Холм','#C4AE80'],['Гора','#9CA2AA'],['Вода','#5AA9E6'],['Поле','#E9DFC4']]],
+    ['Фракции', [['Игрок','#2F6FDB'],['Алые','#D64545'],['Золотые','#E0A526'],['Зелёные','#3BA55C'],['Лиловые','#8E44AD'],['Морвен','#2E3B3F']]],
+    ['Магия и сигналы', [['Мана','#7B5CFF'],['Яд Морвена','#7CFFB2'],['Золото','#F2C14E'],['Плюс','#5BC97A'],['Урон','#FF6B6B'],['Панель','#14212A']]]
+  ];
+  return groups.map(([t, list]) => `<div class="swatch-group"><h3>${t}</h3><div class="swatches">${list.map(([n, c]) => `<div class="sw"><i style="background:${c}"></i><b>${n}</b><code>${c}</code></div>`).join('')}</div></div>`).join('');
+}
+
+/* ---------- tiles sections ---------- */
+function tileCard(svgInner, title, note){
+  return `<div class="tile"><svg viewBox="0 0 120 112" role="img" aria-label="${title}">${svgInner}</svg><b>${title}</b><small>${note}</small></div>`;
+}
+function terrainTiles(){
+  return ['grass','forest','hill','mountain','water','ore','gold','mana','ruins','village'].map(t => {
+    const d = TER[t];
+    return tileCard(tile(t, 60, 58, 46), d.name, `Движение ${d.move} · ${d.note}`);
+  }).join('');
+}
+function buildingTiles(){
+  return Object.entries(BLD).map(([id, b]) => tileCard(tile(b.base, 60, 58, 46) + building(id, 60, 60, 46 * .95, FAC[0].c), b.name, b.note)).join('');
+}
+
+/* ---------- unit cards ---------- */
+let curFac = FAC[0], curAnim = '';
+const statLabels = ['ОЗ','Атк','Защ','Движ','Дальн'];
+function card(kind){
+  const u = UNITS[kind], c = u.undead ? MORVEN : curFac.c;
+  return `<article class="ucard"><div class="stage">${figSVG(kind, c, curAnim, !!u.undead)}</div><span class="branch">${u.br}</span><h3>${u.name}</h3>
+    <div class="stats">${u.st.map((v, i) => `<div><b>${v}</b><span>${statLabels[i]}</span></div>`).join('')}</div>
+    <p class="ability"><b>${u.ab[0]}</b> — ${u.ab[1]}</p></article>`;
+}
+function renderUnits(){
+  document.getElementById('unitCards').innerHTML = ['militia','swordsman','knight','archer','apprentice','battlemage'].map(card).join('');
+  document.getElementById('heroCards').innerHTML = ['alden','irena','corvin'].map(card).join('');
+  document.getElementById('undeadCards').innerHTML = ['skeleton','ghoul','deathknight','acolyte'].map(card).join('');
+}
+function controls(){
+  const fc = document.getElementById('facCtl'), ac = document.getElementById('animCtl');
+  FAC.forEach((f, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'dot'; b.style.background = f.c; b.title = f.name; b.setAttribute('aria-label', 'Фракция: ' + f.name); b.setAttribute('aria-pressed', i === 0); b.onclick = () => { curFac = f; fc.querySelectorAll('.dot').forEach(x => x.setAttribute('aria-pressed', x === b)); renderUnits(); }; fc.appendChild(b); });
+  [['','Покой'],['walk','Шаг'],['attack','Удар'],['hit','Урон'],['cast','Заклинание'],['die','Смерть']].forEach(([a, n], i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = n; b.setAttribute('aria-pressed', i === 0); b.onclick = () => { curAnim = a; ac.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b)); renderUnits(); }; ac.appendChild(b); });
+}
+
+/* ---------- kit marks ---------- */
+function kitMarks(){
+  const s = 30, items = [['Доступно', m => `<polygon points="${pts(m[0], m[1], s*.9)}" fill="rgba(255,255,255,.28)" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>`],
+    ['Зона контроля', m => `<polygon points="${pts(m[0], m[1], s*.82)}" fill="rgba(255,107,107,.12)" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="5 4"/>`],
+    ['Цель', m => `<polygon points="${pts(m[0], m[1], s*.88)}" fill="none" stroke="#FF6B6B" stroke-width="3"/>`],
+    ['Выбран', m => `<polygon points="${pts(m[0], m[1], s*.88)}" fill="none" stroke="#F2C14E" stroke-width="3"/>`]];
+  const g = items.map(([n, f], i) => { const x = 40 + i * 74, y = 34; return tile('grass', x, y, s) + f([x, y]) + `<text x="${x}" y="${y + 44}" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-size="11" font-weight="800" fill="#93A8B5">${n}</text>`; }).join('');
+  return `<svg viewBox="0 0 302 90" style="width:100%;height:auto" role="img" aria-label="Метки на гексах">${g}</svg>`;
+}
+
+/* ---------- map screen ---------- */
+const MAP = [
+  'wwmmhffggfmm',
+  'wmQIfgvgfgmm',
+  'wgSfFMgg*gfm',
+  'wgFTHKgfgrgh',
+  'wwgHABgghggf',
+  'wgf*Ggffvgwf',
+  'wwghhfgg$ggw',
+  'wwwgggffggww',
+  'wwwwggfgwwww'
+];
+const CODE = {w:'water', m:'mountain', h:'hill', f:'forest', g:'grass', o:'ore', $:'gold', '*':'mana', r:'ruins', v:'village'};
+const BCODE = {Q:'quarry', I:'iron', S:'sawmill', F:'farm', M:'mill', T:'townhall', H:'house', K:'market', A:'tower', B:'barracks', G:'forge'};
+function mapScreen(){
+  const s = 34, ox = 34, oy = 34, CITY = [3, 3], me = FAC[0].c;
+  const isFog = (r, c) => c >= 10 && r <= 5 || c === 9 && r <= 1;
+  let tiles = '', overlay = '', edges = '', top = '';
+  const terr = [];
+  MAP.forEach((row, r) => [...row].forEach((ch, c) => {
+    const [x, y] = center(r, c, s, ox, oy);
+    const b = BCODE[ch], t = b ? BLD[b].base : CODE[ch];
+    terr.push([r, c, t]);
+    tiles += tile(t, x, y, s, b ? building(b, x, y + 2, s * .95, me) : '');
+  }));
+  // territory
+  const inT = (r, c) => r >= 0 && r < MAP.length && c >= 0 && c < 12 && dist([r, c], CITY) <= 2;
+  terr.forEach(([r, c]) => {
+    if (!inT(r, c)) return;
+    const [x, y] = center(r, c, s, ox, oy);
+    overlay += `<polygon points="${pts(x, y, s)}" fill="${me}" opacity=".08"/>`;
+    for (let e = 0; e < 6; e++){
+      const [nr, nc] = neighbor(r, c, e);
+      if (!inT(nr, nc)){ const a = corner(x, y, s, e), b = corner(x, y, s, (e + 1) % 6); edges += `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${me}" stroke-width="3.5" stroke-linecap="round"/>`; }
+    }
+  });
+  // reachable from army
+  const ARMY = [4, 7], ENEMY = [2, 9];
+  terr.forEach(([r, c, t]) => {
+    const d = dist([r, c], ARMY);
+    if (d >= 1 && d <= 2 && !['water','mountain'].includes(t) && !isFog(r, c)){
+      const [x, y] = center(r, c, s, ox, oy);
+      overlay += `<polygon points="${pts(x, y, s * .9)}" fill="rgba(255,255,255,.22)" stroke="rgba(255,255,255,.65)" stroke-width="1.4"/>`;
+    }
+  });
+  // fog
+  terr.forEach(([r, c]) => { if (!isFog(r, c)) return; const [x, y] = center(r, c, s, ox, oy); top += `<polygon points="${pts(x, y, s + .6)}" fill="#22313A" opacity=".9"/><polygon points="${pts(x, y + s * .2, s + .6)}" fill="#1A262D" opacity=".9" style="mix-blend-mode:normal"/><polygon points="${pts(x, y, s + .6)}" fill="url(#hatch)"/>`; });
+  // path
+  const p0 = center(...ARMY, s, ox, oy), p1 = center(3, 8, s, ox, oy), p2 = center(2, 8, s, ox, oy);
+  const path = `<polyline points="${p0[0]},${p0[1]} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round" class="marching"/><circle cx="${p2[0]}" cy="${p2[1]}" r="6" fill="#FFFFFF"/><text x="${p2[0]}" y="${p2[1] + 3.5}" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="9" fill="#14212A">2</text>`;
+  // units + labels
+  const [ax, ay] = p0, [ex, ey] = center(...ENEMY, s, ox, oy), [cx, cy] = center(...CITY, s, ox, oy);
+  const badge = (x, y, n, c) => `<circle cx="${x}" cy="${y}" r="8" fill="${c}" stroke="#14212A" stroke-width="2"/><text x="${x}" y="${y + 3.5}" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="10" fill="#fff">${n}</text>`;
+  const units = `<ellipse cx="${ax}" cy="${ay + 4}" rx="${s * .62}" ry="${s * .3}" fill="none" stroke="#F2C14E" stroke-width="2.5"/>`
+    + figAt('knight', me, ax - 9, ay, .42) + figAt('alden', me, ax + 8, ay + 2, .5) + badge(ax + 18, ay - 26, 5, me)
+    + figAt('skeleton', MORVEN, ex - 6, ey, .45, true) + figAt('ghoul', MORVEN, ex + 8, ey + 2, .42, true) + badge(ex + 17, ey - 24, 4, MORVEN);
+  const label = (x, y, t, c) => { const w = t.length * 6.6 + 18; return `<rect x="${x - w/2}" y="${y}" width="${w}" height="18" rx="9" fill="${c}"/><text x="${x}" y="${y + 12.5}" text-anchor="middle" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="11" fill="#fff">${t}</text>`; };
+  const [vx, vy] = center(1, 6, s, ox, oy), [v2x, v2y] = center(5, 8, s, ox, oy);
+  const labels = label(cx, cy + 14, 'Белый Брод · 2', me) + label(vx, vy + 12, 'Деревня', '#6E7A82') + label(v2x, v2y + 12, 'Деревня', '#6E7A82');
+  const w = ox + 12.5 * R3 * s, h = oy + 8 * 1.5 * s * SQ + s * SQ + 14;
+  return `<svg viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" role="img" aria-label="Карта: город Белый Брод, отряд Альдена и нежить у тумана"><defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#2C3E48" stroke-width="3"/></pattern></defs>${tiles}${overlay}${edges}${path}${units}${labels}${top}</svg>`;
+}
+
+/* ---------- city panel ---------- */
+const CITYB = [
+  {id:'farm', n:'Ферма · ур. 2', w:3, slots:4, per:2, res:'food', bonus:'+1 мельница'},
+  {id:'sawmill', n:'Лесопилка', w:2, slots:2, per:2, res:'wood', bonus:'+1 лес рядом'},
+  {id:'quarry', n:'Каменоломня', w:2, slots:2, per:2, res:'stone'},
+  {id:'iron', n:'Шахта железа', w:1, slots:2, per:1, res:'iron'},
+  {id:'tower', n:'Башня магов', w:1, slots:2, per:2, res:'mana', base:3, bonus:'+1 источник'}
+];
+const POP = 9;
+function iconTile(id){ const b = BLD[id]; return `<svg viewBox="0 0 64 60">${tile(b.base, 32, 30, 26)}${building(id, 32, 32, 25, FAC[0].c)}</svg>`; }
+function cityPanel(){
+  const used = CITYB.reduce((a, b) => a + b.w, 0), idle = POP - used;
+  const rows = CITYB.map((b, i) => {
+    const out = (b.base || 0) + b.w * b.per + (b.bonus ? 1 : 0);
+    return `<div class="brow">${iconTile(b.id)}<div><b>${b.n}</b><small>+${out} ${RES[b.res].replace('<svg', '<svg style="width:12px;height:12px;vertical-align:-2px"')}${b.bonus ? ` · <span class="bonus">${b.bonus}</span>` : ''}</small></div>
+      <div class="stepper"><button type="button" data-i="${i}" data-d="-1" aria-label="Убрать крестьянина: ${b.n}">−</button><span class="slots">${Array.from({length: b.slots}, (_, j) => `<i class="${j < b.w ? 'on' : ''}"></i>`).join('')}</span><button type="button" data-i="${i}" data-d="1" aria-label="Добавить крестьянина: ${b.n}">+</button></div></div>`;
+  }).join('');
+  return `<h3>Белый Брод</h3><div class="city-meta"><span>Уровень 2</span><span class="num">${POP} жителей</span><span class="num">Жильё 9/12</span><span class="num" style="color:${idle ? 'var(--gold)' : 'var(--hud-muted)'}">Свободно: ${idle}</span></div>
+    <label class="toggle"><input type="checkbox" id="cityAuto"> Автораспределение</label>${rows}
+    <div class="brow"><span></span><div><b>Рост</b><div class="hpbar" style="margin-top:4px"><i style="width:64%;background:var(--gold)"></i></div><small class="num">18 / 28 еды до нового жителя</small></div><span></span></div>`;
+}
+function bindCity(){
+  const panel = document.getElementById('cityPanel');
+  panel.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-i]'); if (!btn) return;
+    const b = CITYB[+btn.dataset.i], d = +btn.dataset.d, used = CITYB.reduce((a, x) => a + x.w, 0);
+    if (d > 0 && (b.w >= b.slots || used >= POP)) return;
+    if (d < 0 && b.w <= 0) return;
+    b.w += d; const auto = document.getElementById('cityAuto').checked; panel.innerHTML = cityPanel(); document.getElementById('cityAuto').checked = false;
+  });
+}
+
+/* ---------- skirmish ---------- */
+const ARENA = ['gfggkggf','gggWgggg','hgggggfg','hgkgggWg','ggggfggg','fggggkgg'];
+const ACODE = {g:'grass', f:'forest', h:'hill', k:'rock', W:'wall'};
+function arena(){
+  const s = 42, ox = 44, oy = 42, me = FAC[0].c;
+  const P = [ {k:'swordsman', at:[3,3], hp:16, max:20, sel:1}, {k:'knight', at:[3,5], hp:22, max:22}, {k:'alden', at:[2,4], hp:21, max:26}, {k:'archer', at:[2,0], hp:12, max:12}, {k:'apprentice', at:[4,1], hp:11, max:11} ];
+  const E = [ {k:'skeleton', at:[3,4], hp:13, max:15, target:1}, {k:'skeleton', at:[1,5], hp:15, max:15}, {k:'ghoul', at:[4,6], hp:14, max:14}, {k:'acolyte', at:[1,7], hp:11, max:11} ];
+  const occ = new Set([...P, ...E].map(u => u.at.join()));
+  const blocked = (r, c) => ['k','W'].includes(ARENA[r][c]);
+  let g = '', ov = '', units = '';
+  ARENA.forEach((row, r) => [...row].forEach((ch, c) => { const [x, y] = center(r, c, s, ox, oy); g += tile(ACODE[ch], x, y, s); }));
+  const sel = P[0].at;
+  const zoc = new Set();
+  E.forEach(u => { for (let e = 0; e < 6; e++){ const [r, c] = neighbor(...u.at, e); if (r >= 0 && r < 6 && c >= 0 && c < 8 && !blocked(r, c) && !occ.has(r + ',' + c)) zoc.add(r + ',' + c); } });
+  ARENA.forEach((row, r) => [...row].forEach((ch, c) => {
+    const [x, y] = center(r, c, s, ox, oy), d = dist([r, c], sel), key = r + ',' + c;
+    if (d >= 1 && d <= 3 && !blocked(r, c) && !occ.has(key)) ov += `<polygon points="${pts(x, y, s * .9)}" fill="rgba(120,170,255,.22)" stroke="rgba(190,215,255,.6)" stroke-width="1.3"/>`;
+    if (zoc.has(key)) ov += `<polygon points="${pts(x, y, s * .8)}" fill="rgba(255,107,107,.1)" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="5 4"/>`;
+  }));
+  const bar = (x, y, hp, max, c) => `<rect x="${x - 15}" y="${y}" width="30" height="5" rx="2.5" fill="#14212A"/><rect x="${x - 14}" y="${y + 1}" width="${28 * hp / max}" height="3" rx="1.5" fill="${c}"/>`;
+  const all = [...P.map(u => ({...u, c: me, flip: false, bc: '#5BC97A'})), ...E.map(u => ({...u, c: MORVEN, flip: true, bc: '#FF6B6B'}))].sort((a, b) => a.at[0] - b.at[0]);
+  all.forEach(u => {
+    const [x, y] = center(...u.at, s, ox, oy), kk = (u.k === 'knight') ? .5 : .6;
+    if (u.sel) units += `<polygon points="${pts(x, y, s * .88)}" fill="none" stroke="#F2C14E" stroke-width="3"/>`;
+    if (u.target) units += `<polygon points="${pts(x, y, s * .88)}" fill="rgba(255,107,107,.18)" stroke="#FF6B6B" stroke-width="3"/>`;
+    units += figAt(u.k, u.c, x, y, kk, u.flip, u.target ? 'hit' : '') + bar(x, y - 46, u.hp, u.max, u.bc);
+  });
+  // pincer arrows
+  const [tx, ty] = center(3, 4, s, ox, oy), [sx, sy] = center(3, 3, s, ox, oy), [kx, ky] = center(3, 5, s, ox, oy);
+  const arrows = `<path d="M${sx + 14} ${sy - 4} L${tx - 16} ${ty - 4}" stroke="#F2C14E" stroke-width="3" marker-end="url(#ah)"/><path d="M${kx - 14} ${ky - 4} L${tx + 16} ${ty - 4}" stroke="#F2C14E" stroke-width="2" stroke-dasharray="3 3" opacity=".8"/>`;
+  // forecast card
+  const fx = tx + 40, fy = ty - 132;
+  const fc = `<g font-family="Nunito,system-ui,sans-serif"><rect x="${fx}" y="${fy}" width="186" height="104" rx="12" fill="#14212A" stroke="#2E4150"/><text x="${fx + 12}" y="${fy + 20}" font-size="11" font-weight="700" fill="#93A8B5">Мечник → Скелет</text><text x="${fx + 12}" y="${fy + 46}" font-size="22" font-weight="800" fill="#EAF1F4" style="font-family:Unbounded,system-ui,sans-serif">−11</text><text x="${fx + 70}" y="${fy + 45}" font-size="11" font-weight="700" fill="#93A8B5">останется 2 / 15</text><text x="${fx + 70}" y="${fy + 31}" font-size="11" font-weight="700" fill="#93A8B5">ответ −1</text><rect x="${fx + 12}" y="${fy + 56}" width="162" height="6" rx="3" fill="#2E4150"/><rect x="${fx + 12}" y="${fy + 56}" width="${162 * 2/15}" height="6" rx="3" fill="#5BC97A"/><rect x="${fx + 12}" y="${fy + 72}" width="74" height="20" rx="10" fill="#1D2D38" stroke="#2E4150"/><text x="${fx + 49}" y="${fy + 86}" text-anchor="middle" font-size="10" font-weight="800" fill="#5BC97A">Фланг +50%</text><rect x="${fx + 92}" y="${fy + 72}" width="82" height="20" rx="10" fill="#1D2D38" stroke="#2E4150"/><text x="${fx + 133}" y="${fy + 86}" text-anchor="middle" font-size="10" font-weight="800" fill="#5BC97A">Клещи +25%</text></g><line x1="${tx + 14}" y1="${ty - 30}" x2="${fx}" y2="${fy + 90}" stroke="#2E4150" stroke-width="2"/>`;
+  const w = ox * 2 + 8.5 * R3 * s - 30, h = oy + 5 * 1.5 * s * SQ + s * SQ + 20;
+  return `<svg viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" style="display:block;width:100%;height:auto" role="img" aria-label="Стычка: мечник атакует скелета с фланга"><defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#F2C14E"/></marker></defs>${g}${ov}${arrows}${units}${fc}</svg>`;
+}
+
+/* ---------- illustrations (placeholders) ---------- */
+function eventArt(){
+  return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="320" height="180" fill="#2B3F5C"/><circle cx="252" cy="44" r="18" fill="#F4E9C8"/><circle cx="244" cy="40" r="18" fill="#2B3F5C" opacity=".0"/>
+    <path d="M0 120 Q60 88 120 108 T240 100 T320 96 V180 H0 Z" fill="#3D5A6E"/>
+    <path d="M150 106 h44 v-22 h6 v-8 h6 v8 h6 v-8 h6 v8 h6 v30 h10 v-34 l8 -10 l8 10 v34 h6 V140 H150 Z" fill="#22303D"/>
+    <rect x="221" y="84" width="4" height="6" fill="#FFD86B"/><rect x="172" y="96" width="4" height="6" fill="#FFD86B"/>
+    <path d="M0 150 Q80 124 170 140 T320 132 V180 H0 Z" fill="#4F7A5E"/>
+    <g transform="translate(70 116)"><ellipse cx="18" cy="26" rx="16" ry="6.5" fill="#5A3E2E"/><polygon points="28,24 34,11 39,13 33,27" fill="#5A3E2E"/><rect x="6" y="28" width="3" height="10" fill="#4A3226"/><rect x="25" y="28" width="3" height="10" fill="#4A3226"/><path d="M12 20 Q18 8 24 20 Z" fill="#7C2D2D"/><circle cx="18" cy="9" r="4" fill="#F2C9A0"/><line x1="24" y1="14" x2="30" y2="0" stroke="#6B4E2E" stroke-width="1.6"/><circle cx="30" cy="0" r="3.4" fill="#FF9A3C"/><circle cx="30" cy="0" r="8" fill="#FF9A3C" opacity=".2"/></g>
+  </svg>`;
+}
+function menuArt(){
+  return `<svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="400" height="320" fill="#2B3F5C"/>
+    ${Array.from({length: 24}, (_, i) => `<circle cx="${(i * 73) % 400}" cy="${(i * 41) % 150}" r="${i % 3 ? 1 : 1.6}" fill="#EAF1F4" opacity=".6"/>`).join('')}
+    <path d="M0 220 Q100 170 200 200 T400 186 V320 H0 Z" fill="#3D5A6E"/>
+    <g transform="translate(200 120)"><rect x="-14" y="10" width="28" height="90" fill="#E6E0D2"/><polygon points="-20,10 0,-30 20,10" fill="#7B5CFF"/><rect x="-5" y="30" width="10" height="16" fill="#A28BFF"/><circle class="pulse" cx="0" cy="-24" r="16" fill="#7B5CFF" opacity=".35"/></g>
+    <path d="M0 260 Q120 226 220 248 T400 238 V320 H0 Z" fill="#4F7A5E"/>
+    <text x="24" y="290" font-family="Unbounded,system-ui,sans-serif" font-weight="700" font-size="22" fill="#EAF1F4">Пробуждение</text>
+    <text x="24" y="306" font-family="Nunito,system-ui,sans-serif" font-weight="800" font-size="11" fill="#C9D6DD" letter-spacing="2">ИСТОЧНИКОВ</text>
+  </svg>`;
+}
+
+/* ---------- lane greybox ---------- */
+const LANE = [ {n:'Мечники ×8', o:1}, {n:'Лучники ×6', o:3}, {n:'Рыцари ×3', o:0} ];
+function lane(){
+  const W = 760, slot = 56, y0 = 120;
+  let g = `<rect width="${W}" height="170" fill="#3A4045"/><line x1="20" y1="${y0}" x2="${W - 20}" y2="${y0}" stroke="#5B6268" stroke-width="2"/>`;
+  for (let i = 0; i < 12; i++){ const x = 44 + i * slot; g += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0 + 8}" stroke="#5B6268" stroke-width="2"/><text x="${x}" y="${y0 + 22}" text-anchor="middle" font-size="10" fill="#7E868C" font-family="Nunito,system-ui,sans-serif">${i + 1}</text>`; }
+  const grp = (pos, h, label, fill, hp) => { const x = 44 + pos * slot; return `<rect x="${x - 24}" y="${y0 - h}" width="48" height="${h}" rx="4" fill="${fill}"/><text x="${x}" y="${y0 - h - 18}" text-anchor="middle" font-size="11" font-weight="800" fill="#E6E8EA" font-family="Nunito,system-ui,sans-serif">${label}</text><rect x="${x - 22}" y="${y0 - h - 12}" width="44" height="4" rx="2" fill="#262A2E"/><rect x="${x - 22}" y="${y0 - h - 12}" width="${44 * hp}" height="4" rx="2" fill="#C9CED2"/>`; };
+  g += grp(4, 60, 'Мечники', '#9AA3A8', .9) + grp(2, 44, 'Лучники', '#8A9398', 1) + grp(1, 52, 'Рыцари', '#AEB6BB', 1);
+  g += grp(6, 60, 'Скелеты', '#6E777C', .7) + grp(8, 40, 'Гули', '#62696E', 1) + grp(10, 46, 'Послушники', '#575E63', 1);
+  g += `<path d="M${44 + 4 * slot + 30} ${y0 - 30} h22" stroke="#C9CED2" stroke-width="3" marker-end="url(#ahg)"/><path d="M${44 + 6 * slot - 30} ${y0 - 30} h-22" stroke="#7E868C" stroke-width="3" marker-end="url(#ahg2)"/>`;
+  return `<svg viewBox="0 0 ${W} 170" role="img" aria-label="Серая болванка сражения: три группы против трёх"><defs><marker id="ahg" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#C9CED2"/></marker><marker id="ahg2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#7E868C"/></marker></defs>${g}</svg>`;
+}
+function orders(){
+  const O = ['Наступать','Держать строй','Отступить','Залп'];
+  return LANE.map((g, i) => `<div class="order-row"><span>${g.n}</span><div class="seg">${O.map((o, j) => `<label><input type="radio" name="ord${i}" id="ord${i}-${j}" ${j === g.o ? 'checked' : ''}>${o}</label>`).join('')}</div></div>`).join('');
+}
+
+/* ---------- mount ---------- */
+document.getElementById('heroScene').innerHTML = heroScene();
+document.getElementById('swatches').innerHTML = swatches();
+document.getElementById('terrainTiles').innerHTML = terrainTiles();
+document.getElementById('buildingTiles').innerHTML = buildingTiles();
+controls(); renderUnits();
+document.getElementById('kitBar').innerHTML = hudBar();
+document.getElementById('mapBar').innerHTML = hudBar();
+document.getElementById('kitFarm').innerHTML = iconTile('farm');
+document.getElementById('kitMarks').innerHTML = kitMarks();
+document.getElementById('menuArt').innerHTML = menuArt();
+document.getElementById('mapArea').innerHTML = mapScreen();
+document.getElementById('cityPanel').innerHTML = cityPanel(); bindCity();
+document.getElementById('arena').innerHTML = arena();
+document.getElementById('whoAva').innerHTML = figSVG('swordsman', FAC[0].c);
+document.getElementById('eventIll').insertAdjacentHTML('afterbegin', eventArt());
+document.getElementById("laneSvg").innerHTML = lane();
+document.getElementById('orders').innerHTML = orders();
+document.getElementById('newGame').addEventListener('submit', e => e.preventDefault());
+document.getElementById('reseed').addEventListener('click', () => { document.getElementById('seed').value = Math.floor(10000 + Math.random() * 89999); });
+document.querySelectorAll('.fig .upper').forEach(el => { el.style.animationDelay = (-Math.random() * 2.6).toFixed(2) + 's'; });
+})();
+</script>
