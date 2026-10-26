@@ -71,7 +71,7 @@ $('laneBtn').addEventListener('click', () => {
   if (!player.length) return;
   const enemy = enemySquad(makeRng(setup.seed * 7 + 3), setup.foe, DIF[setup.dif].budget);
   $('setup').hidden = true; $('lane').hidden = false;
-  closeLane = openLane({ player, enemy, onExit: () => { closeLane?.(); $('lane').hidden = true; $('setup').hidden = false; renderSetup(); } });
+  closeLane = openLane({ player, enemy, seed: setup.seed, onExit: () => { closeLane?.(); $('lane').hidden = true; $('setup').hidden = false; renderSetup(); } });
 });
 
 function startBattle(newSeed) {

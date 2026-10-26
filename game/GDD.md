@@ -76,8 +76,10 @@ End: all enemies dead/fled; retreat = move back 1 hex, lose 1 unit. Wounds persi
 Autobattle: same sim, AI for both sides, player dmg penalty by difficulty, pre-battle outcome estimate.
 Skirmish AI: score moves = dmg dealt − taken + kill bonus + flank/pincer + mage protection − ZoC exits − exposed shooters; focus wounded, mages first.
 
-## Lane battle greybox (1b)
-Side view, 12 positions. ≤6 groups/side (1–10 same units, pooled HP). Round: order per group Advance/Hold/Retreat/Volley/Spell → 4 s auto-sim. Same stats/RPS; Hold = shield wall. Win when enemy loses 70% HP or retreats. If liked: replaces skirmish for army-vs-army and sieges.
+## Lane battle greybox (1b) — v2 after owner feedback ("unclear, no tactics")
+12-position line, groups (size by type, hero = 1 strong group). Round: enemy intent shown first (AI orders computed at round end), player orders per group, 8 ticks × 0.5 s.
+Orders: advance / hold (+2 def, rest; militia hold counters charge ×4 dmg to charger, swordsmen hold halve charge & arrows) / charge (mounted: ×2 speed, impact ×2.5 dmg −20 morale on first contact, −25 stamina, none in forest) / fallback (retreat, +9 stamina/tick, pursuit ×1.3) / volley (target near|ranged|mage) / spell (fireball AoE ±1 pos, apprentice heal, acolyte raise).
+Stamina: melee −7/tick (mounted −11), hold +6, fallback +9; dmg ×1 / ×0.75 (≤50) / ×0.5 (≤20). Morale: loss = dmg/maxHp×150 (+impact); ≤25 waver ×0.7 dmg, 0 rout (flees, −10 morale to neighbours); hero within 1.5 props morale; undead fearless. Ranks: only front melee rank strikes, militia reach 2. Melee vs ranged ×1.5. Terrain mirrored per battle: hill (ranged +1 range +25%, hold +1 def), forest (arrows ×0.5, slow, no charge), ford (slow, −2 def). Armour is percentage: atk×6/(6+def). Win: other side has no active groups; cap 15 rounds. AI-vs-AI mirror ≈ 57%; naive "all advance" vs AI ≈ 27% → orders matter.
 
 ## Tribe prologue greybox (3b)
 Small fogged map, tent, chief, 3–4 tribesmen, food+wood only. 3–4 tribes, unify by peace (gifts, fire ritual minigame, request quest) or force (skirmish, clubs/slings). All unified → found kingdom. Peace-lean: mana recruit −20%, mages +2 HP. Force-lean: iron recruit −20%, steel +1 atk. Even: balanced.
