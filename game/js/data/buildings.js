@@ -19,8 +19,8 @@ const ANY = ['grass', 'forest', 'hill'];
 const PROD_UP = [{ wood: 6, stone: 6 }, { wood: 10, stone: 12 }];
 
 export const BUILDINGS = {
-  townhall: { name: 'Ратуша',         tiles: [],          cost: {},                              housing: [4],    note: '+2 еды, +1 золото, найм ополченцев' },
-  house:    { name: 'Дом',            tiles: ['grass', 'hill'], cost: { wood: 8, stone: 2 },     housing: [4, 6], up: [{ wood: 8, stone: 6 }], note: 'Жильё +4 (ур. 2: +6)' },
+  townhall: { name: 'Ратуша',         tiles: [],          cost: {},                              housing: [6],    note: '+2 еды, +1 золото, найм крестьян и ополченцев' },
+  house:    { name: 'Дом',            tiles: ['grass', 'hill'], cost: { wood: 8, stone: 2 },     housing: [5, 8], up: [{ wood: 8, stone: 6 }], note: 'Жильё +5 (ур. 2: +8)' },
   farm:     { name: 'Ферма',          tiles: ['grass'],   cost: { wood: 6 },                     slots: [2, 4, 6], per: { food: 2 }, up: PROD_UP, note: '+2 еды за крестьянина, +1 за соседнюю мельницу' },
   mill:     { name: 'Мельница',       tiles: ['grass'],   cost: { wood: 10, stone: 6 },          note: 'Соседние фермы дают +1 еды' },
   sawmill:  { name: 'Лесопилка',      tiles: ['forest'],  cost: { wood: 4 },                     slots: [2, 4, 6], per: { wood: 2 }, up: PROD_UP, note: '+2 дерева за крестьянина, +1 если рядом 2 леса' },
@@ -36,6 +36,7 @@ export const BUILDINGS = {
 };
 export const BUILD_ORDER = ['farm', 'mill', 'house', 'sawmill', 'quarry', 'iron', 'goldmine', 'market', 'barracks', 'forge', 'stable', 'tower', 'tavern'];
 export const WALLS_COST = { stone: 20 };
+export const PEASANT_COST = { food: 12 };
 
 // Recruitment: unit kind → requirement and cost/upkeep per turn.
 export const RECRUIT = {
@@ -54,7 +55,7 @@ export const UPKEEP_MONSTER = {};
 export const CITY_NAMES = ['Белый Брод', 'Каменный Яр', 'Ольховка', 'Тихая Заводь', 'Сосновый Дол', 'Медвежий Угол', 'Светлогорье', 'Речной Двор', 'Вересковка', 'Дубравка', 'Ясный Холм', 'Ковыльное', 'Сторожевая', 'Липовый Луг'];
 
 export const MAP_SIZES = {
-  short:  { name: 'Короткая', w: 12, h: 12, villages: 6,  mana: 3,  lairs: 4,  wanderEvery: 12 },
-  medium: { name: 'Средняя',  w: 20, h: 20, villages: 14, mana: 6,  lairs: 9,  wanderEvery: 10 },
-  long:   { name: 'Длинная',  w: 30, h: 30, villages: 26, mana: 10, lairs: 16, wanderEvery: 9 }
+  short:  { name: 'Короткая', w: 12, h: 12, villages: 6,  mana: 3,  lairs: 4,  wanderEvery: 12, costMult: 0.7, growthMult: 1.5 },
+  medium: { name: 'Средняя',  w: 20, h: 20, villages: 14, mana: 6,  lairs: 9,  wanderEvery: 10, costMult: 1, growthMult: 1.2 },
+  long:   { name: 'Длинная',  w: 30, h: 30, villages: 26, mana: 10, lairs: 16, wanderEvery: 9, costMult: 1, growthMult: 1 }
 };

@@ -100,7 +100,9 @@ export class MapView {
     for (const a of K.armies) {
       if (a.owner !== 'player' && vis && !vis.has(key(a.r, a.c))) continue;
       if (a.owner !== 'player' && !K.explored[key(a.r, a.c)]) continue;
-      const [x, y] = this.pos(a.r, a.c), col = armyColor(a), flip = a.owner !== 'player';
+      const [cx0, y] = this.pos(a.r, a.c), col = armyColor(a), flip = a.owner !== 'player';
+      // a garrison stands to the side so the town itself stays clickable
+      const x = cx0 + (K.cities.some(t => t.r === a.r && t.c === a.c) ? 17 : 0);
       const lead = a.units.find(u => u.kind in { alden: 1, irena: 1, corvin: 1 }) || a.units[0];
       const second = a.units.find(u => u !== lead);
       const k = 0.5;
@@ -174,7 +176,7 @@ export class MapView {
     const svg = this.svg;
     svg.addEventListener('pointermove', e => this.h.hover(this.hexFromEvent(e), e));
     svg.addEventListener('pointerleave', () => this.h.hover(null));
-    svg.addEventListener('click', e => { const h = this.hexFromEvent(e); if (h) this.h.click(h); });
+    svg.addEventListener('click', e => { const h = this.hexFromEvent(e); if (h) this.h.click(h, { onArmy: !!e.target.closest('.army') }); });
     svg.addEventListener('wheel', e => {
       e.preventDefault();
       if (e.ctrlKey) this.zoom(Math.exp(-e.deltaY * 0.01));

@@ -9,7 +9,8 @@ import {
 import { armyReach, reachPath, armyAt, territory, visibleSet } from './rules/map.js';
 import {
   cityAt, cityById, buildOptions, build, upgrade, upgradeCost, buildWalls, setWorkers, autoAssign, slotsOf,
-  buildingYield, cityYield, housing, idleOf, buildingsOf, recruitOptions, recruit, forecast, marketRate, trade, canPay
+  buildingYield, cityYield, housing, idleOf, buildingsOf, recruitOptions, recruit, forecast, marketRate, trade, canPay,
+  peasantCheck, hirePeasant, growthNeed, scaled
 } from './rules/economy.js';
 import { MapView, armyColor } from './view/map-view.js';
 import { openBattle } from './view/battle-screen.js';
@@ -56,7 +57,7 @@ function enterMap() {
   if (cap) view.centerOn(cap.r, cap.c);
   refresh();
   $('kLog').innerHTML = '';
-  logLines(['Ход 1. Отряд героя стоит в столице. Кликни ратушу, чтобы распределить крестьян и строить.'].slice(0, K.turn === 1 ? 1 : 0));
+  logLines(['Ход 1. Кликни по столице (по зданию, не по фигуркам): там найм крестьян за еду, их распределение и найм войск.'].slice(0, K.turn === 1 ? 1 : 0));
 }
 
 /* ---------- top bar ---------- */
@@ -163,11 +164,16 @@ const bIcon = (id, t) => tileArt(id === 'farm' ? 'field' : (BUILDINGS[id].tiles[
 
 function cityPanel(side, city) {
   const y = cityYield(K, city), list = buildingsOf(K, city.id).filter(([, b]) => slotsOf(b) > 0);
-  const need = 10 + 2 * city.pop, surplus = y.food - city.pop, house = housing(K, city);
+  const need = growthNeed(K, city), surplus = y.food - city.pop, house = housing(K, city), hire = peasantCheck(K, city);
   side.innerHTML = `<h3>${city.name}${city.capital ? ' ★' : ''}</h3>
-    <div class="cmeta"><span>Уровень ${city.level}</span><span class="num">${city.pop} жителей</span><span class="num">Жильё ${city.pop}/${house}</span><span class="num ${idleOf(K, city) ? 'gold' : ''}">Свободно: ${idleOf(K, city)}</span></div>
-    <div><div class="hpbar"><i style="width:${Math.min(100, city.growth / need * 100).toFixed(0)}%;background:var(--gold)"></i></div>
-    <small class="muted num">${city.pop >= house ? 'Нет жилья — построй дом' : surplus > 0 ? `Рост: ${city.growth}/${need} (+${surplus} в ход)` : 'Нет излишка еды — рост стоит'}</small></div>
+    <div class="popbox">
+      <div class="poprow"><span class="popbig num">${ICON.pop}${city.pop}<small>/${house}</small></span><span class="muted small">жителей / мест в домах · свободно: <b class="${idleOf(K, city) ? 'gold' : ''}">${idleOf(K, city)}</b></span></div>
+      <button class="gbtn primary" type="button" id="hirePeasant" ${hire.why ? 'disabled' : ''}>+ Крестьянин <span class="chips">${costHTML(hire.cost)}</span></button>
+      ${hire.why ? `<small class="bad">${hire.why}</small>` : ''}
+      <div class="hpbar"><i style="width:${Math.min(100, city.growth / need * 100).toFixed(0)}%;background:var(--gold)"></i></div>
+      <small class="muted num">${city.pop >= house ? 'Сами не растут: нет жилья. Кликни свободный гекс территории → Дом.' : surplus > 0 ? `Сами растут: ${city.growth}/${need}, +${surplus} в ход (излишек еды)` : 'Сами не растут: нет излишка еды — добавь крестьян на ферму.'}</small>
+      <small class="muted">Уровень города ${city.level}: на 3-м уровне территория станет больше.</small>
+    </div>
     <div class="chips">${yieldHTML(y)}</div>
     <label class="toggle"><input type="checkbox" id="cityAuto" ${city.auto ? 'checked' : ''}> Автораспределение крестьян</label>
     ${list.map(([k, b]) => { const out = buildingYield(K, k, b); return `<div class="brow"><span class="bico small"><svg viewBox="0 0 64 60">${bIcon(b.type, K.tiles[unkey(k)[0]][unkey(k)[1]])}</svg></span>
@@ -176,11 +182,11 @@ function cityPanel(side, city) {
     <p class="label">Найм</p>
     <div class="blist">${recruitOptions(K, city).map(o => `<button class="bopt" type="button" data-recruit="${o.kind}" ${o.why ? 'disabled' : ''}>
       <span class="bico unit">${figSVG(o.kind, BLUE)}</span><span class="btxt"><b>${o.name}</b><span class="chips">${costHTML(o.cost)}</span><small class="muted">содержание: ${Object.entries(o.upkeep).map(([r, v]) => `${v} ${RES_NAME[r].toLowerCase()}`).join(', ')}</small>${o.why ? `<small class="bad">${o.why}</small>` : ''}</span></button>`).join('')}</div>
-    ${city.walls ? '<p class="muted small">Стены построены: при осаде к горожанам присоединится мечник.</p>' : `<button class="gbtn" type="button" id="buildWalls" ${canPay(K, WALLS_COST) ? '' : 'disabled'}>Построить стены <span class="chips">${costHTML(WALLS_COST)}</span></button>`}`;
+    ${city.walls ? '<p class="muted small">Стены построены: при осаде к горожанам присоединится мечник.</p>' : `<button class="gbtn" type="button" id="buildWalls" ${canPay(K, scaled(K, WALLS_COST)) ? '' : 'disabled'}>Построить стены <span class="chips">${costHTML(scaled(K, WALLS_COST))}</span></button>`}`;
 }
 
 function buildingPanel(side, k, b) {
-  const D = BUILDINGS[b.type], up = upgradeCost(b), city = cityById(K, b.city);
+  const D = BUILDINGS[b.type], up = upgradeCost(b, K), city = cityById(K, b.city);
   side.innerHTML = `<h3>${D.name}${b.level > 1 ? ' · ур. ' + b.level : ''}</h3><p class="muted">${city?.name || ''} · ${D.note}</p>
     <div class="chips">Даёт: ${yieldHTML(buildingYield(K, k, b))}</div>
     ${slotsOf(b) ? `<div class="brow"><span></span><div><b>Крестьяне</b><small class="muted">Свободно в городе: ${idleOf(K, city)}</small></div><div class="stepper"><button type="button" data-w="${k}" data-d="-1" aria-label="Убрать крестьянина">−</button><span class="slots">${Array.from({ length: slotsOf(b) }, (_, j) => `<i class="${j < b.workers ? 'on' : ''}"></i>`).join('')}</span><button type="button" data-w="${k}" data-d="1" aria-label="Добавить крестьянина">+</button></div></div>` : ''}
@@ -197,6 +203,7 @@ $('kSide').addEventListener('click', e => {
   if (rc && !rc.disabled && sel?.type === 'tile') { const city = cityAt(K, sel.r, sel.c); if (city && recruit(K, city, rc.dataset.recruit)) { save(); refresh(); } return; }
   const sp = t.closest('[data-split]');
   if (sp) { const a = selArmy(); if (a && splitUnit(K, a, +sp.dataset.split)) refresh(); return; }
+  if (t.closest('#hirePeasant')) { const city = cityAt(K, sel.r, sel.c); if (city && hirePeasant(K, city)) { save(); refresh(); } return; }
   if (t.closest('#upgradeB')) { if (upgrade(K, key(sel.r, sel.c))) { save(); refresh(); } return; }
   if (t.closest('#buildWalls')) { const city = cityAt(K, sel.r, sel.c); if (city && buildWalls(K, city)) { save(); refresh(); } return; }
   const cr = t.closest('[data-city]');
@@ -240,9 +247,11 @@ function showTip() {
   t.style.top = Math.min(box.height - t.offsetHeight - 8, pointer.y - box.top + 16) + 'px';
 }
 
-function onClick([r, c]) {
+function onClick([r, c], { onArmy = true } = {}) {
   if (busy || K.status !== 'playing') return;
   const a = selArmy(), mine = myArmyAt(r, c), foe = visibleFoeAt(r, c);
+  // a click on the town (not on the figures) opens the city even when a garrison stands there
+  if (!onArmy && cityAt(K, r, c) && (!a || a.owner !== 'player' || (mine && mine.id === a.id))) { sel = { type: 'tile', r, c }; return refresh(); }
   if (a && a.owner === 'player') {
     if (foe) {
       const o = attackOptions(K, a).find(x => x.target.id === foe.id);

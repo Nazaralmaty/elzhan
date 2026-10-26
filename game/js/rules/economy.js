@@ -1,11 +1,16 @@
 // Cities, buildings, peasants, income/upkeep, growth, market, recruitment. Pure over the kingdom state K.
 import { key, unkey, neighbors } from '../core/hex.js';
 import { UNITS } from '../data/units.js';
-import { RES, BUILDINGS, RECRUIT, WALLS_COST, CITY_NAMES } from '../data/buildings.js';
+import { RES, BUILDINGS, RECRUIT, WALLS_COST, PEASANT_COST, CITY_NAMES, MAP_SIZES } from '../data/buildings.js';
 import { territory, inMap, armyAt } from './map.js';
 
 export const emptyRes = () => Object.fromEntries(RES.map(r => [r, 0]));
 const add = (a, b, k = 1) => { for (const r in b) a[r] = (a[r] || 0) + b[r] * k; return a; };
+// short maps make buildings cheaper (GDD length table)
+export const scaled = (K, cost) => {
+  const m = MAP_SIZES[K.size]?.costMult ?? 1;
+  return m === 1 ? cost : Object.fromEntries(Object.entries(cost).map(([r, v]) => [r, Math.ceil(v * m)]));
+};
 export const canPay = (K, cost) => Object.entries(cost).every(([r, v]) => (K.res[r] || 0) >= v);
 const pay = (K, cost) => add(K.res, cost, -1);
 
@@ -88,8 +93,9 @@ export function buildOptions(K, r, c) {
     if (d.perCity && buildingsOf(K, city.id).some(([, b]) => b.type === id)) why = 'Уже есть в этом городе';
     if (d.perKingdom && Object.values(K.buildings).some(b => b.type === id)) why = 'Уже есть в королевстве';
     if (d.needsAdj && !adjBuilding(K, k, d.needsAdj)) why = `Нужна соседняя ${BUILDINGS[d.needsAdj].name.toLowerCase()}`;
-    if (!why && !canPay(K, d.cost)) why = 'Не хватает ресурсов';
-    return { id, name: d.name, cost: d.cost, note: d.note, why };
+    const cost = scaled(K, d.cost);
+    if (!why && !canPay(K, cost)) why = 'Не хватает ресурсов';
+    return { id, name: d.name, cost, note: d.note, why };
   });
   return { city, list };
 }
@@ -104,12 +110,12 @@ export function build(K, r, c, id) {
   return true;
 }
 
-export function upgradeCost(b) {
-  const up = BUILDINGS[b.type].up;
-  return up && up[b.level - 1];
+export function upgradeCost(b, K) {
+  const up = BUILDINGS[b.type].up, cost = up && up[b.level - 1];
+  return cost && K ? scaled(K, cost) : cost;
 }
 export function upgrade(K, k) {
-  const b = K.buildings[k], cost = b && upgradeCost(b);
+  const b = K.buildings[k], cost = b && upgradeCost(b, K);
   if (!cost || !canPay(K, cost)) return false;
   pay(K, cost);
   b.level++;
@@ -118,13 +124,32 @@ export function upgrade(K, k) {
   return true;
 }
 export function buildWalls(K, city) {
-  if (city.walls || !canPay(K, WALLS_COST)) return false;
-  pay(K, WALLS_COST);
+  const cost = scaled(K, WALLS_COST);
+  if (city.walls || !canPay(K, cost)) return false;
+  pay(K, cost);
   city.walls = true;
   return true;
 }
 
 /* ---------- peasants ---------- */
+// Town hall trains a peasant for food (Cossacks-style), as long as there is housing.
+export function peasantCheck(K, city) {
+  const cost = scaled(K, PEASANT_COST);
+  if (city.pop >= housing(K, city)) return { cost, why: 'Нет жилья — построй дом' };
+  if (!canPay(K, cost)) return { cost, why: 'Не хватает еды' };
+  return { cost, why: '' };
+}
+export function hirePeasant(K, city) {
+  const { cost, why } = peasantCheck(K, city);
+  if (why) return false;
+  pay(K, cost);
+  city.pop++;
+  if (city.auto) autoAssign(K, city);
+  return true;
+}
+export const growthNeed = (K, city) => Math.ceil((6 + city.pop) / (MAP_SIZES[K.size]?.growthMult ?? 1));
+
+
 export function setWorkers(K, k, delta) {
   const b = K.buildings[k], city = b && cityById(K, b.city);
   if (!b || !slotsOf(b)) return false;
@@ -263,7 +288,7 @@ export function economyTurn(K, log) {
     const surplus = yields.get(c.id).food - c.pop;
     if (surplus > 0 && c.pop < housing(K, c)) {
       c.growth += surplus;
-      const need = 10 + 2 * c.pop;
+      const need = growthNeed(K, c);
       if (c.growth >= need) { c.growth -= need; c.pop++; log.push(`${c.name}: родился житель (${c.pop})`); }
     }
     const lvl = levelFor(c.pop);
