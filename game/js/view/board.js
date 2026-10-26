@@ -4,6 +4,21 @@ import { tile, decor, figInner, figSVG, SIDE_COLOR, MORVEN } from './art.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const S = 46, PAD = 40, FIG_K = 0.72;
+const ROLE = {
+  militia: '<line x1="0" y1="4" x2="0" y2="-3" stroke="#fff" stroke-width="1.4"/><polygon points="0,-5.5 2,-2 -2,-2" fill="#fff"/>',
+  swordsman: '<path d="M-3.5 -4 h7 v3 q0 3.5 -3.5 5 q-3.5 -1.5 -3.5 -5 Z" fill="#fff"/>',
+  knight: '<path d="M-3.5 -3.5 v2.5 a3.5 3.5 0 0 0 7 0 v-2.5" stroke="#fff" stroke-width="1.6" fill="none"/>',
+  archer: '<path d="M-1.5 -4.5 Q3.5 0 -1.5 4.5" stroke="#fff" stroke-width="1.4" fill="none"/><line x1="-3.5" y1="0" x2="3.5" y2="0" stroke="#fff" stroke-width="1.2"/>',
+  apprentice: '<path d="M0 -4 v8 M-4 0 h8" stroke="#fff" stroke-width="2"/>',
+  battlemage: '<polygon points="0,-4.5 3,0 0,4.5 -3,0" fill="#fff"/>',
+  alden: '<path d="M-4 3 v-5 l2 2 l2 -3 l2 3 l2 -2 v5 Z" fill="#fff"/>',
+  irena: '<path d="M-4 3 v-5 l2 2 l2 -3 l2 3 l2 -2 v5 Z" fill="#fff"/>',
+  corvin: '<path d="M-4 3 v-5 l2 2 l2 -3 l2 3 l2 -2 v5 Z" fill="#fff"/>',
+  skeleton: '<circle r="3" fill="#fff"/><circle cx="-1.1" cy="-.3" r=".9" fill="#14212A"/><circle cx="1.1" cy="-.3" r=".9" fill="#14212A"/>',
+  ghoul: '<path d="M-3 -3 l2 6 M0 -3.5 l1 6.5 M3 -3 l0 6" stroke="#fff" stroke-width="1.3"/>',
+  deathknight: '<path d="M-3.5 -3.5 v2.5 a3.5 3.5 0 0 0 7 0 v-2.5" stroke="#fff" stroke-width="1.6" fill="none"/>',
+  acolyte: '<circle r="3.2" fill="none" stroke="#fff" stroke-width="1.3"/><circle r="1" fill="#fff"/>'
+};
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const el = (tag, attrs = {}, html = '') => {
   const n = document.createElementNS(NS, tag);
@@ -87,8 +102,10 @@ export class Board {
   makeNode(u) {
     const g = el('g', { class: 'unit', 'data-id': u.id });
     const flip = u.side === 'enemy';
-    g.innerHTML = `<g class="fig" transform="translate(${-32 * FIG_K} ${4 - 74 * FIG_K}) scale(${FIG_K})">${figInner(u.kind, unitColor(u), flip)}</g>
-      <g class="bar" transform="translate(0 -56)"><rect x="-16" y="0" width="32" height="6" rx="3" fill="#14212A"/><rect class="hpfill" x="-15" y="1" height="4" rx="2" fill="${u.side === 'player' ? '#5BC97A' : '#FF6B6B'}"/></g>
+    const ring = u.hero ? `<ellipse cx="0" cy="4" rx="19" ry="6" fill="none" stroke="#F2C14E" stroke-width="2.2"/>` : '';
+    const roleBg = u.hero ? '#B8862B' : u.side === 'player' ? '#2F6FDB' : (u.undead ? '#2E3B3F' : '#D64545');
+    g.innerHTML = ring + `<g class="fig" transform="translate(${-32 * FIG_K} ${4 - 74 * FIG_K}) scale(${FIG_K})">${figInner(u.kind, unitColor(u), flip)}</g>
+      <g class="bar" transform="translate(0 -56)"><rect x="-16" y="0" width="32" height="6" rx="3" fill="#14212A"/><rect class="hpfill" x="-15" y="1" height="4" rx="2" fill="${u.side === 'player' ? '#5BC97A' : '#FF6B6B'}"/><g transform="translate(-24 3)"><circle r="7" fill="${roleBg}" stroke="#14212A" stroke-width="1.5"/>${ROLE[u.kind] || ''}</g></g>
       <g class="badges" transform="translate(0 -66)"></g>`;
     const up = g.querySelector('.upper');
     if (up) up.style.animationDelay = (-Math.random() * 2.6).toFixed(2) + 's';

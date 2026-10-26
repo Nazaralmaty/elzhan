@@ -10,6 +10,7 @@ import {
 import { aiTurn } from './ai/skirmish-ai.js';
 import { Board, unitColor } from './view/board.js';
 import { figSVG } from './view/art.js';
+import { openLane } from './view/lane-view.js';
 
 const $ = id => document.getElementById(id);
 const DIF = [{ budget: 13, pen: 0 }, { budget: 17, pen: 0.1 }, { budget: 21, pen: 0.15 }, { budget: 25, pen: 0.2 }];
@@ -69,6 +70,15 @@ $('unitPick').addEventListener('click', e => {
 $('seed').addEventListener('change', () => { setup.seed = Math.max(1, parseInt($('seed').value, 10) || 1); save(); });
 $('reseed').addEventListener('click', () => { setup.seed = rand(); save(); renderSetup(); });
 $('start').addEventListener('click', () => startBattle());
+let closeLane = null;
+$('laneBtn').addEventListener('click', () => {
+  const player = [setup.hero, ...squadList()].filter(Boolean);
+  if (!player.length) return;
+  const enemy = enemySquad(makeRng(setup.seed * 7 + 3), setup.foe, DIF[setup.dif].budget);
+  st = null;
+  $('setup').hidden = true; $('lane').hidden = false;
+  closeLane = openLane({ player, enemy, onExit: () => { closeLane?.(); $('lane').hidden = true; $('setup').hidden = false; renderSetup(); } });
+});
 
 /* ---------- battle state ---------- */
 let st = null, sel = null, mode = null, busy = false, hoverHex = null, pointer = { x: 0, y: 0 }, lastBattle = null;
@@ -412,7 +422,7 @@ window.addEventListener('keydown', e => {
   if (e.target.closest('input')) return;
   if (!$('help').hidden) { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); $('help').hidden = true; } return; }
   if (!$('setup').hidden) { if (e.key === 'Enter' && !e.target.closest('button')) { e.preventDefault(); startBattle(); } return; }
-  if (!$('result').hidden) return;
+  if (!$('result').hidden || !$('lane').hidden) return;
   if (e.key === 'Enter') { e.preventDefault(); endPlayerTurn(); }
   else if (e.key === 'Tab') { e.preventDefault(); nextUnit(); }
   else if (e.key === 'Escape') { if (mode) mode = null; else if (!selU()?.disengage) sel = null; updateUI(); }

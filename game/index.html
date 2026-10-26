@@ -42,6 +42,7 @@
           <label><input type="radio" name="dif" value="3" id="dif-3"> Король</label></div></div>
         <div><p class="label">Сид</p><div class="seed"><input id="seed" inputmode="numeric" aria-label="Сид боя"><button class="gbtn" type="button" id="reseed">Случайный</button></div></div>
         <div class="go"><button class="gbtn primary" type="button" id="start">В бой <kbd>Enter</kbd></button><button class="gbtn" type="button" id="helpBtn1">Правила</button></div>
+        <div class="proto"><p class="label">Прототип 1б</p><button class="gbtn" type="button" id="laneBtn">Стенка на стенку</button><span class="hint">Серая болванка: тот же отряд и противник, но армия на армию, раундами с приказами.</span></div>
       </div>
     </div>
   </div>
@@ -73,6 +74,12 @@
       <button class="gbtn primary" type="button" id="endBtn">Конец хода <kbd>Enter</kbd></button>
     </div>
   </footer>
+</div>
+
+<div id="lane" hidden>
+  <header class="topbar"><span class="title">Стенка на стенку · прототип</span><span class="sep"></span><span id="laneStatus" class="lane-status"></span></header>
+  <div class="lane-stage"><svg id="laneSvg" role="img" aria-label="Линия сражения"></svg></div>
+  <div class="lane-orders" id="laneOrders"></div>
 </div>
 
 <div class="overlay" id="result" hidden>

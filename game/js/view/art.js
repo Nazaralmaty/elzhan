@@ -51,10 +51,12 @@ const armRect = (x) => `<rect x="${x}" y="43" width="5" height="14" rx="2.5" fil
 function humanoid(kind, c){
   const dark = shade(c, -.32), light = shade(c, .35), u = UNITS[kind] || {};
   const undead = !!u.undead, robe = ['apprentice','battlemage','irena','acolyte'].includes(kind);
-  const body = undead ? MORVEN : c, sleeve = undead ? '#3B4B50' : dark;
+  const body = undead ? MORVEN : kind === 'militia' ? light : kind === 'apprentice' ? '#E9ECF2' : kind === 'battlemage' ? dark : c;
+  const sleeve = undead ? '#3B4B50' : kind === 'apprentice' ? '#D5DAE3' : kind === 'militia' ? c : dark;
+  const trim = undead ? TOXIC : kind === 'apprentice' ? c : kind === 'battlemage' ? '#F2C14E' : light;
   const legs = robe ? '' : `<rect x="25" y="60" width="5.5" height="12" rx="2" fill="${undead ? '#E9E4D6' : '#4A3B30'}"/><rect x="33.5" y="60" width="5.5" height="12" rx="2" fill="${undead ? '#E9E4D6' : '#4A3B30'}"/>`;
   const torso = robe
-    ? `<path d="M23 42 Q32 37 41 42 L45 72 Q32 75 19 72 Z" fill="${body}"/><path d="M30 42 L34 42 L35 72 L29 72 Z" fill="${undead ? TOXIC : light}" opacity="${undead ? .5 : .45}"/>`
+    ? `<path d="M23 42 Q32 37 41 42 L45 72 Q32 75 19 72 Z" fill="${body}"/><path d="M30 42 L34 42 L35 72 L29 72 Z" fill="${trim}" opacity="${undead ? .5 : .75}"/>`
     : `<path d="M22 42 Q32 37 42 42 L44 63 Q32 66 20 63 Z" fill="${body}"/><rect x="21" y="54" width="22" height="3" fill="${undead ? TOXIC : dark}" opacity="${undead ? .7 : 1}"/>`;
   let head = undead
     ? `<circle cx="32" cy="32" r="8.5" fill="#E9E4D6"/><circle cx="29" cy="31" r="2.2" fill="${MORVEN}"/><circle cx="35" cy="31" r="2.2" fill="${MORVEN}"/><circle cx="29" cy="31" r=".8" fill="${TOXIC}"/><circle cx="35" cy="31" r=".8" fill="${TOXIC}"/><rect x="29" y="36" width="6" height="2.5" rx="1" fill="#CFC8B6"/>`
@@ -64,14 +66,36 @@ function humanoid(kind, c){
   const shield = (f) => `<path d="M17 47 h14 v8 q0 7 -7 10 q-7 -3 -7 -10 Z" fill="${f}"/><path d="M24 49 v13" stroke="${shade(f,.45)}" stroke-width="2"/>`;
   const staff = (orb, big) => `<line x1="41" y1="${big ? 22 : 26}" x2="41" y2="70" stroke="#8A6A48" stroke-width="2.2" stroke-linecap="round"/>` + (big ? `<polygon points="41,12 45,20 41,27 37,20" fill="${orb}"/><circle cx="41" cy="20" r="7" fill="${orb}" opacity=".25"/>` : `<circle cx="41" cy="24" r="3.2" fill="${orb}"/>`);
   switch(kind){
-    case 'militia': hat = `<path d="M23.5 31 A8.5 8.5 0 0 1 40.5 31 Z" fill="#8A6A48"/>`; offhand = `<circle cx="22" cy="54" r="6.5" fill="#A97C50"/><circle cx="22" cy="54" r="2" fill="#7A5634"/>`; weapon = `<line x1="40" y1="18" x2="40" y2="68" stroke="#8A6A48" stroke-width="2"/><polygon points="40,12 42.6,19 37.4,19" fill="#C9D1DA"/>`; break;
-    case 'swordsman': hat = `<path d="M23 30 A9 9 0 0 1 41 30 Z" fill="#AEB6BF"/><rect x="20.5" y="28.5" width="23" height="2.6" rx="1.2" fill="#8F98A2"/>`; offhand = shield(c); weapon = sword; break;
-    case 'archer': hat = `<path d="M22 37 Q22 21 32 21 Q42 21 42 37 L39 35 Q39 26 32 26 Q25 26 25 35 Z" fill="${dark}"/>`; offhand = `<path d="M19 36 Q10 52 19 68" stroke="#8A5A33" stroke-width="2.4" fill="none"/><line x1="19" y1="36" x2="19" y2="68" stroke="#E9E4D6" stroke-width=".8"/>`; weapon = `<line x1="40" y1="48" x2="40" y2="60" stroke="#8A6A48" stroke-width="1.4"/>`; break;
-    case 'apprentice': hat = `<polygon points="21,29.5 43,29.5 35,9" fill="${light}"/><rect x="19.5" y="28" width="25" height="3" rx="1.5" fill="${light}"/>`; weapon = staff('#A28BFF'); break;
+    case 'militia':
+      hat = `<path d="M23.5 31 A8.5 8.5 0 0 1 40.5 31 Z" fill="#8A6A48"/><rect x="22" y="29.5" width="20" height="2" rx="1" fill="#6E5236"/>`;
+      offhand = `<circle cx="21" cy="54" r="7.5" fill="#A97C50" stroke="#7A5634" stroke-width="1.5"/><circle cx="21" cy="54" r="2" fill="#7A5634"/>`;
+      weapon = `<line x1="40" y1="8" x2="40" y2="70" stroke="#8A6A48" stroke-width="2.2"/><polygon points="40,1 43,10 37,10" fill="#C9D1DA"/>`;
+      break;
+    case 'swordsman':
+      hat = `<path d="M23 30 A9 9 0 0 1 41 30 Z" fill="#AEB6BF"/><rect x="20.5" y="28.5" width="23" height="2.6" rx="1.2" fill="#8F98A2"/>`;
+      back = `<circle cx="23" cy="43" r="4" fill="#9AA3AD"/>`;
+      offhand = `<path d="M14 44 h18 v10 q0 9 -9 13 q-9 -4 -9 -13 Z" fill="${c}" stroke="${light}" stroke-width="1.6"/><path d="M23 47 v16 M17.5 53 h11" stroke="#FFFFFF" stroke-width="2.2"/>`;
+      weapon = sword + `<circle cx="40" cy="43" r="4" fill="#9AA3AD"/>`;
+      break;
+    case 'archer':
+      back = `<g transform="rotate(-20 24 46)"><rect x="19" y="37" width="7" height="21" rx="2.5" fill="#7A4E2C"/><path d="M20.5 37 l1.2 -6 l1.2 6 M23.5 37 l1.2 -7 l1.2 7" stroke="#F2EBD9" stroke-width="1.5" stroke-linejoin="round"/></g>`;
+      hat = `<path d="M22 37 Q22 21 32 21 Q42 21 42 37 L39 35 Q39 26 32 26 Q25 26 25 35 Z" fill="#4E7A3E"/><path d="M32 21 Q40 20 44 26 Q38 24 34 25 Z" fill="#4E7A3E"/>`;
+      offhand = '';
+      weapon = `<path d="M43 42 Q52 56 43 70" stroke="#8A5A33" stroke-width="2.8" fill="none" stroke-linecap="round"/><line x1="43" y1="42" x2="43" y2="70" stroke="#F2EBD9" stroke-width=".9"/><line x1="37" y1="56" x2="51" y2="56" stroke="#C9A26A" stroke-width="1.4"/><polygon points="54,56 50,54 50,58" fill="#C9D1DA"/>`;
+      break;
+    case 'apprentice':
+      hat = `<path d="M21 30 Q32 25 43 30 Q40 33 32 33 Q24 33 21 30 Z" fill="${c}"/><path d="M25 30 Q32 13 39 30 Z" fill="${c}"/>`;
+      offhand = `<rect x="16" y="52" width="11" height="8" rx="1" fill="#FFFFFF" stroke="#C9CED6" stroke-width="1"/><line x1="21.5" y1="52" x2="21.5" y2="60" stroke="#C9CED6" stroke-width="1"/><path d="M19 55 h5 M21.5 53 v4" stroke="#5BC97A" stroke-width="1.4"/>`;
+      weapon = staff('#7FE0A0');
+      break;
     case 'battlemage': hat = `<polygon points="20,29.5 44,29.5 29,3" fill="${dark}"/><rect x="18.5" y="28" width="27" height="3" rx="1.5" fill="${dark}"/><circle cx="31" cy="20" r="1.8" fill="#FFD86B"/>`; weapon = staff(MANA, true); break;
     case 'alden': back = `<path d="M22 41 Q32 37 42 41 L46 68 Q32 71 18 68 Z" fill="${dark}"/>`; hat = `<path d="M23 25 Q32 19 41 25 L41 37 Q32 40 23 37 Z" fill="#B8C0C8"/><rect x="27" y="30" width="12" height="2" fill="#2B3138"/><path d="M23 25 l3 -5 l3 3 l3 -5 l3 5 l3 -3 l3 5 Z" fill="#F2C14E"/>`; offhand = shield(c); weapon = sword; break;
     case 'irena': back = `<path d="M24 30 Q22 44 25 48 L28 34 Z M40 30 Q42 44 39 48 L36 34 Z" fill="#7A3B2E"/>`; hat = `<polygon points="20,29.5 44,29.5 33,4" fill="${dark}"/><rect x="18.5" y="28" width="27" height="3" rx="1.5" fill="${dark}"/><polygon points="32,22 34.5,25.5 32,29 29.5,25.5" fill="${MANA}"/>`; weapon = staff(MANA, true); break;
-    case 'corvin': hat = `<path d="M22 37 Q22 20 32 20 Q42 20 42 37 L39 35 Q39 26 32 26 Q25 26 25 35 Z" fill="#3E5A3E"/><path d="M24 39 Q32 44 40 39 L40 43 Q32 47 24 43 Z" fill="${c}"/>`; offhand = `<path d="M18 34 Q8 52 18 70" stroke="#6B4E2E" stroke-width="2.8" fill="none"/><line x1="18" y1="34" x2="18" y2="70" stroke="#E9E4D6" stroke-width=".8"/>`; break;
+    case 'corvin':
+      back = `<path d="M22 41 Q32 37 42 41 L45 66 Q32 69 19 66 Z" fill="#2F4A2F"/><g transform="rotate(-20 24 46)"><rect x="19" y="37" width="7" height="21" rx="2.5" fill="#5A3A20"/><path d="M20.5 37 l1.2 -6 l1.2 6 M23.5 37 l1.2 -7 l1.2 7" stroke="#F2C14E" stroke-width="1.5" stroke-linejoin="round"/></g>`;
+      hat = `<path d="M22 37 Q22 20 32 20 Q42 20 42 37 L39 35 Q39 26 32 26 Q25 26 25 35 Z" fill="#2F4A2F"/><path d="M24 39 Q32 44 40 39 L40 43 Q32 47 24 43 Z" fill="${c}"/>`;
+      weapon = `<path d="M43 40 Q53 56 43 72" stroke="#5A3A20" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="43" y1="40" x2="43" y2="72" stroke="#F2EBD9" stroke-width=".9"/><line x1="37" y1="56" x2="51" y2="56" stroke="#C9A26A" stroke-width="1.4"/><polygon points="54,56 50,54 50,58" fill="#F2C14E"/>`;
+      break;
     case 'skeleton': offhand = `<circle cx="22" cy="54" r="6" fill="#4B4F57"/>`; weapon = `<rect x="38.8" y="36" width="2.6" height="20" rx="1" fill="#A7ADB4"/>`; break;
     case 'ghoul': head = `<circle cx="34" cy="35" r="8" fill="#8FA38A"/><circle cx="37" cy="34" r="1.6" fill="${TOXIC}"/><path d="M32 40 l2 2 l2 -2 l2 2" stroke="#2B3036" stroke-width="1" fill="none"/>`; weapon = `<path d="M40 56 l4 4 M40 57 l2 6 M39 57 l-1 6" stroke="#E9E4D6" stroke-width="1.4"/>`; offhand = `<path d="M24 56 l-4 4 M24 57 l-2 6" stroke="#E9E4D6" stroke-width="1.4"/>`; break;
     case 'acolyte': hat = `<path d="M22 38 Q22 20 32 20 Q42 20 42 38 L39 36 Q39 26 32 26 Q25 26 25 36 Z" fill="#1A2326"/>`; weapon = staff(TOXIC, true); break;
