@@ -42,7 +42,7 @@
           <label><input type="radio" name="dif" value="3" id="dif-3"> Король</label></div></div>
         <div><p class="label">Сид</p><div class="seed"><input id="seed" inputmode="numeric" aria-label="Сид боя"><button class="gbtn" type="button" id="reseed">Случайный</button></div></div>
         <div class="go"><button class="gbtn primary" type="button" id="start">В бой <kbd>Enter</kbd></button><button class="gbtn" type="button" id="helpBtn1">Правила</button></div>
-        <div class="proto"><p class="label">Прототип 1б</p><button class="gbtn" type="button" id="laneBtn">Стенка на стенку</button><span class="hint">Серая болванка: тот же отряд и противник, но армия на армию, раундами с приказами.</span></div>
+        <div class="proto"><p class="label">Прототип 1б</p><button class="gbtn" type="button" id="laneBtn">Стенка на стенку</button><span class="hint">Как Age of War и Stick War: базы, золото и рудокопы, покупаешь бойцов, командуешь армией. Твой герой — особый боец.</span></div>
       </div>
     </div>
   </div>
@@ -76,43 +76,45 @@
   </footer>
 </div>
 
-<div id="lane" hidden>
-  <header class="lane-top">
-    <span class="lane-round" id="laneRound">Раунд 1</span>
-    <span class="lane-power"><b>Ты</b><i id="lanePwrP"></i></span>
-    <span class="lane-power enemy"><b>Враг</b><i id="lanePwrE"></i></span>
+<div id="war" hidden>
+  <header class="war-top">
+    <span class="war-gold" title="Золото"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#F2C14E"/><circle cx="10" cy="10" r="4.8" fill="none" stroke="#C99A2E" stroke-width="1.4"/></svg><b id="warGold">150</b><small id="warInc">+4/с</small></span>
+    <span class="war-stat" title="Рудокопы">⛏ <b id="warMiners">0</b></span>
+    <span class="war-stat" title="Армия / предел">⚔ <b id="warPop">0/20</b></span>
+    <span class="war-base"><b>База</b><i id="warBaseP"></i></span>
     <span class="grow"></span>
-    <button class="lbtn" type="button" id="laneHelpBtn" aria-label="Памятка">?</button>
-    <button class="lbtn" type="button" id="laneExit">Выйти</button>
+    <span class="war-base enemy"><b>Враг</b><i id="warBaseE"></i></span>
+    <button class="lbtn" type="button" id="warPause" aria-label="Пауза">⏸</button>
+    <button class="lbtn" type="button" id="warSpeed" aria-label="Скорость">×1</button>
+    <button class="lbtn" type="button" id="warHelpBtn" aria-label="Памятка">?</button>
+    <button class="lbtn" type="button" id="warExit">Выйти</button>
   </header>
-  <div class="lane-field"><svg id="laneSvg" role="application" aria-label="Поле сражения"></svg></div>
-  <footer class="lane-bar">
-    <div class="lane-chips" id="laneChips"></div>
-    <div class="lane-cmd" id="laneCmd"></div>
-    <button class="lane-go" type="button" id="laneFight">▶ В бой</button>
+  <div class="war-field"><svg id="warSvg" role="img" aria-label="Поле сражения"></svg></div>
+  <footer class="war-bar">
+    <div class="war-cmds" id="warCmds"></div>
+    <div class="war-shop" id="warShop"></div>
+    <button class="war-rain" type="button" id="warRain"><b>🏹</b><span>Град стрел</span><small>готов</small><kbd>F</kbd></button>
   </footer>
-  <div class="overlay" id="laneHelp" hidden>
-    <div class="modal lane-legend" role="dialog" aria-modal="true" aria-labelledby="lhTitle">
-      <h2 id="lhTitle">Памятка</h2>
+  <div class="overlay" id="warHelp" hidden>
+    <div class="modal lane-legend" role="dialog" aria-modal="true" aria-labelledby="whTitle">
+      <h2 id="whTitle">Как играть</h2>
       <div class="legend-grid">
-        <span class="lg-ico">⇒</span><span><b>Вперёд</b> — идти и рубиться</span>
-        <span class="lg-ico">▣</span><span><b>Строй</b> — стоять, защита, отдых</span>
-        <span class="lg-ico">⚡</span><span><b>Натиск</b> — конница бьёт ×2.5</span>
-        <span class="lg-ico">◁</span><span><b>Отход</b> — назад, отдышаться</span>
-        <span class="lg-ico">➶</span><span><b>Стрелять</b> — стоять и стрелять</span>
-        <span class="lg-ico">✦</span><span><b>Магия</b> — огонь, лечение</span>
-        <span class="lg-bar mo"></span><span><b>Мораль</b> — на нуле отряд бежит</span>
-        <span class="lg-bar st"></span><span><b>Силы</b> — усталые бьют слабее</span>
+        <span class="lg-ico">⛏</span><span><b>Рудокоп</b> — больше золота в секунду</span>
+        <span class="lg-ico">1–9</span><span><b>Покупка</b> — боец выходит из базы</span>
+        <span class="lg-ico">⚔</span><span><b>Атака</b> — вся армия идёт на врага</span>
+        <span class="lg-ico">🛡</span><span><b>Оборона</b> — держать линию у базы</span>
+        <span class="lg-ico">🏰</span><span><b>Отход</b> — в базу: лечение, лучники усиливают башню</span>
+        <span class="lg-ico">🏹</span><span><b>Град стрел</b> — удар по толпе врагов</span>
       </div>
       <ul class="legend-tips">
-        <li>Смотри на значок над врагом: <b>⚡</b> — он готовит натиск. Ополченцы в <b>Строю</b> встретят его копьями.</li>
-        <li>Уставших отводи назад, свежих — вперёд.</li>
-        <li>Холм — стрелкам дальше и сильнее. Лес — стрелы слабее, натиска нет. Брод — медленно.</li>
+        <li>Цель — разрушить вражескую базу. Копи армию в обороне и бей, когда сильнее.</li>
+        <li>Рыцарь первым ударом бьёт вдвое. Против конницы — копейщики-ополченцы. Маги бьют по толпе.</li>
+        <li>Пробел — пауза, кнопка ×2 — быстрее.</li>
       </ul>
-      <div class="row"><button class="gbtn primary" type="button" id="laneHelpClose">Понятно</button></div>
+      <div class="row"><button class="gbtn primary" type="button" id="warHelpClose">В бой</button></div>
     </div>
   </div>
-  <div class="overlay" id="laneEnd" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="leTitle" id="laneEndBody"></div></div>
+  <div class="overlay" id="warEnd" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="weTitle" id="warEndBody"></div></div>
 </div>
 
 <div class="overlay" id="result" hidden>

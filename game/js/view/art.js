@@ -79,6 +79,11 @@ function humanoid(kind, c){
       offhand = `<circle cx="21" cy="54" r="7.5" fill="#A97C50" stroke="#7A5634" stroke-width="1.5"/><circle cx="21" cy="54" r="2" fill="#7A5634"/>`;
       weapon = `<line x1="40" y1="8" x2="40" y2="70" stroke="#8A6A48" stroke-width="2.2"/><polygon points="40,1 43,10 37,10" fill="#C9D1DA"/>`;
       break;
+    case 'miner':
+      hat = `<path d="M23.5 31 A8.5 8.5 0 0 1 40.5 31 Z" fill="#B08A4A"/><circle cx="32" cy="24.5" r="2" fill="#F2C14E"/>`;
+      offhand = `<circle cx="21" cy="57" r="6" fill="#C9A26A"/><circle cx="21" cy="55" r="2.2" fill="#F2C14E"/>`;
+      weapon = `<line x1="40" y1="34" x2="40" y2="62" stroke="#8A6A48" stroke-width="2.4"/><path d="M32 36 Q40 30 49 37" stroke="#9AA3AD" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+      break;
     case 'swordsman':
       hat = `<path d="M23 30 A9 9 0 0 1 41 30 Z" fill="#AEB6BF"/><rect x="20.5" y="28.5" width="23" height="2.6" rx="1.2" fill="#8F98A2"/>`;
       back = `<circle cx="23" cy="43" r="4" fill="#9AA3AD"/>`;

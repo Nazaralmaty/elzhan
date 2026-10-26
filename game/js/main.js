@@ -4,7 +4,7 @@ import { UNITS, ABILITIES, BASIC_UNITS, HEROES } from './data/units.js';
 import { createBattle, enemySquad } from './rules/skirmish.js';
 import { openBattle, openHelp } from './view/battle-screen.js';
 import { figSVG } from './view/art.js';
-import { openLane } from './view/lane-view.js';
+import { openWar } from './view/war-view.js';
 
 const $ = id => document.getElementById(id);
 const DIF = [{ budget: 13, pen: 0 }, { budget: 17, pen: 0.1 }, { budget: 21, pen: 0.15 }, { budget: 25, pen: 0.2 }];
@@ -64,14 +64,10 @@ $('unitPick').addEventListener('click', e => {
 $('seed').addEventListener('change', () => { setup.seed = Math.max(1, parseInt($('seed').value, 10) || 1); save(); });
 $('reseed').addEventListener('click', () => { setup.seed = rand(); save(); renderSetup(); });
 $('start').addEventListener('click', () => startBattle());
-let closeLane = null;
 $('helpBtn1').addEventListener('click', openHelp);
 $('laneBtn').addEventListener('click', () => {
-  const player = [setup.hero, ...squadList()].filter(Boolean);
-  if (!player.length) return;
-  const enemy = enemySquad(makeRng(setup.seed * 7 + 3), setup.foe, DIF[setup.dif].budget);
-  $('setup').hidden = true; $('lane').hidden = false;
-  closeLane = openLane({ player, enemy, seed: setup.seed, onExit: () => { closeLane?.(); $('lane').hidden = true; $('setup').hidden = false; renderSetup(); } });
+  $('setup').hidden = true; $('war').hidden = false;
+  openWar({ hero: setup.hero, foe: setup.foe, seed: setup.seed, enemyIncome: [0.8, 1, 1.15, 1.3][setup.dif], onExit: () => { $('war').hidden = true; $('setup').hidden = false; renderSetup(); } });
 });
 
 function startBattle(newSeed) {
