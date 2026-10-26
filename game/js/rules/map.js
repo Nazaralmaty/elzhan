@@ -56,10 +56,10 @@ export function generateMap(seed, sizeId) {
     const [r, c] = cand.length ? cand[rng.int(cand.length)] : near[rng.int(near.length)];
     tiles[r][c] = t;
   };
-  ensure('forest', 2, ['grass']); ensure('hill', 2, ['grass', 'forest']); ensure('mana', 2, ['grass']); ensure('ore', 3, ['hill', 'grass']);
+  ensure('forest', 2, ['grass']); ensure('hill', 2, ['grass', 'forest']); ensure('mana', 2, ['grass']); ensure('ore', 2, ['hill', 'grass']); ensure('gold', 3, ['hill', 'grass']);
   const hills = [];
   tiles.forEach((row, r) => row.forEach((t, c) => { if (t === 'hill') hills.push([r, c]); }));
-  rng.shuffle(hills).slice(0, Math.max(2, Math.round(hills.length * 0.12))).forEach(([r, c], i) => { tiles[r][c] = i % 3 === 2 ? 'gold' : 'ore'; });
+  rng.shuffle(hills).slice(0, Math.max(3, Math.round(hills.length * 0.25))).forEach(([r, c], i) => { tiles[r][c] = i % 3 === 2 ? 'gold' : 'ore'; });
   const free = () => {
     for (let tries = 0; tries < 400; tries++) {
       const r = rng.int(h), c = rng.int(w);
@@ -92,7 +92,8 @@ export function generateMap(seed, sizeId) {
 }
 
 /* ---------- territory ---------- */
-export const cityRadius = city => city.capital || city.level >= 3 ? 2 : 1;
+// territory grows with every city level; the capital reaches one hex further
+export const cityRadius = city => Math.min(4, city.level || 1) + (city.capital ? 1 : 0);
 
 // tile key → city id; closer city wins, ties go to the older city
 export function territory(K) {
@@ -101,6 +102,15 @@ export function territory(K) {
     for (const [r, c] of ring(K, city.r, city.c, cityRadius(city))) {
       const k = key(r, c), dd = dist([r, c], [city.r, city.c]);
       if (!own.has(k) || dd < d.get(k)) { own.set(k, city.id); d.set(k, dd); }
+    }
+  }
+  // outposts claim the hexes around them for their city
+  for (const [k0, b] of Object.entries(K.buildings)) {
+    if (b.type !== 'outpost') continue;
+    const [r0, c0] = unkey(k0);
+    for (const [r, c] of ring(K, r0, c0, 1)) {
+      const k = key(r, c), dd = dist([r, c], [r0, c0]) + 0.5;
+      if (!own.has(k) || dd < d.get(k)) { own.set(k, b.city); d.set(k, dd); }
     }
   }
   return own;
@@ -112,6 +122,7 @@ export function visibleSet(K) {
   const see = (r, c, R) => ring(K, r, c, R + (K.tiles[r][c] === 'hill' ? 1 : 0)).forEach(([a, b]) => vis.add(key(a, b)));
   K.cities.filter(x => x.owner === 'player').forEach(x => see(x.r, x.c, cityRadius(x) + 1));
   K.armies.filter(a => a.owner === 'player').forEach(a => see(a.r, a.c, 2));
+  Object.entries(K.buildings).forEach(([k, b]) => { if (b.type === 'outpost') { const [r, c] = unkey(k); see(r, c, 2); } });
   return vis;
 }
 

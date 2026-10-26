@@ -16,7 +16,7 @@ const pay = (K, cost) => add(K.res, cost, -1);
 
 export const cityById = (K, id) => K.cities.find(c => c.id === id);
 export const cityAt = (K, r, c) => K.cities.find(x => x.r === r && x.c === c);
-export const levelFor = pop => pop >= 25 ? 4 : pop >= 15 ? 3 : pop >= 8 ? 2 : 1;
+export const levelFor = pop => pop >= 20 ? 4 : pop >= 12 ? 3 : pop >= 6 ? 2 : 1;
 export const buildingsOf = (K, cityId) => Object.entries(K.buildings).filter(([, b]) => b.city === cityId);
 export const slotsOf = b => BUILDINGS[b.type].slots ? BUILDINGS[b.type].slots[b.level - 1] : 0;
 const adjCount = (K, k, pred) => { const [r, c] = unkey(k); return neighbors(r, c).filter(([a, b]) => inMap(K, a, b) && pred(a, b)).length; };
@@ -51,7 +51,7 @@ export function buildingYield(K, k, b) {
     case 'farm': out.food = w * 2 + (w ? adjBuilding(K, k, 'mill') : 0); break;
     case 'sawmill': out.wood = w * 2 + (w && adjCount(K, k, (a, c) => K.tiles[a][c] === 'forest') >= 2 ? 1 : 0); break;
     case 'quarry': out.stone = w * 2; break;
-    case 'iron': out.iron = w + (w && adjBuilding(K, k, 'forge') ? 1 : 0); break;
+    case 'iron': out.iron = w * 2 + (w && adjBuilding(K, k, 'forge') ? 1 : 0); break;
     case 'goldmine': out.gold = w; break;
     case 'tower': out.mana = 3 + w * 2 + adjCount(K, k, (a, c) => K.tiles[a][c] === 'mana'); break;
     case 'market': out.gold = adjBuilding(K, k, 'house'); break;
@@ -83,12 +83,17 @@ export function forecast(K) {
 
 /* ---------- building ---------- */
 export function buildOptions(K, r, c) {
-  const k = key(r, c), own = territory(K).get(k);
-  if (!own || K.buildings[k] || cityAt(K, r, c) || K.tiles[r][c] === 'village') return { city: null, list: [] };
+  const k = key(r, c), terr = territory(K);
+  let own = terr.get(k);
+  if (K.buildings[k] || cityAt(K, r, c) || K.tiles[r][c] === 'village' || !K.explored[k]) return { city: null, list: [] };
+  // just outside the border only an outpost can be built; it belongs to the neighbouring city
+  const outside = !own;
+  if (outside) own = neighbors(r, c).map(([a, b]) => terr.get(key(a, b))).find(id => id && cityById(K, id)?.owner === 'player');
+  if (!own) return { city: null, list: [] };
   const city = cityById(K, own);
   if (city.owner !== 'player') return { city: null, list: [] };
   const t = K.tiles[r][c];
-  const list = Object.entries(BUILDINGS).filter(([id, d]) => d.tiles.includes(t)).map(([id, d]) => {
+  const list = Object.entries(BUILDINGS).filter(([id, d]) => d.tiles.includes(t) && !!d.outside === outside).map(([id, d]) => {
     let why = '';
     if (d.perCity && buildingsOf(K, city.id).some(([, b]) => b.type === id)) why = 'Уже есть в этом городе';
     if (d.perKingdom && Object.values(K.buildings).some(b => b.type === id)) why = 'Уже есть в королевстве';
@@ -104,7 +109,7 @@ export function build(K, r, c, id) {
   const opt = buildOptions(K, r, c).list.find(o => o.id === id);
   if (!opt || opt.why) return false;
   pay(K, opt.cost);
-  K.buildings[key(r, c)] = { type: id, level: 1, workers: 0, city: territory(K).get(key(r, c)) };
+  K.buildings[key(r, c)] = { type: id, level: 1, workers: 0, city: buildOptions(K, r, c).city?.id ?? territory(K).get(key(r, c)) };
   const city = cityById(K, K.buildings[key(r, c)].city);
   if (city.auto) autoAssign(K, city);
   return true;
@@ -292,7 +297,7 @@ export function economyTurn(K, log) {
       if (c.growth >= need) { c.growth -= need; c.pop++; log.push(`${c.name}: родился житель (${c.pop})`); }
     }
     const lvl = levelFor(c.pop);
-    if (lvl > c.level) { c.level = lvl; log.push(`${c.name} вырос до уровня ${lvl}${lvl === 3 ? ': территория расширилась' : ''}`); }
+    if (lvl > c.level) { c.level = lvl; log.push(`${c.name} вырос до уровня ${lvl}: территория расширилась`); }
     if (c.auto) autoAssign(K, c);
     else if (workersUsed(K, c) > c.pop) autoAssign(K, c);
   }

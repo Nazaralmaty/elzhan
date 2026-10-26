@@ -32,7 +32,7 @@ export function newKingdom({ seed = 1, size = 'medium', hardcore = false } = {})
   const K = {
     version: 1, seed, size, w: S.w, h: S.h, tiles: g.tiles, turn: 1, hardcore,
     cities: [], buildings: {}, armies: [], wounded: [],
-    res: { food: 30, wood: 25, stone: 10, gold: 15, iron: 0, mana: 0 },
+    res: { food: 30, wood: 25, stone: 10, gold: 15, iron: 10, mana: 0 },
     explored: {}, nextId: 1, unrest: 0, short: [], heroPool: [], heroesOwned: [], ruins: {},
     status: 'playing', lairsTotal: 0, stats: { lairs: 0, battles: 0, captured: 0, razed: 0 }
   };

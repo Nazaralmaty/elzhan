@@ -148,7 +148,7 @@ function updatePanel() {
           <span class="bico"><svg viewBox="0 0 64 60">${bIcon(o.id, t)}</svg></span><span class="btxt"><b>${o.name}</b><small>${o.note}</small><span class="chips">${costHTML(o.cost)}</span>${o.why ? `<small class="bad">${o.why}</small>` : ''}</span></button>`).join('') : '<p class="muted">Здесь ничего не построить.</p>'}</div>`;
       return;
     }
-    side.innerHTML = `<h3>${terrainName(t)}</h3><p class="muted">${K.tiles[r][c] === 'village' ? 'Приведи отряд и закончи на ней ход — деревня станет городом.' : 'Вне твоей территории.'}</p>`;
+    side.innerHTML = `<h3>${terrainName(t)}</h3><p class="muted">${K.tiles[r][c] === 'village' ? 'Приведи отряд и закончи на ней ход — деревня станет городом.' : 'Вне твоей территории. Территория растёт с уровнем города, а заставу можно поставить на гекс прямо у границы.'}</p>`;
     return;
   }
   const cities = K.cities.filter(x => x.owner === 'player');
@@ -188,9 +188,9 @@ function cityPanel(side, city) {
 function buildingPanel(side, k, b) {
   const D = BUILDINGS[b.type], up = upgradeCost(b, K), city = cityById(K, b.city);
   side.innerHTML = `<h3>${D.name}${b.level > 1 ? ' · ур. ' + b.level : ''}</h3><p class="muted">${city?.name || ''} · ${D.note}</p>
-    <div class="chips">Даёт: ${yieldHTML(buildingYield(K, k, b))}</div>
+    ${D.outside ? '<p class="muted small">Земля в радиусе 1 вокруг заставы — твоя, и с неё видно на 2 гекса.</p>' : `<div class="chips">Даёт: ${yieldHTML(buildingYield(K, k, b))}</div>`}
     ${slotsOf(b) ? `<div class="brow"><span></span><div><b>Крестьяне</b><small class="muted">Свободно в городе: ${idleOf(K, city)}</small></div><div class="stepper"><button type="button" data-w="${k}" data-d="-1" aria-label="Убрать крестьянина">−</button><span class="slots">${Array.from({ length: slotsOf(b) }, (_, j) => `<i class="${j < b.workers ? 'on' : ''}"></i>`).join('')}</span><button type="button" data-w="${k}" data-d="1" aria-label="Добавить крестьянина">+</button></div></div>` : ''}
-    ${up ? `<button class="gbtn" type="button" id="upgradeB" ${canPay(K, up) ? '' : 'disabled'}>Улучшить до ур. ${b.level + 1} <span class="chips">${costHTML(up)}</span></button>` : '<p class="muted small">Максимальный уровень.</p>'}`;
+    ${up ? `<button class="gbtn" type="button" id="upgradeB" ${canPay(K, up) ? '' : 'disabled'}>Улучшить до ур. ${b.level + 1} <span class="chips">${costHTML(up)}</span></button>` : D.outside ? '' : '<p class="muted small">Максимальный уровень.</p>'}`;
 }
 
 $('kSide').addEventListener('click', e => {

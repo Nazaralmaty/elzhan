@@ -25,25 +25,26 @@ export const BUILDINGS = {
   mill:     { name: 'Мельница',       tiles: ['grass'],   cost: { wood: 10, stone: 6 },          note: 'Соседние фермы дают +1 еды' },
   sawmill:  { name: 'Лесопилка',      tiles: ['forest'],  cost: { wood: 4 },                     slots: [2, 4, 6], per: { wood: 2 }, up: PROD_UP, note: '+2 дерева за крестьянина, +1 если рядом 2 леса' },
   quarry:   { name: 'Каменоломня',    tiles: ['hill'],    cost: { wood: 8 },                     slots: [2, 4, 6], per: { stone: 2 }, up: PROD_UP, note: '+2 камня за крестьянина' },
-  iron:     { name: 'Шахта железа',   tiles: ['ore'],     cost: { wood: 10, stone: 6 },          slots: [2, 4, 6], per: { iron: 1 }, up: PROD_UP, note: '+1 железо за крестьянина, +1 рядом с кузницей' },
+  iron:     { name: 'Шахта железа',   tiles: ['ore'],     cost: { wood: 10, stone: 6 },          slots: [2, 4, 6], per: { iron: 2 }, up: PROD_UP, note: '+2 железа за крестьянина, +1 рядом с кузницей' },
   goldmine: { name: 'Золотой рудник', tiles: ['gold'],    cost: { wood: 10, stone: 8 },          slots: [2, 4, 6], per: { gold: 1 }, up: PROD_UP, note: '+1 золото за крестьянина' },
   market:   { name: 'Рынок',          tiles: ['grass'],   cost: { wood: 12, stone: 8 },          up: [{ wood: 10, stone: 10, gold: 10 }], perCity: 1, note: 'Обмен 3:1 (ур. 2: 2:1), +1 золото за соседний дом' },
   barracks: { name: 'Казарма',        tiles: ['grass'],   cost: { wood: 12, stone: 6 },          note: 'Найм мечников и лучников' },
   forge:    { name: 'Кузница',        tiles: ANY,         cost: { wood: 10, stone: 10 },         note: 'Нужна для мечников и рыцарей; у шахты железа — сталь дешевле' },
   stable:   { name: 'Конюшня',        tiles: ['grass'],   cost: { wood: 14, stone: 4, gold: 4 }, needsAdj: 'farm', note: 'Найм рыцарей; только рядом с фермой' },
   tower:    { name: 'Башня магов',    tiles: ['mana'],    cost: { wood: 8, stone: 12, gold: 4 }, slots: [2, 2], per: { mana: 2 }, up: [{ stone: 12, gold: 10 }], note: '+3 маны, адепты +2; ур. 2 — боевые маги' },
+  outpost:  { name: 'Застава',        tiles: ['grass', 'forest', 'hill', 'ore', 'gold', 'mana', 'ruins'], cost: { wood: 12, stone: 6 }, outside: true, note: 'Ставится у границы и забирает землю вокруг — так берут руду, золото и ману' },
   tavern:   { name: 'Таверна',        tiles: ANY,         cost: { wood: 10, stone: 4, gold: 10 }, perKingdom: 1, note: 'Найм героев' }
 };
-export const BUILD_ORDER = ['farm', 'mill', 'house', 'sawmill', 'quarry', 'iron', 'goldmine', 'market', 'barracks', 'forge', 'stable', 'tower', 'tavern'];
+export const BUILD_ORDER = ['farm', 'mill', 'house', 'sawmill', 'quarry', 'iron', 'goldmine', 'market', 'barracks', 'forge', 'stable', 'tower', 'tavern', 'outpost'];
 export const WALLS_COST = { stone: 20 };
 export const PEASANT_COST = { food: 12 };
 
 // Recruitment: unit kind → requirement and cost/upkeep per turn.
 export const RECRUIT = {
   militia:    { cost: { food: 10, wood: 4 },             upkeep: { food: 1 },                    needs: 'townhall' },
-  swordsman:  { cost: { food: 12, iron: 8 },             upkeep: { food: 1, iron: 1 },           needs: 'barracks', forge: true },
+  swordsman:  { cost: { food: 12, iron: 8 },             upkeep: { food: 1, gold: 1 },           needs: 'barracks', forge: true },
   archer:     { cost: { food: 10, wood: 8 },             upkeep: { food: 1 },                    needs: 'barracks' },
-  knight:     { cost: { food: 15, gold: 10, iron: 8 },   upkeep: { food: 2, gold: 1, iron: 1 },  needs: 'stable', forge: true },
+  knight:     { cost: { food: 15, gold: 10, iron: 8 },   upkeep: { food: 2, gold: 2 },  needs: 'stable', forge: true },
   apprentice: { cost: { food: 10, mana: 8 },             upkeep: { food: 1, mana: 1 },           needs: 'tower' },
   battlemage: { cost: { gold: 10, mana: 15 },            upkeep: { gold: 1, mana: 2 },           needs: 'tower', level: 2 },
   alden:      { cost: { gold: 30 },                      upkeep: { food: 1, gold: 1 },           needs: 'tavern', hero: true },
