@@ -6,11 +6,11 @@ import { makeRng } from '../core/rng.js';
 export const LANE = 12, TICKS = 8, ROUND_CAP = 15;
 export const ORDERS = {
   advance: { name: 'Вперёд', icon: '⇒', hint: 'Идти на врага и рубиться' },
-  hold: { name: 'Держать строй', icon: '▣', hint: '+2 защиты, отдых; ополченцы встречают натиск копьями' },
-  charge: { name: 'Натиск', icon: '⚡', hint: 'Разгон и удар ×2.5, −20 морали врагу; дорого по выносливости' },
-  fallback: { name: 'Отойти', icon: '◁', hint: 'Отступить назад и отдышаться; вдогонку бьют сильнее' },
-  volley: { name: 'Стрелять', icon: '➶', hint: 'Стоять и стрелять по выбранной цели' },
-  spell: { name: 'Заклинание', icon: '✦', hint: 'Огненный шар, лечение или подъём мёртвых' }
+  hold: { name: 'Строй', icon: '▣', hint: 'Стоять: +2 защиты, отдых. Ополченцы встречают натиск копьями' },
+  charge: { name: 'Натиск', icon: '⚡', hint: 'Разгон и удар ×2.5, враг теряет мораль. Сильно утомляет' },
+  fallback: { name: 'Отход', icon: '◁', hint: 'Отойти назад и отдышаться' },
+  volley: { name: 'Стрелять', icon: '➶', hint: 'Стоять и стрелять' },
+  spell: { name: 'Магия', icon: '✦', hint: 'Огненный шар, лечение или подъём мёртвых' }
 };
 export const TARGETS = { near: 'Ближние', ranged: 'Стрелки', mage: 'Маги' };
 export const TERRAIN_NAME = { hill: 'Холм', forest: 'Лес', ford: 'Брод' };

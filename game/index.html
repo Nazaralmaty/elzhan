@@ -77,20 +77,42 @@
 </div>
 
 <div id="lane" hidden>
-  <header class="topbar"><span class="title">Стенка на стенку · прототип</span><span class="sep"></span><span id="laneStatus" class="lane-status"></span></header>
-  <details class="lane-help">
-    <summary>Как это работает</summary>
-    <ul>
-      <li><b>Раунд.</b> Справа видно, что задумал враг. Отдай приказ каждому отряду и жми «В бой» — 4 секунды отряды действуют сами.</li>
-      <li><b>Силы</b> (синяя полоска). В рукопашной быстро тают, в строю и при отходе восстанавливаются. Уставшие бьют на 25–50% слабее — меняй ряды: свежих вперёд, уставших назад.</li>
-      <li><b>Мораль</b> (жёлтая). Падает от потерь и натиска. Ниже 25 — отряд колеблется и бьёт хуже, на нуле бежит и пугает соседей. Герой рядом держит строй. Нежить не бежит — её надо добить.</li>
-      <li><b>Натиск конницы.</b> Удар ×2.5 и −20 морали, но съедает силы. Ополченцы, держащие строй, встречают его копьями, мечники в строю гасят его щитами. В лесу натиска нет.</li>
-      <li><b>Ряды.</b> Рубится только передний ряд, ополченцы достают копьями и из второго. Стрелков, до которых дошла рукопашная, бьют в полтора раза сильнее.</li>
-      <li><b>Местность.</b> Холм: стрелкам +1 дальность и +25% урона, держащим строй +защита. Лес: стрелы наносят вдвое меньше, идти медленно. Брод: идти медленно, защита −2.</li>
-    </ul>
-  </details>
-  <div class="lane-stage"><svg id="laneSvg" role="img" aria-label="Линия сражения"></svg></div>
-  <div class="lane-orders" id="laneOrders"></div>
+  <header class="lane-top">
+    <span class="lane-round" id="laneRound">Раунд 1</span>
+    <span class="lane-power"><b>Ты</b><i id="lanePwrP"></i></span>
+    <span class="lane-power enemy"><b>Враг</b><i id="lanePwrE"></i></span>
+    <span class="grow"></span>
+    <button class="lbtn" type="button" id="laneHelpBtn" aria-label="Памятка">?</button>
+    <button class="lbtn" type="button" id="laneExit">Выйти</button>
+  </header>
+  <div class="lane-field"><svg id="laneSvg" role="application" aria-label="Поле сражения"></svg></div>
+  <footer class="lane-bar">
+    <div class="lane-chips" id="laneChips"></div>
+    <div class="lane-cmd" id="laneCmd"></div>
+    <button class="lane-go" type="button" id="laneFight">▶ В бой</button>
+  </footer>
+  <div class="overlay" id="laneHelp" hidden>
+    <div class="modal lane-legend" role="dialog" aria-modal="true" aria-labelledby="lhTitle">
+      <h2 id="lhTitle">Памятка</h2>
+      <div class="legend-grid">
+        <span class="lg-ico">⇒</span><span><b>Вперёд</b> — идти и рубиться</span>
+        <span class="lg-ico">▣</span><span><b>Строй</b> — стоять, защита, отдых</span>
+        <span class="lg-ico">⚡</span><span><b>Натиск</b> — конница бьёт ×2.5</span>
+        <span class="lg-ico">◁</span><span><b>Отход</b> — назад, отдышаться</span>
+        <span class="lg-ico">➶</span><span><b>Стрелять</b> — стоять и стрелять</span>
+        <span class="lg-ico">✦</span><span><b>Магия</b> — огонь, лечение</span>
+        <span class="lg-bar mo"></span><span><b>Мораль</b> — на нуле отряд бежит</span>
+        <span class="lg-bar st"></span><span><b>Силы</b> — усталые бьют слабее</span>
+      </div>
+      <ul class="legend-tips">
+        <li>Смотри на значок над врагом: <b>⚡</b> — он готовит натиск. Ополченцы в <b>Строю</b> встретят его копьями.</li>
+        <li>Уставших отводи назад, свежих — вперёд.</li>
+        <li>Холм — стрелкам дальше и сильнее. Лес — стрелы слабее, натиска нет. Брод — медленно.</li>
+      </ul>
+      <div class="row"><button class="gbtn primary" type="button" id="laneHelpClose">Понятно</button></div>
+    </div>
+  </div>
+  <div class="overlay" id="laneEnd" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="leTitle" id="laneEndBody"></div></div>
 </div>
 
 <div class="overlay" id="result" hidden>
