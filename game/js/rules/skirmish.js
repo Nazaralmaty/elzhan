@@ -45,21 +45,26 @@ export function generateArena(rng, kind) {
 }
 
 /* ---------- setup ---------- */
-function makeUnit(st, kind, side, r, c) {
-  const d = UNITS[kind];
+// entry: unit kind, or { kind, hp, level, unrest, ref } coming from the kingdom map
+function makeUnit(st, entry, side, r, c) {
+  const e = typeof entry === 'string' ? { kind: entry } : entry, d = UNITS[e.kind], lvl = (e.level || 1) - 1;
+  const maxHp = d.hp + lvl * 3;
+  let atk = d.atk + lvl;
+  if (e.unrest) atk = Math.round(atk * 0.75);
   return {
-    id: st.nextId++, kind, side, r, c,
-    name: d.name, hp: d.hp, maxHp: d.hp, atk: d.atk, def: d.def, move: d.move, range: d.range,
+    id: st.nextId++, kind: e.kind, side, r, c, ref: e.ref, level: e.level || 1, kills: 0,
+    name: d.name, hp: Math.min(maxHp, e.hp ?? maxHp), maxHp, atk, def: d.def, move: d.move, range: d.range,
     magic: !!d.magic, mounted: !!d.mounted, hero: !!d.hero, undead: !!d.undead,
     abilities: [...d.abilities], cd: {}, status: {},
     ap: side === st.turn ? 2 : 0, retaliated: false, disengage: false
   };
 }
 
-function deploy(st, side, kinds) {
+function deploy(st, side, entries) {
   const front = side === 'player' ? 1 : COLS - 2, back = side === 'player' ? 0 : COLS - 1;
   const rows = [2, 3, 1, 4, 0, 5];
-  const melee = kinds.filter(k => UNITS[k].range === 1), ranged = kinds.filter(k => UNITS[k].range > 1);
+  const kindOf = e => typeof e === 'string' ? e : e.kind;
+  const melee = entries.filter(e => UNITS[kindOf(e)].range === 1), ranged = entries.filter(e => UNITS[kindOf(e)].range > 1);
   const slots = [...rows.map(r => [r, front]), ...rows.map(r => [r, back])];
   const backFirst = [...rows.map(r => [r, back]), ...rows.map(r => [r, front])];
   const take = (list, kind) => {
@@ -303,6 +308,8 @@ function hurt(st, u, amount, ev) {
   u.hp = Math.max(0, u.hp - amount);
   ev.push({ t: 'dmg', id: u.id, amount, hp: u.hp });
   if (u.hp <= 0) {
+    const killer = st.actor && unitById(st, st.actor);
+    if (killer && killer.side !== u.side) killer.kills = (killer.kills || 0) + 1;
     ev.push({ t: 'death', id: u.id });
     st.corpses.push({ r: u.r, c: u.c, kind: u.kind, side: u.side });
   }
@@ -324,6 +331,7 @@ function knock(st, t, d, ev) {
 }
 
 function strike(st, u, t, o, ev) {
+  st.actor = u.id;
   const f = computeDamage(st, u, pos(u), t, o);
   ev.push({ t: 'attack', id: u.id, target: t.id, ranged: u.range > 1, magic: u.magic });
   hurt(st, t, f.dmg, ev);
@@ -341,6 +349,7 @@ export function performMove(st, u, path) {
   for (let i = 0; i + 1 < path.length; i++) {
     for (const s of strikes.filter(s => s.step === i)) {
       if (s.by.hp <= 0) continue;
+      st.actor = s.by.id;
       ev.push({ t: 'attack', id: s.by.id, target: u.id, opp: true });
       hurt(st, u, s.dmg, ev);
     }
@@ -365,6 +374,7 @@ export function useAbility(st, u, id, at) {
   const A = ABILITIES[id], ev = [], t = at ? unitAt(st, at[0], at[1]) : null;
   if (A.mana) st.mana[u.side] -= A.mana;
   u.cd[id] = A.cd;
+  st.actor = u.id;
   ev.push({ t: 'ability', id: u.id, ability: id, at });
   switch (id) {
     case 'spears': case 'shieldWall': u.status[id] = true; break;

@@ -17,7 +17,15 @@ export const TER = {
   forest: { top: '#6FA35B', side: '#4F7E43', name: 'Лес' },
   hill: { top: '#C4AE80', side: '#9E8960', name: 'Холм' },
   rock: { top: '#7FB069', side: '#5E8F4C', name: 'Камень' },
-  wall: { top: '#7FB069', side: '#5E8F4C', name: 'Стена' }
+  wall: { top: '#7FB069', side: '#5E8F4C', name: 'Стена' },
+  mountain: { top: '#9CA2AA', side: '#767C84' },
+  water: { top: '#5AA9E6', side: '#3F87C2' },
+  ore: { top: '#C4AE80', side: '#9E8960' },
+  gold: { top: '#C4AE80', side: '#9E8960' },
+  mana: { top: '#7FB069', side: '#5E8F4C' },
+  ruins: { top: '#D8CCAB', side: '#B3A684' },
+  village: { top: '#7FB069', side: '#5E8F4C' },
+  field: { top: '#E9DFC4', side: '#C9BC9A' }
 };
 const tree = (x, y, k) => `<rect x="${x-1.2*k}" y="${y}" width="${2.4*k}" height="${4*k}" fill="#6B4E2E"/><polygon points="${x},${y-14*k} ${x+7*k},${y+1*k} ${x-7*k},${y+1*k}" fill="#3E7C59"/><polygon points="${x},${y-14*k} ${x+7*k},${y+1*k} ${x},${y+1*k}" fill="#356C4D"/>`;
 const humps = (x, y, k, c) => `<path d="M${x-15*k} ${y+6*k} Q${x-7*k} ${y-9*k} ${x+1*k} ${y+6*k} Z" fill="${c}"/><path d="M${x-2*k} ${y+7*k} Q${x+6*k} ${y-4*k} ${x+14*k} ${y+7*k} Z" fill="${shade(c,-.08)}"/>`;
@@ -128,5 +136,31 @@ export function figSVG(kind, c, anim = '', flip = false){
 }
 export function figAt(kind, c, x, y, k, flip, anim = ''){
   return `<g class="fig ${anim}" transform="translate(${(x - 32*k).toFixed(1)} ${(y + 4 - 74*k).toFixed(1)}) scale(${k})">${figInner(kind, c, flip)}</g>`;
+}
+
+
+/* ---------- buildings (ported from mockup) ---------- */
+export function building(id, x, y, s, c){
+  const k = s / 30, W = '#F3EAD6', roof = c;
+  const box = (bx, by, w, h, f = W) => `<rect x="${x+bx*k}" y="${y+by*k}" width="${w*k}" height="${h*k}" fill="${f}"/>`;
+  const poly = (arr, f) => `<polygon points="${arr.map(p => (x+p[0]*k).toFixed(1)+','+(y+p[1]*k).toFixed(1)).join(' ')}" fill="${f}"/>`;
+  const shadow = `<ellipse cx="${x}" cy="${y+7*k}" rx="${14*k}" ry="${3.5*k}" fill="rgba(0,0,0,.14)"/>`;
+  switch(id){
+    case 'townhall': return shadow + box(-12,-6,24,13) + poly([[-14,-6],[0,-15],[14,-6]], roof) + box(4,-22,7,14,'#E6DCC4') + poly([[3,-22],[7.5,-28],[12,-22]], roof) + `<line x1="${x+7.5*k}" y1="${y-28*k}" x2="${x+7.5*k}" y2="${y-36*k}" stroke="#6B4E2E" stroke-width="${1.2*k}"/>` + poly([[7.5,-36],[14,-34],[7.5,-32]], roof) + box(-3,0,5,7,'#8A6A48');
+    case 'house': return shadow + box(-7,-4,14,10) + poly([[-9,-4],[0,-13],[9,-4]], roof) + box(-1.5,1,3,5,'#8A6A48');
+    case 'farm': return `<rect x="${x+2*k}" y="${y-6*k}" width="${8*k}" height="${7*k}" fill="${W}"/>` + poly([[1,-6],[6,-11],[11,-6]], roof);
+    case 'mill': return shadow + poly([[-5,6],[-3.5,-10],[3.5,-10],[5,6]], W) + poly([[-5,-10],[0,-15],[5,-10]], roof) + `<g class="spin" style="transform-origin:${x}px ${y-9*k}px">${[0,90,180,270].map(a => `<rect x="${x-1.2*k}" y="${y-21*k}" width="${2.4*k}" height="${12*k}" fill="#8A6A48" transform="rotate(${a} ${x} ${y-9*k})"/>`).join('')}</g><circle cx="${x}" cy="${y-9*k}" r="${1.6*k}" fill="#5A4430"/>`;
+    case 'sawmill': return shadow + box(-9,-3,14,9,'#C89A6A') + poly([[-10,-3],[6,-8],[6,-3]], roof) + [0,1,2].map(i => `<circle cx="${x+(8)*k}" cy="${y+(4-i*3.2)*k}" r="${1.8*k}" fill="#8A5A33"/><circle cx="${x+8*k}" cy="${y+(4-i*3.2)*k}" r="${.7*k}" fill="#D6AE7E"/>`).join('');
+    case 'quarry': return shadow + box(-10,-1,8,7,'#D9DCE0') + box(-2,-1,8,7,'#C3C7CD') + box(-6,-8,8,7,'#B5BAC1') + box(6,1,5,5,'#D9DCE0');
+    case 'iron': case 'goldmine': return `<path d="M${x-7*k} ${y+6*k} V${y-2*k} A${7*k} ${7*k} 0 0 1 ${x+7*k} ${y-2*k} V${y+6*k} Z" fill="#8A6A48"/><path d="M${x-4.5*k} ${y+6*k} V${y-1*k} A${4.5*k} ${4.5*k} 0 0 1 ${x+4.5*k} ${y-1*k} V${y+6*k} Z" fill="#2B3036"/>` + (id === 'goldmine' ? `<circle cx="${x+9*k}" cy="${y+5*k}" r="${2*k}" fill="#F2C14E"/>` : `<circle cx="${x+9*k}" cy="${y+5*k}" r="${2*k}" fill="#5A5F68"/>`);
+    case 'market': return shadow + box(-10,0,20,6,'#C89A6A') + [0,1,2,3,4].map(i => box(-11+i*4.4,-7,4.4,6, i%2 ? '#FFFFFF' : roof)).join('') + box(-10,-1,2,7,'#8A6A48') + box(8,-1,2,7,'#8A6A48');
+    case 'barracks': return shadow + poly([[-11,6],[0,-12],[11,6]], roof) + poly([[-3,6],[0,-2],[3,6]], shade(roof,-.35)) + `<line x1="${x+12*k}" y1="${y+7*k}" x2="${x+12*k}" y2="${y-14*k}" stroke="#6B4E2E" stroke-width="${1.2*k}"/>` + poly([[12,-17],[13.6,-13],[10.4,-13]], '#C9D1DA');
+    case 'forge': return shadow + box(-10,-4,18,10,'#6A6F78') + poly([[-11,-4],[-1,-10],[9,-4]], roof) + box(4,-15,4,8,'#575C64') + `<circle cx="${x-4*k}" cy="${y+1*k}" r="${2.6*k}" fill="#FF9A3C"/>` + poly([[9,4],[15,4],[14,1],[10,1]], '#3A3F46');
+    case 'stable': return shadow + box(-11,-3,22,9,'#B5653A') + poly([[-12,-3],[0,-11],[12,-3]], roof) + `<path d="M${x-3*k} ${y+6*k} V${y-1*k} H${x+3*k} V${y+6*k} M${x-3*k} ${y-1*k} L${x+3*k} ${y+6*k} M${x+3*k} ${y-1*k} L${x-3*k} ${y+6*k}" stroke="#F3EAD6" stroke-width="${1*k}" fill="none"/>`;
+    case 'tower': return shadow + box(-4.5,-20,9,26,'#E6E0D2') + poly([[-6.5,-20],[0,-32],[6.5,-20]], MANA) + box(-1.5,-15,3,5,'#A28BFF') + `<circle class="pulse" cx="${x}" cy="${y-30*k}" r="${4*k}" fill="${MANA}" opacity=".35"/>`;
+    case 'walls': return box(-13,-7,26,13,'#B9B2A4') + [-13,-6.5,0,6.5].map(d => box(d,-11,4.5,4,'#B9B2A4')).join('') + box(-3,-1,6,7,'#6B4E2E') + `<line x1="${x-13*k}" y1="${y-1*k}" x2="${x+13*k}" y2="${y-1*k}" stroke="#A39C8F" stroke-width="${1*k}"/>`;
+    case 'tavern': return shadow + box(-9,-4,16,10) + poly([[-11,-4],[-1,-12],[9,-4]], roof) + `<line x1="${x+9*k}" y1="${y-4*k}" x2="${x+13*k}" y2="${y-4*k}" stroke="#6B4E2E" stroke-width="${1*k}"/><circle cx="${x+13*k}" cy="${y-0.5*k}" r="${3*k}" fill="#F2C14E"/><rect x="${x+11.5*k}" y="${y-2*k}" width="${3*k}" height="${3.4*k}" fill="#FFFFFF" opacity=".85"/>` + box(-3,1,4,5,'#8A6A48');
+  }
+  return '';
 }
 

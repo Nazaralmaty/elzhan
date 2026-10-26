@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Пробуждение источников · Королевство</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Nunito:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+
+<main id="kStart">
+  <div class="setup-wrap">
+    <header class="setup-head">
+      <div><p class="label">Этап 2 · Королевство</p><h1>Пробуждение <span>источников</span></h1></div>
+      <p>Строй королевство: города, застройка по гексам, крестьяне и армия. Зачисти логова монстров и не дай нежити с севера разорить столицу.</p>
+    </header>
+    <div class="setup-grid">
+      <div class="panel">
+        <h2>Новая партия</h2>
+        <div><p class="label">Размер карты</p><div class="seg">
+          <label><input type="radio" name="ksize" value="short" id="ks-short"> Короткая<small>12×12 · 4 логова</small></label>
+          <label><input type="radio" name="ksize" value="medium" id="ks-medium" checked> Средняя<small>20×20 · 9 логов</small></label>
+          <label><input type="radio" name="ksize" value="long" id="ks-long"> Длинная<small>30×30 · 16 логов</small></label></div></div>
+        <label class="toggle"><input type="checkbox" id="kHard"> Жёсткий режим: павший герой не возвращается</label>
+        <div><p class="label">Сид карты</p><div class="seed"><input id="kSeed" inputmode="numeric" aria-label="Сид карты"><button class="gbtn" type="button" id="kReseed">Случайный</button></div></div>
+        <div class="go"><button class="gbtn primary" type="button" id="kNew">Новая партия</button><button class="gbtn" type="button" id="kContinue" hidden>Продолжить</button></div>
+      </div>
+      <div class="panel">
+        <h2>Как играть</h2>
+        <ul class="howto">
+          <li><b>Город.</b> Кликни ратушу: крестьяне, найм, стены. Кликни пустой гекс своей территории — постройка.</li>
+          <li><b>Соседство.</b> Мельница рядом с фермами, кузница у шахты, башня у источников маны дают бонусы.</li>
+          <li><b>Отряд.</b> Кликни его, затем гекс — идти, врага — атаковать. Отряд, закончивший ход на деревне, присоединяет её.</li>
+          <li><b>Содержание.</b> Армия ест еду и берёт ресурсы каждый ход. Нехватка — ропот, потом дезертирство.</li>
+          <li><b>Цель.</b> Зачисти все логова. Каждые несколько ходов с севера приходит нежить — держи армию у городов.</li>
+          <li><b>Управление.</b> Два пальца или <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> — карта, щипок или <kbd>Q</kbd>/<kbd>E</kbd> — масштаб, <kbd>Enter</kbd> — конец хода, <kbd>Tab</kbd> — следующий отряд.</li>
+        </ul>
+        <a class="gbtn" href="index.html">Перейти в Арену</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="kMap" hidden>
+  <header class="topbar">
+    <span class="title">Королевство</span><span class="sep"></span>
+    <span class="num" id="kTurn">Ход 1</span><span class="sep"></span>
+    <span class="kres" id="kRes"></span>
+    <span class="grow"></span>
+    <span class="kgoal" id="kGoal"></span>
+    <button class="gbtn" type="button" id="kMarket">Рынок</button>
+    <button class="gbtn" type="button" id="kMenu">Меню</button>
+    <button class="gbtn primary" type="button" id="kEnd">Конец хода <kbd>Enter</kbd></button>
+  </header>
+  <div class="kmain">
+    <div class="kstage"><svg id="kSvg" role="application" aria-label="Карта королевства"></svg><div id="kTip" hidden></div><div id="kLog" aria-live="polite"></div></div>
+    <aside class="kside" id="kSide"></aside>
+  </div>
+</div>
+
+<div class="overlay" id="kBattle" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="kbTitle" id="kBattleBody"></div></div>
+<div class="overlay" id="kMarketDlg" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="kmTitle" id="kMarketBody"></div></div>
+<div class="overlay" id="kEndDlg" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="keTitle" id="kEndBody"></div></div>
+
+<div id="battle" hidden>
+  <header class="topbar">
+    <span class="title" id="arenaTitle">Арена</span><span class="sep"></span>
+    <span class="num" id="roundLbl">Раунд 1</span>
+    <span class="turn player" id="turnLbl">Твой ход</span><span class="sep"></span>
+    <span class="res" title="Мана для заклинаний"><svg viewBox="0 0 20 20"><polygon points="10,1.5 15.5,9 10,18.5 4.5,9" fill="#7B5CFF"/><polygon points="10,1.5 15.5,9 10,10.5" fill="#A28BFF"/></svg><span class="num" id="manaLbl">20</span></span>
+    <span class="grow"></span>
+    <button class="gbtn" type="button" id="autoBtn">Автобой</button>
+    <button class="gbtn" type="button" id="helpBtn">Правила</button>
+    <button class="gbtn" type="button" id="retreatBtn">Отступить</button>
+  </header>
+  <div id="stage">
+    <svg id="board" role="application" aria-label="Поле боя"></svg>
+    <div id="tip" hidden></div>
+    <div id="banner"></div>
+    <div id="log" aria-live="polite"></div>
+    <div id="deployHint" hidden>Расстановка: выбери бойца и кликни гекс в своих двух левых столбцах. Затем «Начать бой».</div>
+  </div>
+  <footer class="actionbar">
+    <div class="who" id="who"></div>
+    <div class="abil" id="abil"></div>
+    <div class="ends">
+      <button class="gbtn" type="button" id="nextBtn">Следующий <kbd>Tab</kbd></button>
+      <button class="gbtn primary" type="button" id="endBtn">Конец хода <kbd>Enter</kbd></button>
+    </div>
+  </footer>
+</div>
+
+<div class="overlay" id="result" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="resTitle">
+    <h2 id="resTitle">Победа</h2>
+    <p id="resText"></p>
+    <div class="result-stats" id="resStats"></div>
+    <div class="row" id="resButtons"></div>
+  </div>
+</div>
+
+<div class="overlay" id="help" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">Правила стычки</h2>
+    <ul>
+      <li><b>Ход по сторонам.</b> Сначала ходят все твои бойцы в любом порядке, потом все враги. <kbd>Enter</kbd> — конец хода.</li>
+      <li><b>2 действия.</b> Шаг + атака, шаг + шаг или шаг + умение. Атака или умение завершают ход бойца.</li>
+      <li><b>Зона контроля.</b> Шесть гексов вокруг врага ближнего боя. Вошёл — остановился. Вышел — получил удар вдогонку.</li>
+      <li><b>Фланги.</b> +25% за каждого твоего бойца рядом с целью (до +50%). Бойцы с противоположных сторон цели — клещи, ещё +25%.</li>
+      <li><b>Укрытия.</b> Цель прямо за камнем получает −50% от выстрелов, в лесу −25%. Стена закрывает выстрел полностью.</li>
+      <li><b>Высота.</b> С холма стрелки бьют на 1 гекс дальше, а удар сверху вниз +25%.</li>
+      <li><b>Отбрасывание.</b> Таран толкает цель. Если сзади препятствие или боец — +4 урона.</li>
+      <li><b>Ответ.</b> Боец ближнего боя отвечает на удар в ближнем бою половиной атаки, один раз за ход.</li>
+      <li><b>Урон без случайностей.</b> Наведи курсор на врага — увидишь точный прогноз.</li>
+      <li><b>Управление.</b> Два пальца или <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> — двигать поле, щипок или <kbd>Q</kbd>/<kbd>E</kbd> — масштаб, <kbd>1</kbd>–<kbd>3</kbd> — атака и умения, <kbd>Tab</kbd> — следующий боец, <kbd>Esc</kbd> — отмена.</li>
+    </ul>
+    <div class="row"><button class="gbtn primary" type="button" id="helpClose">Понятно</button></div>
+  </div>
+</div>
+
+<script type="module" src="js/kingdom-main.js"></script>
+</body>
+</html>

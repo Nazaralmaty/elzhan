@@ -24,7 +24,7 @@ kbd{font:800 11px/1 var(--body);padding:3px 6px;border-radius:5px;background:rgb
 .gbtn.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
 
 /* ---------- setup ---------- */
-#setup{height:100%;overflow:auto;padding:28px max(20px,env(safe-area-inset-left,0px)) 40px max(20px,env(safe-area-inset-right,0px))}
+#setup,#kStart{height:100%;overflow:auto;padding:28px max(20px,env(safe-area-inset-left,0px)) 40px max(20px,env(safe-area-inset-right,0px))}
 .setup-wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
 .setup-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px}
 .setup-head h1{font-size:clamp(26px,4vw,40px)}
@@ -131,11 +131,79 @@ kbd{font:800 11px/1 var(--body);padding:3px 6px;border-radius:5px;background:rgb
 #lane .gbtn{background:#3A4045;border-color:#5B6268;color:#E6E8EA}
 #lane .gbtn.lane-fight{background:#C9CED2;color:#1E2124}
 
+/* kingdom */
+.inline-link{color:#9CC0FF;font-weight:800;text-decoration:none;white-space:nowrap}
+.inline-link:hover{text-decoration:underline}
+a.gbtn{text-decoration:none;justify-self:start}
+.howto{margin:0;padding-left:18px;display:grid;gap:7px;color:#C9D6DD;font-size:14px}
+.howto b{color:var(--fg)}
+#kMap{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+.kres{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.kres .res small{font-weight:700;font-size:11px}
+.res small.up{color:var(--good)} .res small.down{color:var(--bad)}
+.kgoal{font-weight:800;color:var(--gold);font-size:13px}
+.kmain{display:grid;grid-template-columns:minmax(0,1fr) 340px;min-height:0}
+.kstage{position:relative;min-height:0;overflow:hidden;touch-action:none}
+#kSvg{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+#kSvg .hit{fill:transparent;cursor:pointer}
+#kSvg .army{cursor:pointer}
+#kTip{position:absolute;pointer-events:none;background:var(--hud);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:grid;gap:3px;font-size:12.5px;max-width:240px;z-index:4}
+#kLog{position:absolute;left:12px;bottom:12px;width:min(380px,60%);display:grid;gap:3px;font-size:12.5px;pointer-events:none}
+#kLog div{background:rgba(20,33,42,.88);border-radius:8px;padding:5px 10px;color:#DCE6EC;animation:logIn .25s ease-out}
+#kLog div:first-child{font-weight:800;color:var(--fg)}
+.kside{background:var(--hud);border-left:1px solid var(--line);padding:14px;overflow:auto;display:grid;gap:10px;align-content:start}
+.kside h3{font-size:16px}
+.kside .muted,.muted{color:var(--muted)}
+.small{font-size:12px}
+.note{background:var(--hud-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;margin:0}
+.bad{color:var(--bad)} .gold{color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:3px;font-weight:800;font-size:12px;background:var(--table);border-radius:999px;padding:2px 8px 2px 4px;font-variant-numeric:tabular-nums}
+.chip svg{width:15px;height:15px}
+.chip.short{color:var(--bad)}
+.cmeta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted)}
+.ulist{display:grid;gap:6px}
+.urow{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;background:var(--hud-2);border-radius:10px;padding:5px 8px}
+.uava{height:46px;display:grid;place-items:center;overflow:hidden}
+.uava svg{height:52px;width:auto;margin-top:6px}
+.uinfo{display:grid;gap:3px;min-width:0}
+.uinfo b{font-size:13px}
+.uinfo small{color:var(--muted);font-size:11px}
+.gbtn.mini{min-height:28px;padding:4px 8px;font-size:12px}
+.blist{display:grid;gap:6px}
+.bopt{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;text-align:left;background:var(--hud-2);border:1px solid var(--line);border-radius:12px;padding:6px 8px}
+.bopt:hover:not([disabled]){border-color:var(--gold)}
+.bopt[disabled]{opacity:.55;cursor:not-allowed}
+.bico{width:52px;height:46px;display:grid;place-items:center}
+.bico svg{width:52px;height:auto}
+.bico.small{width:36px;height:34px}.bico.small svg{width:36px}
+.bico.unit svg{height:50px;width:auto}
+.btxt{display:grid;gap:3px;min-width:0}
+.btxt b{font-size:13px}
+.btxt small{font-size:11.5px;color:var(--muted);line-height:1.3}
+.btxt small.bad{color:var(--bad)}
+.brow{display:grid;grid-template-columns:36px 1fr auto;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:7px;font-size:13px}
+.brow b{display:block;font-size:13px}
+.slots{display:inline-flex;gap:3px}
+.slots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.slots i.on{background:var(--gold)}
+.clist{display:grid;gap:4px}
+.crow{display:flex;justify-content:space-between;gap:8px;background:var(--hud-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:13px;text-align:left}
+.crow:hover{border-color:var(--muted)}
+.crow span{color:var(--muted)}
+.kb-vs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kb-side{background:var(--hud-2);border-radius:12px;padding:10px;display:grid;gap:6px}
+.kb-figs{display:flex;flex-wrap:wrap;gap:4px}
+.kb-u{display:grid;justify-items:center;font-size:11px;color:var(--muted)}
+.kb-u svg{height:58px;width:auto}
+#kMarketBody .seg label{padding:6px 2px}
+#kMarketBody .seg label svg{width:18px;height:18px;justify-self:center}
+
 /* overlays */
 .overlay{position:fixed;inset:0;background:rgba(8,14,18,.66);display:grid;place-items:center;padding:20px;z-index:20}
 .modal{width:min(560px,100%);max-height:100%;overflow:auto;background:var(--hud);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .modal h2{font-size:26px}
-.modal p{color:#C9D6DD}
+.modal p{color:#C9D6DD;margin:0}
 .modal .row{display:flex;flex-wrap:wrap;gap:8px}
 .modal ul{margin:0;padding-left:18px;display:grid;gap:6px;color:#C9D6DD}
 .modal ul b{color:var(--fg)}
@@ -178,6 +246,8 @@ kbd{font:800 11px/1 var(--body);padding:3px 6px;border-radius:5px;background:rgb
 
 @media (max-width:900px){
   .setup-grid{grid-template-columns:1fr}
+  .kmain{grid-template-columns:1fr;grid-template-rows:minmax(320px,1fr) auto}
+  .kside{border-left:0;border-top:1px solid var(--line);max-height:45vh}
   .actionbar{grid-template-columns:1fr}
   .ends{justify-content:flex-start}
   body{overflow:auto}
