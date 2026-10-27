@@ -164,7 +164,7 @@ export function orderBuild(st, side, kind, x, z, ids) {
   if (!canAfford(S, B.cost)) return 'Не хватает ресурсов';
   pay(S, B.cost);
   const b = placeBuilding(st, side, kind, x, z, false);
-  for (const id of ids) { const u = unit(st, id); if (u && u.side === side && UNITS[u.kind].peasant) setTask(st, u, { kind: 'build', b: b.id }); }
+  for (const id of ids) { const u = unit(st, id); if (u && u.side === side && UNITS[u.kind].peasant) setTask(st, u, { kind: 'build', b: b.id, prev: jobOf(u) }); }
   return '';
 }
 
@@ -239,8 +239,17 @@ export function research(st, bid, key) {
 
 /* ---------- unit orders ---------- */
 function setPath(st, u, x, z) {
-  u.path = st.pf.find(u.x, u.z, x, z) || [[x, z]];
+  const p = st.pf.find(u.x, u.z, x, z);
+  // an empty path (goal in the same cell) still has to walk the last step
+  u.path = p && p.length ? p : [[x, z]];
   u.stuck = 0;
+}
+// the peasant's current job, kept so it can return to it after building
+function jobOf(u) {
+  const T = u.task;
+  if (!T) return null;
+  if (T.kind === 'build' || T.kind === 'repair') return T.prev || null;
+  return { kind: T.kind, res: T.res, b: T.b };
 }
 export function setTask(st, u, task) {
   leaveInside(st, u);
@@ -318,7 +327,7 @@ export function commandWork(st, ids, x, z) {
   if (bid) {
     const b = building(st, bid);
     if (b.side !== side) return false;
-    if (!b.done) { peasants.forEach(u => setTask(st, u, { kind: 'build', b: b.id })); return true; }
+    if (!b.done) { peasants.forEach(u => setTask(st, u, { kind: 'build', b: b.id, prev: jobOf(u) })); return true; }
     if (b.kind === 'mine') { peasants.forEach(u => setTask(st, u, { kind: 'mine', b: b.id })); return true; }
     if (b.kind === 'mill') { peasants.forEach(u => { leaveFarm(st, u); setTask(st, u, { kind: 'farm', b: b.id }); }); return true; }
     if (b.hp < b.maxHp) { peasants.forEach(u => setTask(st, u, { kind: 'repair', b: b.id })); return true; }
@@ -504,10 +513,13 @@ function stepToward(st, u, tx, tz, speed, dt) {
   const v = Math.min(d, speed * (inForest ? 0.7 : 1) * dt);
   const nx = u.x + dx / d * v, nz = u.z + dz / d * v;
   const ok = (x, z) => st.pf.ok(Math.floor(x), Math.floor(z));
-  if (ok(nx, nz)) { u.x = nx; u.z = nz; }
+  // a unit caught inside a footprint (a house raised on top of it) walks out freely
+  const x0 = u.x, z0 = u.z;
+  if (ok(nx, nz) || !ok(u.x, u.z)) { u.x = nx; u.z = nz; }
   else if (ok(nx, u.z)) u.x = nx;
   else if (ok(u.x, nz)) u.z = nz;
-  else { u.stuck += dt; }
+  // sliding along a wall without getting closer also counts as stuck, so the path gets rebuilt
+  if (Math.hypot(u.x - x0, u.z - z0) < v * 0.3) u.stuck += dt;
   u.facing = Math.atan2(dz, dx);
   u.moving = true;
   u.moved += v;
@@ -751,7 +763,7 @@ function updatePeasant(st, u, dt) {
       b.farmers.push(u.id);
     }
     const k = b.farmers.indexOf(u.id), spot = farmSpot(st, b, k);
-    if (goNear(st, u, spot.x, spot.z, 0.6, dt)) {
+    if (goNear(st, u, spot.x, spot.z, 1.1, dt)) {
       u.working = true;
       const mult = (hasUp(S, 'scythe') ? 1.25 : 1) * (hasUp(S, 'threefield') ? 1.35 : 1) * S.gatherMult;
       const n = GATHER.food * mult * dt;
@@ -787,13 +799,15 @@ function updatePeasant(st, u, dt) {
       return;
     }
     const want = T.res === 'wood' ? TREE : ROCK;
+    // crowded or unreachable for a while: take another tree or rock
+    if (T.cell >= 0 && !u.working && (T.tryT = (T.tryT || 0) + dt) > 6) { T.skip = T.cell; T.cell = -1; T.tryT = 0; }
     if (T.cell < 0 || st.map.kind[T.cell] !== want) {
-      T.cell = findResource(st, u.x, u.z, want, 12);
+      T.cell = findWork(st, u, want, T.skip);
       if (T.cell < 0) { if (u.carry?.n) T.back = true; else { u.task = null; u.order = { type: 'idle' }; } return; }
     }
     const cx = T.cell % st.W + 0.5, cz = Math.floor(T.cell / st.W) + 0.5;
     if (goNear(st, u, cx, cz, 1.25, dt)) {
-      u.working = true;
+      u.working = true; T.tryT = 0;
       u.facing = Math.atan2(cz - u.z, cx - u.x);
       const rate = GATHER[T.res] * mult * dt;
       u.carry = u.carry || { res: T.res, n: 0 };
@@ -803,7 +817,7 @@ function updatePeasant(st, u, dt) {
       if (st.map.amount[T.cell] <= 0.001) {
         st.map.kind[T.cell] = GRASS; st.map.amount[T.cell] = 0; st.mapVersion++;
         st.events.push({ t: want === TREE ? 'treeGone' : 'rockGone', i: T.cell });
-        T.cell = findResource(st, cx, cz, want, 8);
+        T.cell = findWork(st, u, want);
         if (T.cell < 0) T.back = true;
       }
       if (u.carry.n >= cap) T.back = true;
@@ -816,7 +830,10 @@ function afterBuild(st, u, b) {
   if (b.kind === 'mine') { setTask(st, u, { kind: 'mine', b: b.id }); return; }
   // help with another unfinished building nearby
   const next = st.buildings.find(o => o.side === u.side && !o.done && distToBuilding(o, u.x, u.z) < 12);
-  if (next) { setTask(st, u, { kind: 'build', b: next.id }); return; }
+  const prev = u.task?.prev;
+  if (next) { setTask(st, u, { kind: 'build', b: next.id, prev }); return; }
+  // back to the job the peasant had before the order to build
+  if (prev && (prev.kind === 'gather' || building(st, prev.b))) { setTask(st, u, prev.kind === 'gather' ? { kind: 'gather', res: prev.res, cell: -1 } : { ...prev }); return; }
   u.task = null; u.order = { type: 'idle' }; u.anchor = { x: u.x, z: u.z };
 }
 export function farmSpot(st, b, k) {
@@ -835,6 +852,24 @@ function nearestDrop(st, u, res) {
     if (d < bd) { bd = d; best = b; }
   }
   return best;
+}
+// nearest tree or rock with few others already at it; looks further out when the edge is cut back
+function findWork(st, u, want, skip = -1) {
+  const busy = new Map();
+  for (const o of st.units) if (o !== u && o.side === u.side && o.task?.kind === 'gather' && o.task.cell >= 0) busy.set(o.task.cell, (busy.get(o.task.cell) || 0) + 1);
+  for (const r of [10, 24, 48]) {
+    let best = -1, bd = Infinity;
+    const x0 = Math.floor(u.x), z0 = Math.floor(u.z);
+    for (let j = Math.max(0, z0 - r); j <= Math.min(st.H - 1, z0 + r); j++) for (let i = Math.max(0, x0 - r); i <= Math.min(st.W - 1, x0 + r); i++) {
+      const k = j * st.W + i;
+      if (st.map.kind[k] !== want || k === skip) continue;
+      if (!(st.pf.ok(i + 1, j) || st.pf.ok(i - 1, j) || st.pf.ok(i, j + 1) || st.pf.ok(i, j - 1))) continue;
+      const d = Math.sqrt((i - u.x) ** 2 + (j - u.z) ** 2) + 5 * (busy.get(k) || 0) ** 2;
+      if (d < bd) { bd = d; best = k; }
+    }
+    if (best >= 0) return best;
+  }
+  return -1;
 }
 export function findResource(st, x, z, want, r) {
   let best = -1, bd = Infinity;

@@ -12,6 +12,7 @@ import {
 import { aiTick } from './ai.js';
 import { UNITS, BUILDINGS, UPGRADES, BUILD_MENU, RES, RES_NAME, RES_ICON, SHAPES, TECH_HINT } from './data.js';
 import { createWorld, CELL } from './view/world3d.js';
+import { getSound } from '../audio/sound.js';
 
 const $ = id => document.getElementById(id);
 const KEYS = ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB'];
@@ -31,7 +32,9 @@ window.addEventListener('keydown', e => { if (e.key === 'Enter' && !$('rSetup').
 try { if (!document.createElement('canvas').getContext('webgl2')) $('rGl').textContent = 'Браузер не поддерживает WebGL2 — 3D может не запуститься.'; } catch { /* ignore */ }
 
 let game = null;
+const snd = getSound();
 function start() {
+  snd.unlock();
   const opts = { size: val('rsize'), players: 1 + +val('rfoes'), difficulty: +val('rdif'), peace: +val('rpeace'), startRes: val('rstart'), seed: +seedInput.value || 1 };
   $('rSetup').hidden = true; $('rGame').hidden = false;
   game = runGame(opts);
@@ -54,6 +57,55 @@ function runGame(opts) {
   const home = centerOf(st.buildings.find(b => b.side === 0 && b.kind === 'townhall'));
   rig.tx = home.x * CELL; rig.tz = (home.z + 6) * CELL;
   eng.updateCamera();
+
+  // sound: loudness and stereo from where the camera looks; the far and the fogged stay quiet
+  snd.setListener((x, z) => {
+    const dx = x * CELL - rig.tx, dz = z * CELL - rig.tz;
+    const right = dx * Math.cos(rig.yaw) - dz * Math.sin(rig.yaw), d = Math.hypot(dx, dz), r = rig.dist * 0.75;
+    const zoom = Math.min(1.1, Math.max(0.3, 50 / rig.dist));
+    return { gain: zoom / (1 + Math.max(0, d - r * 0.5) ** 2 / (r * r) * 2.5), pan: Math.max(-1, Math.min(1, right / r)) * 0.85, far: Math.min(1, Math.max(0, (rig.dist - 30) / 140 + d / (r * 4))) };
+  });
+  const vis = st.sides[0].visible;
+  const seen = (x, z) => !!vis[Math.floor(z) * W + Math.floor(x)];
+  let dinT = 0;
+  function sounds() {
+    for (const e of st.events) {
+      if (e.t === 'shot') { if (seen(e.x, e.z) || seen(e.tx, e.tz)) snd.play('musket', e.x, e.z); }
+      else if (e.t === 'cannon') { if (seen(e.x, e.z)) snd.play('cannon', e.x, e.z); }
+      else if (e.t === 'boom') { if (seen(e.x, e.z)) snd.play('boom', e.x, e.z); }
+      else if (e.t === 'melee') {
+        const a = unit(st, e.id), tg = unit(st, e.to);
+        if (!a || !tg || !seen(tg.x, tg.z)) continue;
+        dinT += 1;
+        const wood = UNITS[a.kind].peasant || a.kind === 'pikeman';
+        snd.play(Math.random() < 0.5 ? (wood ? 'knock' : 'blade') : 'thud', tg.x, tg.z, 0.8);
+      } else if (e.t === 'death') { if (seen(e.x, e.z) || e.side === 0) snd.play('fall', e.x, e.z, UNITS[e.kind].cav ? 1 : 0.6); }
+      else if (e.t === 'destroyed') { const cx = e.x + e.w / 2, cz = e.z + e.h / 2; if (seen(cx, cz)) snd.play('crash', cx, cz); }
+      else if (e.t === 'treeGone') { const x = e.i % W + 0.5, z = Math.floor(e.i / W) + 0.5; if (seen(x, z) && Math.random() < 0.6) snd.play('treefall', x, z, 0.7); }
+      else if (e.t === 'built') { const b = building(st, e.id); if (b?.side === 0) snd.play('news'); }
+      else if (e.t === 'placed') { const b = building(st, e.id); if (b?.side === 0) snd.play('place'); }
+      else if (e.t === 'researched' && e.side === 0) snd.play('news');
+      else if (e.t === 'formed' && e.side === 0) snd.play('advance');
+      else if (e.t === 'drop' && Math.random() < 0.35) { const u = unit(st, e.id); if (u) snd.play('sack', u.x, u.z, 0.4); }
+      else if ((e.t === 'captured' || e.t === 'convert') && e.from === 0) snd.play('alarm');
+      else if (e.t === 'msg' && e.side === 0 && e.kind === 'bad') snd.play('deny');
+    }
+  }
+  // crowd beds from what is on screen near the camera
+  function soundBeds(dt) {
+    let march = 0, hooves = 0, work = 0;
+    const cx = rig.tx / CELL, cz = rig.tz / CELL, r = rig.dist / CELL * 0.9;
+    for (const u of st.units) {
+      if (u.hp <= 0 || u.inside || Math.abs(u.x - cx) > r || Math.abs(u.z - cz) > r || !seen(u.x, u.z)) continue;
+      const U = UNITS[u.kind];
+      if (U.peasant) { if (u.working && u.task?.kind !== 'farm') work++; }
+      else if (u.moving) { if (U.cav) hooves++; else march++; }
+    }
+    const zoom = Math.min(1, Math.max(0.3, 50 / rig.dist));
+    dinT = Math.max(0, dinT - dt * 6);
+    snd.bed('march', march / 18 * zoom); snd.bed('hooves', hooves / 6 * zoom); snd.bed('work', work / 8 * zoom);
+    snd.bed('din', dinT / 10 * zoom); snd.bed('wind', 0.35 + (1 - zoom) * 0.5);
+  }
 
   const sel = { units: new Set(), building: 0 };
   const groups = {};
@@ -337,6 +389,7 @@ function runGame(opts) {
     keys.add(e.code);
     if (e.code === 'Escape') { if (mode) setMode(null); else { sel.units.clear(); sel.building = 0; renderPanel(); } return; }
     if (e.code === 'KeyP' || e.code === 'Pause') { paused = !paused; renderSpeed(); return; }
+    if (e.code === 'KeyM') { toggleSound(); return; }
     if (e.code === 'Home') { rig.tx = home.x * CELL; rig.tz = (home.z + 6) * CELL; return; }
     if (/^Digit[0-9]$/.test(e.code)) {
       const n = e.code.slice(5);
@@ -410,7 +463,8 @@ function runGame(opts) {
     if (!el) return;
     const bt = buttons[+el.dataset.i];
     const why = bt.why ? bt.why() : '';
-    if (why) { toast(why, 'bad'); return; }
+    if (why) { toast(why, 'bad'); snd.play('deny'); return; }
+    snd.play('click');
     bt.act(e.shiftKey);
     renderPanel();
     showInfo(bt);
@@ -559,6 +613,10 @@ function runGame(opts) {
   }
   $('rIdle').onclick = e => selectIdle(e.shiftKey);
   $('rHintX').onclick = () => setMode(null);
+  const toggleSound = () => { const v = snd.toggle(); $('rSound').textContent = v ? '🔊' : '🔇'; toast(v ? 'Звук включён' : 'Звук выключен'); };
+  $('rSound').textContent = snd.on ? '🔊' : '🔇';
+  $('rSound').onclick = toggleSound;
+  canvas.addEventListener('pointerdown', () => snd.unlock());
 
   /* ---------- squad bar: select groups by click, no box or right button needed ---------- */
   let squadKey = '';
@@ -785,6 +843,7 @@ function runGame(opts) {
   /* ---------- loop ---------- */
   function events() {
     world.playEvents(st.events, st.t);
+    sounds();
     let rebuild = false;
     for (const e of st.events) {
       if (e.t === 'msg' && e.side === 0) toast(e.text, e.kind);
@@ -837,7 +896,8 @@ function runGame(opts) {
     eng.render();
     drawOverlay(real);
     hudT -= real; bldT -= real;
-    if (hudT <= 0) { hudT = 0.25; cleanSel(); renderTop(); renderSel(); renderSquads(); refreshButtons(); drawMini(); }
+    if (hudT <= 0) { hudT = 0.25; cleanSel(); renderTop(); renderSel(); renderSquads(); refreshButtons(); drawMini(); soundBeds(0.25); }
+    snd.flush();
     if (bldT <= 0) { bldT = 2; renderPanel(); }
     if (st.over && $('rEnd').hidden) showEnd();
   }
@@ -848,11 +908,13 @@ function runGame(opts) {
       <div class="lstats"><span>Убито врагов <b>${S.stats.killed}</b></span><span>Потеряно <b>${S.stats.lost}</b></span><span>Добыто ресурсов <b>${Math.round(S.stats.gathered)}</b></span><span>Захвачено зданий <b>${S.stats.captured}</b></span></div>
       <div class="row"><button class="gbtn primary" type="button" id="rAgain">Новая партия</button><button class="gbtn" type="button" id="rLook">Посмотреть на поле</button></div>`;
     $('rEnd').hidden = false;
+    snd.quiet(); snd.play(win ? 'victory' : 'defeat'); snd.flush();
     $('rAgain').onclick = () => close();
     $('rLook').onclick = () => { $('rEnd').hidden = true; };
   }
   function close() {
     closed = true;
+    snd.quiet();
     cancelAnimationFrame(raf);
     window.removeEventListener('keydown', onKey); window.removeEventListener('keyup', onKey); window.removeEventListener('resize', onResize);
     eng.renderer.dispose();

@@ -459,22 +459,9 @@ function moveToward(st, u, tx, tz, speedMul = 1) {
   return true;
 }
 
+// No body collision, like Stick War: soldiers pass through each other and keep to their slots across the field.
 function separate(st) {
-  const list = st.units.filter(u => u.hp > 0 && u.state !== 'garrison' && u.state !== 'inMine' && !u.hidden);
-  for (let i = 0; i < list.length; i++) {
-    const a = list[i], ra = ROSTER[a.kind].mounted || ROSTER[a.kind].group === 'art' ? 13 : 9;
-    for (let j = i + 1; j < list.length; j++) {
-      const b = list[j], rb = ROSTER[b.kind].mounted || ROSTER[b.kind].group === 'art' ? 13 : 9;
-      const dx = b.x - a.x, dz = b.z - a.z, min = ra + rb;
-      if (Math.abs(dx) > min || Math.abs(dz) > min) continue;
-      const d = Math.hypot(dx, dz) || 0.01;
-      if (d >= min) continue;
-      const push = (min - d) * 0.25, nx = dx / d, nz = dz / d;
-      const wa = ROSTER[a.kind].miner || a.brace ? 0.2 : 1, wb = ROSTER[b.kind].miner || b.brace ? 0.2 : 1;
-      a.x -= nx * push * wb; a.z -= nz * push * wb; b.x += nx * push * wa; b.z += nz * push * wa;
-    }
-  }
-  for (const u of list) { u.z = Math.max(-ZW, Math.min(ZW, u.z)); u.x = Math.max(10, Math.min(FIELD - 10, u.x)); }
+  for (const u of st.units) if (u.hp > 0) { u.z = Math.max(-ZW, Math.min(ZW, u.z)); u.x = Math.max(10, Math.min(FIELD - 10, u.x)); }
 }
 
 // Spread each branch into ranks across the depth of the field.

@@ -13,6 +13,7 @@ import { buildTerrain, buildProps, backdrop } from '../gfx/scenery.js';
 import { fortress, necropolis, crystal, goldMine, boneMine, windmill, windmillSails, haystack, fence, halfTimber, staticMesh } from '../gfx/structures.js';
 import { makeNoise } from '../rts/noise.js';
 import { makeRng } from '../core/rng.js';
+import { getSound } from '../audio/sound.js';
 
 const $ = id => document.getElementById(id);
 const WX = x => x / 10 - FIELD / 20, WZ = z => z / 10;
@@ -41,6 +42,45 @@ export function startLane(opts) {
   rig.groundY = (x, z) => world.heightAt(x, z);
   rig.tx = WX(320); rig.tz = 0;
   eng.updateCamera();
+
+  // sound: loudness and stereo along the field from where the camera looks
+  const snd = getSound();
+  snd.unlock();
+  snd.setListener((x, z) => {
+    const half = rig.dist * 0.8 * Math.max(1, canvas.clientWidth / Math.max(1, canvas.clientHeight)), dx = WX(x) - rig.tx, off = Math.max(0, Math.abs(dx) - half * 0.6);
+    const zoom = Math.min(1.15, Math.max(0.35, 34 / rig.dist));
+    return { gain: zoom / (1 + (off / half) ** 2 * 2.5), pan: Math.max(-1, Math.min(1, dx / half)) * 0.85, far: Math.min(1, Math.max(0, (rig.dist - 25) / 90 + off / (half * 3))) };
+  });
+  const STEEL = new Set(['cossack', 'cuirassier', 'skeleton', 'deathknight', 'alden', 'bonelord', 'musketeer']);
+  let dinT = 0;
+  function sound(e, u) {
+    const at = (name, o, k) => snd.play(name, o.x, o.z, k);
+    if (e.t === 'fire' && u) at('musket', u);
+    else if (e.t === 'shoot' && u) at({ cannon: 'cannon', bonecaster: 'sling', irena: 'fire', morven: 'bolt' }[u.kind] || 'musket', u);
+    else if (e.t === 'boom') snd.play({ irena: 'blast', morven: 'blast' }[e.kind] || 'boom', e.x, e.z, e.kind === 'bonecaster' ? 0.75 : 1);
+    else if (e.t === 'melee' && u) { dinT++; const tg = st.units.find(o => o.id === e.to); if (tg) at(R(u).miner ? 'knock' : Math.random() < 0.55 ? (STEEL.has(u.kind) ? 'blade' : u.kind === 'pikeman' ? 'knock' : 'thud') : 'thud', tg, 0.8); }
+    else if (e.t === 'bolt' && u) at(u.kind === 'tarn' ? 'ice' : 'bolt', u);
+    else if (e.t === 'charge' && u) at('charge', u);
+    else if (e.t === 'raise' && u) at('raise', u);
+    else if (e.t === 'grape' && u) at('grape', u);
+    else if (e.t === 'devour' && u) at('thud', u);
+    else if (e.t === 'death' && u) at('fall', u, R(u).mounted ? 1 : 0.6);
+    else if (e.t === 'gold' && e.side === 'player' && u && Math.random() < 0.5) at('sack', u, 0.45);
+    else if (e.t === 'turret') snd.play('cannon', e.side === 'player' ? 40 : FIELD - 40, 0, 0.7);
+    else if ((e.t === 'upgrade' || e.t === 'built') && e.side === 'player') snd.play('news');
+    else if (e.t === 'baseHit' && e.side === 'player') snd.play('alarm');
+  }
+  function soundBeds() {
+    let march = 0, hooves = 0;
+    const half = rig.dist * 1.2;
+    for (const u of st.units) {
+      if (u.hp <= 0 || !u.moving || u.hidden || Math.abs(WX(u.x) - rig.tx) > half) continue;
+      if (R(u).mounted || R(u).group === 'cav') hooves++; else if (!R(u).miner) march++;
+    }
+    const zoom = Math.min(1, Math.max(0.35, 34 / rig.dist));
+    dinT = Math.max(0, dinT * 0.85);
+    snd.bed('march', march / 16 * zoom); snd.bed('hooves', hooves / 6 * zoom); snd.bed('din', dinT / 8 * zoom); snd.bed('wind', 0.4 + (1 - zoom) * 0.5);
+  }
 
   const view = new Map(); // id -> render state
   const texts = [];
@@ -146,6 +186,7 @@ export function startLane(opts) {
   function playEvents() {
     for (const e of st.events) {
       const u = e.id && st.units.find(o => o.id === e.id);
+      sound(e, u);
       if (e.t === 'fire' && u) {
         const s = vs(u); s.act = 'fire'; s.actT = 0; s.lastFight = st.t;
         const sc = models[MODEL[u.kind]].scale, dx = Math.cos(u.facing), dz = -Math.sin(u.facing);
@@ -499,6 +540,7 @@ export function startLane(opts) {
     });
   }
   function toast(msg, kind = '') {
+    if (kind === 'bad') snd.play('deny');
     const el = document.createElement('div');
     el.className = 'ltoast ' + kind;
     el.textContent = msg;
@@ -512,13 +554,14 @@ export function startLane(opts) {
   function command(c) {
     if (c === 'flank' && group !== 'cav') return;
     setCommand(st, 'player', group, c);
+    snd.play(c === 'attack' || c === 'flank' ? 'advance' : c === 'retreat' ? 'retreat' : 'click');
     renderCommands();
     toast(`${GROUP_TABS[group]}: ${COMMANDS[c].toLowerCase()}`);
   }
   function buyKind(k) {
     const why = canBuy(st, 'player', k);
     if (why) { toast(why, 'bad'); return; }
-    buy(st, 'player', k); renderHud();
+    buy(st, 'player', k); snd.play('click'); renderHud();
   }
   $('lnShop').onclick = e => { const b = e.target.closest('[data-kind]'); if (b) buyKind(b.dataset.kind); };
   const built = k => !!st.sides.player.bld[UPGRADES[k].at]?.done;
@@ -527,13 +570,13 @@ export function startLane(opts) {
     const bb = e.target.closest('[data-build]');
     if (bb) {
       const why = canBuild(st, 'player', bb.dataset.build);
-      if (why && why !== 'Уже построено') toast(why, 'bad'); else if (!why) { build(st, 'player', bb.dataset.build); toast(`Строим: ${BUILDINGS[bb.dataset.build].name}`); renderBuildings(); }
+      if (why && why !== 'Уже построено') toast(why, 'bad'); else if (!why) { build(st, 'player', bb.dataset.build); snd.play('place'); toast(`Строим: ${BUILDINGS[bb.dataset.build].name}`); renderBuildings(); }
       renderHud(); return;
     }
     const b = e.target.closest('[data-up]');
     if (!b) return;
     const why = canResearch(st, 'player', b.dataset.up);
-    if (why) toast(why, 'bad'); else { research(st, 'player', b.dataset.up); renderBuildings(); }
+    if (why) toast(why, 'bad'); else { research(st, 'player', b.dataset.up); snd.play('place'); renderBuildings(); }
     renderHud();
   };
   $('lnUps').onmouseover = e => { const el = e.target.closest('[data-up],[data-build]'); if (el) { infoEl = el; $('lnInfo').innerHTML = infoFor(el); } };
@@ -548,6 +591,9 @@ export function startLane(opts) {
   $('lnHelpBtn').onclick = () => { paused = true; $('lnHelp').hidden = false; renderHud(); };
   $('lnHelpClose').onclick = () => { $('lnHelp').hidden = true; paused = false; renderHud(); };
   $('lnExit').onclick = () => close();
+  const toggleSound = () => { const v = snd.toggle(); $('lnSound').textContent = v ? '🔊' : '🔇'; toast(v ? 'Звук включён' : 'Звук выключен'); };
+  $('lnSound').textContent = snd.on ? '🔊' : '🔇';
+  $('lnSound').onclick = toggleSound;
 
   // click on the field: set the hold line for the selected branch
   let down = null;
@@ -593,6 +639,7 @@ export function startLane(opts) {
     else if (k === 'g' || k === 'п') command('flank');
     else if (k === 'f' || k === 'а') $('lnBarrage').click();
     else if (k === 'c' || k === 'с') follow = true;
+    else if (k === 'm' || k === 'ь') toggleSound();
     else if (k === 'escape') selectGroup('all');
   }
   window.addEventListener('keydown', onKey);
@@ -640,7 +687,8 @@ export function startLane(opts) {
     eng.render();
     drawOverlay(paused ? 0 : real);
     hud += real;
-    if (hud > 0.15) { hud = 0; renderHud(); drawMini(); }
+    if (hud > 0.15) { hud = 0; renderHud(); drawMini(); soundBeds(); }
+    snd.flush();
     if (st.over && $('lnEnd').hidden) showEnd();
   }
 
@@ -653,12 +701,14 @@ export function startLane(opts) {
       <div class="lstats"><span>Убито врагов <b>${P.kills}</b></span><span>Потеряно <b>${P.losses}</b></span><span>Добыто золота <b>${Math.round(P.mined)}</b></span><span>Улучшений <b>${ups}</b></span></div>
       <div class="row"><button class="gbtn primary" type="button" id="lnAgain">Ещё раз</button><button class="gbtn" type="button" id="lnBack">В меню</button></div>`;
     $('lnEnd').hidden = false;
+    snd.quiet(); snd.play(win ? 'victory' : 'defeat'); snd.flush();
     $('lnAgain').onclick = () => { close(); startLane({ ...opts, seed: seed + 1 }); };
     $('lnBack').onclick = () => close();
   }
 
   function close() {
     closed = true;
+    snd.quiet();
     cancelAnimationFrame(raf);
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('keyup', onKey);
