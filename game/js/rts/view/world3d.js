@@ -34,7 +34,7 @@ export function createWorld(eng, st) {
     // forest floor, sand by water, rock on slopes
     const near = (k, r) => { for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const X = Math.floor(x) + i, Z = Math.floor(z) + j; if (X >= 0 && Z >= 0 && X < W && Z < H && map.kind[Z * W + X] === k) return true; } return false; };
     if (near(TREE, 0)) c = mix(c, [0.26, 0.36, 0.18], 0.6);
-    if (y < -1.6) c = mix(c, [0.62, 0.57, 0.42], Math.min(1, (-1.6 - y) * 0.9));
+    if (y < -1.7) c = mix(c, [0.62, 0.57, 0.42], Math.min(1, (-1.7 - y) * 1.2));
     if (near(DEPOSIT, 1) || near(ROCK, 0)) c = mix(c, [0.5, 0.46, 0.38], 0.55);
     c = mix(c, [0.5, 0.47, 0.42], Math.min(1, slope * 4));
     return c;
@@ -42,14 +42,15 @@ export function createWorld(eng, st) {
   const terrain = buildTerrain({ x0: 0, z0: 0, w: W * CELL, d: H * CELL, step: CELL, height: (wx, wz) => gy(wx / CELL, wz / CELL), colorAt, uvScale: 0.25 });
   scene.add(terrain.mesh);
   // skirt beyond the map edge
-  const skirt = new THREE.Mesh(new THREE.PlaneGeometry(W * CELL * 4, H * CELL * 4), new THREE.MeshStandardMaterial({ color: '#202a22', roughness: 1 }));
-  skirt.rotation.x = -Math.PI / 2; skirt.position.set(W * CELL / 2, -0.6, H * CELL / 2); skirt.receiveShadow = true;
+  const skirt = new THREE.Mesh(new THREE.PlaneGeometry(W * CELL * 4, H * CELL * 4), new THREE.MeshStandardMaterial({ color: '#2c3a2a', roughness: 1 }));
+  // well below the lowest lake bed so it never shows through the terrain
+  skirt.rotation.x = -Math.PI / 2; skirt.position.set(W * CELL / 2, -4.5, H * CELL / 2); skirt.receiveShadow = true;
   scene.add(skirt);
   backdrop(scene, W * CELL / 2, H * CELL / 2, W * CELL * 1.1, map.seed);
   // water
   const water = new THREE.Mesh(new THREE.PlaneGeometry(W * CELL, H * CELL), new THREE.MeshStandardMaterial({ color: '#3d7aa0', roughness: 0.18, metalness: 0.15, transparent: true, opacity: 0.86 }));
   water.material.onBeforeCompile = sh => { worldFogHook(sh); };
-  water.rotation.x = -Math.PI / 2; water.position.set(W * CELL / 2, -1.55, H * CELL / 2);
+  water.rotation.x = -Math.PI / 2; water.position.set(W * CELL / 2, -2.5, H * CELL / 2);
   scene.add(water);
 
   /* trees, rocks */

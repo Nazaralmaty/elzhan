@@ -131,11 +131,12 @@ export function createMap({ size = 'medium', players = 2, seed = 1 } = {}) {
     }
     return seen;
   }
-  // water cells sit a little lower so lakes read as basins
+  // lake beds sit below the water line (-2.5), shores just above it, dry land never lower than -2
   for (let z = 0; z <= H; z++) for (let x = 0; x <= W; x++) {
-    let wet = false;
-    for (const [i, j] of [[x - 1, z - 1], [x, z - 1], [x - 1, z], [x, z]]) if (inside(i, j) && kind[idx(i, j)] === WATER) wet = true;
-    if (wet) height[z * (W + 1) + x] = Math.min(height[z * (W + 1) + x], -3.2);
+    let wet = 0, dry = 0;
+    for (const [i, j] of [[x - 1, z - 1], [x, z - 1], [x - 1, z], [x, z]]) if (inside(i, j)) { if (kind[idx(i, j)] === WATER) wet++; else dry++; }
+    const k = z * (W + 1) + x;
+    height[k] = wet && !dry ? Math.min(height[k], -3.2) : wet ? -2.2 : Math.max(height[k], -2.0);
   }
   return { W, H, kind, amount, height, deposits, starts, seed };
 }
