@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Стенка на стенку · 3D</title>
+<title>Стенка на стенку</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Nunito:wght@400;600;800&display=swap">
@@ -16,16 +16,19 @@
 <main id="lnSetup">
   <div class="setup-wrap">
     <header class="setup-head">
-      <div><p class="label">Стенка на стенку · версия 4 · 3D</p><h1>Стенка <span>на стенку</span></h1></div>
-      <p>Поле с глубиной, рудокопы носят золото, 11 улучшений, пикинёры, мушкетёры, казаки, кирасиры и пушки. Командуй каждым родом войск отдельно: держи линию, бей во фланг конницей, отводи раненых. <a class="inline-link" href="index.html">← Арена</a> · <a class="inline-link" href="rts.html">Казаки: большая стратегия →</a></p>
+      <div><p class="label">Стенка на стенку · версия 5</p><h1>Стенка <span>на стенку</span></h1></div>
+      <p>Два государства: Королевство и Нежить Морвена. Жилы золота посреди поля, за которые надо драться, академии с улучшениями для каждого рода войск и умения, которые бойцы применяют сами. <a class="inline-link" href="index.html">← Арена</a> · <a class="inline-link" href="rts.html">Казаки: большая стратегия →</a></p>
     </header>
     <div class="setup-grid">
       <div class="panel">
+        <div><p class="label">Твоё государство</p><div class="seg" id="lnFaction">
+          <label><input type="radio" name="lnside" value="human" checked> Королевство<small>пики, мушкеты, конница, пушки</small></label>
+          <label><input type="radio" name="lnside" value="undead"> Нежить Морвена<small>орда, души, подъём павших</small></label></div></div>
         <h2>Герой</h2>
         <div class="cards" id="lnHeroes"></div>
         <div><p class="label">Противник</p><div class="seg">
           <label><input type="radio" name="lnfoe" value="undead" checked> Нежить Морвена<small>скелеты, гули, костомёты</small></label>
-          <label><input type="radio" name="lnfoe" value="human"> Алое королевство<small>те же войска, что у тебя</small></label></div></div>
+          <label><input type="radio" name="lnfoe" value="human"> Алое королевство<small>пики, мушкеты, конница, пушки</small></label></div></div>
         <div><p class="label">Сложность</p><div class="seg" id="lnDif">
           <label><input type="radio" name="lndif" value="0"> Оруженосец</label>
           <label><input type="radio" name="lndif" value="1" checked> Рыцарь</label>
@@ -36,11 +39,11 @@
       <div class="panel">
         <h2>Что нового</h2>
         <ul class="howto">
-          <li><b>3D-поле с глубиной.</b> Бойцы встают в шеренги поперёк поля, конница может обойти строй по краю.</li>
-          <li><b>Роды войск.</b> Пехота, стрелки, конница и пушки получают приказы отдельно. Клик по полю ставит линию обороны.</li>
-          <li><b>Улучшения.</b> Кирки и тачки ускоряют добычу, кузня, латы и порох усиливают армию, конный завод и литейня открывают тяжёлую конницу и пушки.</li>
-          <li><b>Темп.</b> Бой идёт 10–20 минут: успеешь построить экономику, изучить ветку и провести несколько атак.</li>
-          <li><b>Старая 2D-версия</b> осталась в <a class="inline-link" href="index.html">Арене</a>.</li>
+          <li><b>Жилы на поле.</b> Кроме рудника у крепости, на поле три жилы. Рудокопы идут туда сами, если твоя линия их прикрывает. Двинь линию вперёд — станешь богаче, но враг будет охотиться на рудокопов.</li>
+          <li><b>Академии.</b> Каждое здание открывает род войск и даёт ему свои улучшения. Исследования в разных зданиях идут одновременно.</li>
+          <li><b>Умения ✦</b> бойцы применяют сами: пикинёры встают «ежом» против конницы, мушкетёры бьют залпом шеренгой, казаки срываются на рудокопов, пушка бьёт картечью в упор.</li>
+          <li><b>Нежить</b> собирает души с каждой смерти на поле: за души нанимаются рыцари смерти и костомёты. Мертвецы не лечатся в цитадели, зато дёшевы и поднимаются снова.</li>
+          <li><b>Сложность</b> — один и тот же ИИ, но на Короле он реагирует мгновенно, отвечает на твой состав, давит на жилы с первой минуты.</li>
         </ul>
       </div>
     </div>
@@ -50,7 +53,8 @@
 <div id="lnGame" hidden>
   <header class="ln-top">
     <span class="ln-gold" title="Золото"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#F2C14E"/><circle cx="10" cy="10" r="4.8" fill="none" stroke="#C99A2E" stroke-width="1.4"/></svg><b id="lnGold">0</b><small id="lnRate"></small></span>
-    <span class="ln-stat" title="Рудокопы / места в руднике">⛏ <b id="lnMiners"></b></span>
+    <span class="ln-stat" title="Рудокопы / места в руднике и на жилах">⛏ <b id="lnMiners"></b></span>
+    <span class="ln-stat" id="lnSouls" title="Души: падают с каждой смерти на поле, нужны для элиты" hidden>👻 <b id="lnSoulsN">0</b></span>
     <span class="ln-stat" title="Армия / предел">⚔ <b id="lnArmy"></b></span>
     <span class="ln-stat ln-res" id="lnResearch" title="Текущее исследование"></span>
     <span class="grow"></span>
@@ -83,12 +87,13 @@
       <h2 id="lnHelpTitle">Как воевать</h2>
       <ul>
         <li><b>Цель</b> — разрушить вражескую крепость. Крепость стреляет из пушек по всем, кто подошёл близко.</li>
-        <li><b>Золото.</b> Рудокопы ходят в рудник и носят золото в крепость. Кирки, тачки и новая жила ускоряют добычу, казначейство даёт доход само.</li>
+        <li><b>Золото.</b> Рудокопы носят золото из рудника у крепости. Когда рудник полон, они идут на жилы посреди поля — если твоя линия стоит рядом с жилой и врагов там нет. На мини-карте жила жёлтая, если она твоя, и красная, если вражеская.</li>
+        <li><b>Академии</b> справа внизу: кнопка с иконкой здания — построить, иконки рядом — исследования этого здания. В каждом здании своё исследование, они идут одновременно. ✦ — умение, которое войска применяют сами.</li>
         <li><b>Найм</b> — карточки внизу или <kbd>1</kbd>–<kbd>9</kbd>. Пикинёры рвут конницу, мушкетёры бьют издалека, казаки режут стрелков и пушки, кирасиры проламывают строй, пушки бьют по площади.</li>
         <li><b>Приказы по родам войск.</b> Выбери вкладку (или <kbd>Tab</kbd>) и дай приказ: <kbd>A</kbd> в атаку, <kbd>D</kbd> держать линию, <kbd>R</kbd> отход в крепость (лечит), <kbd>G</kbd> обход конницей по краю поля в тыл стрелкам.</li>
         <li><b>Линия.</b> Клик по полю переносит линию обороны выбранного рода войск.</li>
-        <li><b>Улучшения</b> справа: одно исследование за раз. Конный завод и литейня открывают тяжёлую конницу и пушки.</li>
-        <li><b>Залп крепости</b> (<kbd>F</kbd>) — семь ядер по самой плотной толпе врагов.</li>
+
+        <li><b>Залп крепости</b> или <b>Костяной дождь</b> (<kbd>F</kbd>) — семь ядер по самой плотной толпе врагов.</li>
         <li><b>Камера:</b> свайп двумя пальцами или стрелки — вдоль поля, щипок или <kbd>Q</kbd>/<kbd>E</kbd> — масштаб, <kbd>C</kbd> — снова следить за фронтом. Пробел — пауза.</li>
       </ul>
       <div class="row"><button class="gbtn primary" type="button" id="lnHelpClose">В бой</button></div>
@@ -99,21 +104,26 @@
 
 <script type="module">
 import { startLane } from './js/view/lane-view.js';
-import { ROSTER } from './js/rules/lane.js';
+import { ROSTER, FACTIONS } from './js/rules/lane.js';
 const $ = id => document.getElementById(id);
-const HEROES = { alden: 'Рыцарь: стойкий, бьёт мечом', irena: 'Волшебница: огненный шар по площади', corvin: 'Стрелок: дальний меткий выстрел' };
-let hero = (() => { try { return localStorage.getItem('aos.lane4.hero'); } catch { return null; } })() || 'alden';
+const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
+let faction = store('aos.lane5.side') || 'human';
+let hero = store('aos.lane5.hero');
+document.querySelector(`input[name=lnside][value=${faction}]`).checked = true;
 function renderHeroes() {
-  $('lnHeroes').innerHTML = Object.entries(HEROES).map(([k, d]) => `<button type="button" class="pick" aria-pressed="${k === hero}" data-hero="${k}"><b>${ROSTER[k].name}</b><small>${d}</small><small>${ROSTER[k].hp} здоровья · ${ROSTER[k].cost} золота</small></button>`).join('');
+  const list = FACTIONS[faction].heroes;
+  if (!list.includes(hero)) hero = list[0];
+  $('lnHeroes').innerHTML = list.map(k => `<button type="button" class="pick" aria-pressed="${k === hero}" data-hero="${k}"><b>${ROSTER[k].name}</b><small>${ROSTER[k].desc}</small><small>${ROSTER[k].hp} здоровья · ${ROSTER[k].cost} золота</small></button>`).join('');
 }
-$('lnHeroes').onclick = e => { const b = e.target.closest('[data-hero]'); if (!b) return; hero = b.dataset.hero; try { localStorage.setItem('aos.lane4.hero', hero); } catch {} renderHeroes(); };
+$('lnHeroes').onclick = e => { const b = e.target.closest('[data-hero]'); if (!b) return; hero = b.dataset.hero; store('aos.lane5.hero', hero); renderHeroes(); };
+$('lnFaction').onchange = () => { faction = document.querySelector('input[name=lnside]:checked').value; store('aos.lane5.side', faction); renderHeroes(); };
 renderHeroes();
 const gl = (() => { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } })();
 if (!gl) $('lnGl').textContent = 'Браузер не поддерживает WebGL2 — 3D может не запуститься.';
 function go() {
   const foe = document.querySelector('input[name=lnfoe]:checked').value, dif = +document.querySelector('input[name=lndif]:checked').value;
   $('lnSetup').hidden = true; $('lnGame').hidden = false;
-  startLane({ hero, foe, dif, seed: (Date.now() % 100000) | 0, onExit: () => { $('lnGame').hidden = true; $('lnSetup').hidden = false; } });
+  startLane({ faction, hero, foe, dif, seed: (Date.now() % 100000) | 0, onExit: () => { $('lnGame').hidden = true; $('lnSetup').hidden = false; } });
 }
 $('lnStart').onclick = go;
 window.addEventListener('keydown', e => { if (e.key === 'Enter' && !$('lnSetup').hidden) go(); });

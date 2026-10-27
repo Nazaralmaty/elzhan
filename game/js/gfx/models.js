@@ -202,6 +202,9 @@ export function buildModels() {
   M.alden = humanModel({ hat: 'plume', armor: '#c9d0d8', cape: true, weapon: 'bigsword', shield: '#ffffff', shieldTint: 1, trousers: '#c9d0d8', boots: '#8a929c', scale: 1.15, style: 'sword', moustache: true });
   M.irena = humanModel({ robe: true, hat: 'witch', weapon: 'staff', orb: '#FFB347', trim: BRASS, hair: '#b5532c', scale: 1.08, style: 'staff' });
   M.corvin = humanModel({ hat: 'feather', coatColor: '#3d5a3a', sash: true, long: 'rifle', trousers: '#5a4a38', boots: '#3a2a1e', scale: 1.1, moustache: true });
+  M.morven = humanModel({ robe: true, hat: 'hood', weapon: 'staff', orb: '#7CFFB2', skin: '#a9b3a2', trim: '#7CFFB2', coatColor: '#1F2A2E', cape: true, scale: 1.15, style: 'staff' });
+  M.tarn = humanModel({ robe: true, hat: 'hood', weapon: 'staff', orb: '#9FE3FF', skin: '#c9c2b2', trim: '#9FE3FF', coatColor: '#2c3f52', scale: 1.06, style: 'staff' });
+  M.bonelord = humanModel({ skull: true, hat: 'horned', armor: '#3a3f46', cape: true, weapon: 'bigsword', shield: '#4c4038', scale: 1.22, style: 'sword' });
   // Cossacks mode
   const peasant = { hat: 'cap', coatColor: '#d8cdb3', sash: true, trousers: '#6b5a48', boots: '#3a2c20' };
   M.peasant = humanModel({ ...peasant, style: 'none' });
