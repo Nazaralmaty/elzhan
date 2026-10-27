@@ -28,7 +28,7 @@ export function aiTick(st, side, dt) {
   /* economy: peasants */
   const peasantGoal = Math.min(80, Math.round((22 + st.t / 10) * [0.75, 0.9, 1, 1.1][diff]));
   const pop = mine.length + st.buildings.filter(b => b.side === side).reduce((n, b) => n + b.queue.length, 0);
-  if (peasants.length < peasantGoal && th.done && th.queue.length < 2 && S.res.food > (st.buildings.some(b => b.side === side && b.kind === 'mill' && b.done) ? 90 : 300) && pop < S.popCap) train(st, th.id, 'peasant');
+  if (peasants.length < peasantGoal && th.done && th.queue.length < 2 && S.res.food > (st.buildings.some(b => b.side === side && b.kind === 'mill' && b.done) ? 900 : 3000) && pop < S.popCap) train(st, th.id, 'peasant');
 
   // jobs
   const job = u => u.inside ? 'mine:' + building(st, u.inside)?.res : u.task ? (u.task.kind === 'gather' ? u.task.res : u.task.kind === 'mine' ? 'mine:' + building(st, u.task.b)?.res : u.task.kind) : 'idle';
@@ -37,7 +37,7 @@ export function aiTick(st, side, dt) {
   const eat = mine.reduce((a, u) => a + UNITS[u.kind].eat, 0);
   const foodRate = GATHER.food * (S.up.scythe ? 1.25 : 1) * (S.up.threefield ? 1.35 : 1) * S.gatherMult;
   // food pays for every recruit, so farms get a big share, more when the stock is low
-  const farmersWanted = Math.max(Math.ceil(eat / foodRate * 1.4) + 3, Math.round(peasants.length * (S.res.food < 300 ? 0.5 : S.res.food > 2500 ? 0.25 : 0.4)));
+  const farmersWanted = Math.max(Math.ceil(eat / foodRate * 1.4) + 3, Math.round(peasants.length * (S.res.food < 3000 ? 0.5 : S.res.food > 25000 ? 0.25 : 0.4)));
   const mills = done('mill');
   const farmSlots = mills.length * BUILDINGS.mill.farm;
   const mineJobs = {};
@@ -50,8 +50,8 @@ export function aiTick(st, side, dt) {
     const want = [
       ['farm', farmersWanted - (counts.farm || 0), !!farm],
       ...Object.entries(mineJobs).map(([res, n]) => ['mine:' + res, n, n > 0]),
-      ['wood', Math.max(5, peasants.length * (S.res.wood > 2000 ? 0.08 : 0.28)) - (counts.wood || 0), true],
-      ['stone', Math.max(2, peasants.length * (S.res.stone > 1500 ? 0.03 : 0.12)) - (counts.stone || 0), true]
+      ['wood', Math.max(5, peasants.length * (S.res.wood > 20000 ? 0.08 : 0.28)) - (counts.wood || 0), true],
+      ['stone', Math.max(2, peasants.length * (S.res.stone > 15000 ? 0.03 : 0.12)) - (counts.stone || 0), true]
     ].filter(w => w[2]).sort((a, b) => b[1] - a[1]);
     const pick = want[0]?.[0] || 'wood';
     if (pick === 'farm') { setTask(st, u, { kind: 'farm', b: farm.id }); }
@@ -69,7 +69,7 @@ export function aiTick(st, side, dt) {
     const w = peasants.find(u => u.task?.kind === 'gather' && u.task.res === surplus[0]);
     if (w) setTask(st, w, { kind: 'farm', b: freeFarm.id });
   }
-  if (S.res.food > 3500 && (counts.farm || 0) > 6) {
+  if (S.res.food > 35000 && (counts.farm || 0) > 6) {
     const f = peasants.find(u => u.task?.kind === 'farm');
     if (f) { const cell = findResource(st, f.x, f.z, TREE, 40); if (cell >= 0) setTask(st, f, { kind: 'gather', res: 'wood', cell }); }
   }
@@ -128,7 +128,7 @@ export function aiTick(st, side, dt) {
   const soldiers = mine.filter(u => !UNITS[u.kind].peasant && u.kind !== 'drummer' && u.kind !== 'officer');
   const free = mine.filter(u => !u.formation);
   const armyCap = Math.round((12 + st.t / 14) * [0.6, 0.85, 1, 1.15][diff]);
-  const reserve = { food: 60, wood: 60 };
+  const reserve = { food: 300, wood: 600 };
   const spare = r => S.res[r] - (reserve[r] || 0);
   for (const b of done('barracks')) {
     if (b.queue.length >= 3) continue;
@@ -141,17 +141,17 @@ export function aiTick(st, side, dt) {
     // fill one formation at a time: whichever loose group is closer to a full formation gets the recruit
     const fsize = diff >= 2 && st.t > 900 ? 36 : 15;
     const loosePikes = free.filter(u => u.kind === 'pikeman').length % fsize, looseMuskets = free.filter(u => u.kind === 'musketeer').length % fsize;
-    const kind = S.res.coal > 40 && (looseMuskets > loosePikes || (looseMuskets === loosePikes && muskets < pikes)) ? 'musketeer' : 'pikeman';
+    const kind = S.res.coal > 400 && (looseMuskets > loosePikes || (looseMuskets === loosePikes && muskets < pikes)) ? 'musketeer' : 'pikeman';
     if (spare('food') > 0 && canTrain(st, b.id, kind) === '') train(st, b.id, kind);
   }
   for (const b of done('stable')) {
     if (b.queue.length >= 2 || soldiers.length >= armyCap) continue;
     const kind = st.rng.next() < 0.5 ? 'cossack' : (st.rng.next() < 0.5 && canTrain(st, b.id, 'reiter') === '' ? 'reiter' : 'dragoon');
-    if (spare('food') > 20 && canTrain(st, b.id, kind) === '') train(st, b.id, kind);
+    if (spare('food') > 100 && canTrain(st, b.id, kind) === '') train(st, b.id, kind);
   }
   for (const b of done('foundry')) {
     const guns = mine.filter(u => u.kind === 'cannon').length;
-    if (!b.queue.length && guns < 1 + diff && canTrain(st, b.id, 'cannon') === '' && S.res.coal > 150) train(st, b.id, 'cannon');
+    if (!b.queue.length && guns < 1 + diff && canTrain(st, b.id, 'cannon') === '' && S.res.coal > 1500) train(st, b.id, 'cannon');
   }
   // formations
   const size = diff >= 2 && st.t > 900 ? 36 : 15;

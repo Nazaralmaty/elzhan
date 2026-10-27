@@ -7,7 +7,7 @@ import { rtsTownhall, rtsHouse, rtsMillBody, rtsStorehouse, rtsBarracks, rtsStab
 import {
   createGame, tick, DT, unit, building, centerOf, distToBuilding, canPlace, snapPlacement, orderBuild, canTrain, train, cancelTrain, canResearch, research,
   commandMove, commandAttack, commandWork, commandStop, setStance, canForm, formFormation, setShape, moveFormation, volley, disband, releaseWorkers, popUsed, canAfford, TREE, ROCK,
-  missingNeeds, autoWork, cancelTrainAt, cancelKind, setRepeat
+  missingNeeds, autoWork, cancelTrainAt, cancelKind, setRepeat, faceFormation
 } from './sim.js';
 import { aiTick } from './ai.js';
 import { UNITS, BUILDINGS, UPGRADES, BUILD_MENU, RES, RES_NAME, RES_ICON, SHAPES, TECH_HINT } from './data.js';
@@ -219,9 +219,10 @@ function runGame(opts) {
         ghost.add(ring);
       }
       eng.scene.add(ghost);
-      $('rHint').textContent = `${BUILDINGS[m.kind].name}: кликни место · Esc — отмена${m.kind === 'mine' ? ' · ставь на месторождение' : ''}`;
-    } else if (m?.type === 'rally') $('rHint').textContent = 'Кликни точку сбора · Esc — отмена';
-    else if (m?.type === 'attackMove') $('rHint').textContent = 'Атака с ходу: кликни точку · Esc — отмена';
+      $('rHintText').textContent = `${BUILDINGS[m.kind].name}: кликни место${m.kind === 'mine' ? ' · ставь на месторождение' : ''} · Esc — отмена`;
+    } else if (m?.type === 'rally') $('rHintText').textContent = 'Кликни точку сбора · Esc — отмена';
+    else if (m?.type === 'attackMove') $('rHintText').textContent = 'Атака с ходу: кликни точку · Esc — отмена';
+    else if (m?.type === 'face') $('rHintText').textContent = 'Кликни, куда отряду смотреть · Esc — отмена';
     $('rHint').hidden = !m;
     canvas.classList.toggle('cmd', !!m);
   }
@@ -276,6 +277,7 @@ function runGame(opts) {
     if (mode?.type === 'build') { placeBuilding(e, e.shiftKey); return; }
     if (mode?.type === 'rally') { const g = workPoint(e), b = building(st, sel.building); if (g && b) { b.rally = { x: g.x, z: g.z }; marker(g.x, g.z, '#ffd76a'); toast(rallyText(g)); } setMode(null); return; }
     if (mode?.type === 'attackMove') { orderAt(e); setMode(null); return; }
+    if (mode?.type === 'face') { const g = groundAt(e); if (g) { for (const f of selFormations()) faceFormation(st, f.id, Math.atan2(g.z - f.z, g.x - f.x)); marker(g.x, g.z, '#ffd76a'); } setMode(null); return; }
     if (d.drag) { boxSelect(d, e, d.shift); return; }
     // click: own unit / own building select; otherwise it's an order for the selection
     const own = unitAt(e.clientX, e.clientY, u => u.side === 0);
@@ -449,6 +451,10 @@ function runGame(opts) {
     const forms = selFormations();
     if (forms.length) {
       for (const [shape, name] of Object.entries(SHAPES)) buttons.push({ label: name, icon: shape === 'line' ? '▬' : shape === 'column' ? '▮' : '⬜', desc: shape === 'line' ? 'Широкий фронт: все стреляют разом' : shape === 'column' ? 'Узкий строй: быстрее на марше' : 'Каре: броня +3 против конницы, медленно', isOn: () => selFormations().every(f => f.shape === shape), act: () => forms.forEach(f => setShape(st, f.id, shape)) });
+      buttons.push({ label: 'Лицом к…', icon: '🧭', desc: 'Кликни точку на земле — отряд развернётся к ней лицом', act: () => setMode({ type: 'face' }) });
+      const turn = d => selFormations().forEach(f => faceFormation(st, f.id, (f.faceDir ?? f.dir) + d));
+      buttons.push({ label: 'Влево', icon: '↺', desc: 'Повернуть отряд на 45° влево', act: () => turn(-Math.PI / 4) });
+      buttons.push({ label: 'Вправо', icon: '↻', desc: 'Повернуть отряд на 45° вправо', act: () => turn(Math.PI / 4) });
       if (forms.some(f => UNITS[f.kind].shot)) buttons.push({ label: 'Залп!', icon: '💥', desc: 'Все заряженные мушкеты стреляют сейчас', act: () => forms.forEach(f => volley(st, f.id)) });
       buttons.push({ label: 'Распустить', icon: '✖', desc: 'Разбить строй: солдаты станут свободными', act: () => forms.forEach(f => disband(st, f.id)) });
     }
@@ -543,12 +549,52 @@ function runGame(opts) {
   /* ---------- idle peasants and the cursor hint ---------- */
   const idlePeasants = () => st.units.filter(u => u.side === 0 && UNITS[u.kind].peasant && !u.inside && !u.task && u.order.type === 'idle');
   let idleIdx = 0;
-  $('rIdle').onclick = () => {
+  // click: all idle peasants at once; Shift+click: one by one with the camera
+  function selectIdle(one) {
     const list = idlePeasants();
     if (!list.length) { toast('Все крестьяне при деле', 'good'); return; }
-    const u = list[idleIdx++ % list.length];
-    select([u]); rig.tx = u.x * CELL; rig.tz = u.z * CELL;
+    if (one) { const u = list[idleIdx++ % list.length]; select([u]); rig.tx = u.x * CELL; rig.tz = u.z * CELL; return; }
+    select(list);
+    toast(`Без дела: ${list.length}`);
+  }
+  $('rIdle').onclick = e => selectIdle(e.shiftKey);
+  $('rHintX').onclick = () => setMode(null);
+
+  /* ---------- squad bar: select groups by click, no box or right button needed ---------- */
+  let squadKey = '';
+  const squadGroups = () => {
+    const mine = st.units.filter(u => u.side === 0 && u.hp > 0 && !u.inside);
+    const peasants = mine.filter(u => UNITS[u.kind].peasant), army = mine.filter(u => !UNITS[u.kind].peasant);
+    const g = [
+      { id: 'idle', icon: '😴', title: 'Крестьяне без дела', units: idlePeasants(), warn: true },
+      { id: 'peas', img: icons.peasant, title: 'Все крестьяне', units: peasants },
+      { id: 'army', icon: '⚔', title: 'Вся армия', units: army }
+    ];
+    const forms = st.formations.filter(f => f.side === 0);
+    forms.forEach((f, i) => g.push({ id: 'f' + f.id, img: icons[f.kind], title: `Отряд ${i + 1}: ${UNITS[f.kind].name.toLowerCase()}ы`, units: f.members.map(id => unit(st, id)).filter(Boolean), morale: f.morale, label: `${i + 1}` }));
+    const loose = army.filter(u => !u.formation && u.kind !== 'officer' && u.kind !== 'drummer');
+    if (loose.length && forms.length) g.push({ id: 'loose', icon: '👥', title: 'Солдаты без отряда', units: loose });
+    return g;
   };
+  function renderSquads() {
+    const g = squadGroups();
+    const on = gr => gr.units.length > 0 && gr.units.every(u => sel.units.has(u.id));
+    const key = g.map(gr => `${gr.id}:${gr.units.length}:${gr.morale == null ? '' : Math.round(gr.morale / 5)}:${on(gr)}`).join('|');
+    if (key === squadKey) return;
+    squadKey = key;
+    $('rSquads').innerHTML = g.map((gr, i) => (i === 3 ? '<span class="gap"></span>' : '') + `<button type="button" data-sq="${gr.id}" class="${on(gr) ? 'on' : ''}${gr.warn && gr.units.length ? ' warn' : ''}" title="${gr.title}. Клик — выделить, ещё клик — камера">${gr.img ? `<img src="${gr.img}" alt="">` : `<span class="ic">${gr.icon}</span>`}<b>${gr.label ? gr.label + '·' : ''}${gr.units.length}</b>${gr.morale != null ? `<i><u style="width:${Math.max(0, gr.morale)}%"></u></i>` : ''}</button>`).join('');
+  }
+  $('rSquads').addEventListener('click', e => {
+    const el = e.target.closest('[data-sq]');
+    if (!el) return;
+    const gr = squadGroups().find(g => g.id === el.dataset.sq);
+    if (!gr || !gr.units.length) { toast(gr?.id === 'idle' ? 'Все крестьяне при деле' : 'Никого нет', 'good'); return; }
+    if (gr.id === 'idle' && e.shiftKey) { selectIdle(true); return; }
+    const again = gr.units.every(u => sel.units.has(u.id));
+    if (again) { const c = gr.units.reduce((a, u) => ({ x: a.x + u.x / gr.units.length, z: a.z + u.z / gr.units.length }), { x: 0, z: 0 }); rig.tx = c.x * CELL; rig.tz = c.z * CELL; }
+    else select(gr.units, e.shiftKey);
+    squadKey = '';
+  });
   let hintT = 0;
   function cursorHint(e) {
     const el = $('rCursor');
@@ -584,7 +630,7 @@ function runGame(opts) {
   const prevRes = {};
   function renderTop() {
     const S = st.sides[0];
-    $('rRes').innerHTML = RES.map(r => `<span title="${RES_NAME[r]}" class="${S.res[r] < 30 ? 'low' : ''}"><i>${RES_ICON[r]}</i>${Math.floor(S.res[r])}</span>`).join('');
+    $('rRes').innerHTML = RES.map(r => `<span title="${RES_NAME[r]}" class="${S.res[r] < 300 ? 'low' : ''}"><i>${RES_ICON[r]}</i>${Math.floor(S.res[r])}</span>`).join('');
     const used = popUsed(st, 0);
     $('rPop').textContent = `👥 ${used}/${S.popCap}`;
     $('rPop').classList.toggle('full', used >= S.popCap);
@@ -592,7 +638,7 @@ function runGame(opts) {
     const idle = idlePeasants().length;
     $('rIdle').textContent = `😴 ${idle}`;
     $('rIdle').classList.toggle('warn', idle > 0);
-    $('rIdle').title = idle ? `Без дела: ${idle} крестьян. Клик — показать следующего` : 'Все крестьяне при деле';
+    $('rIdle').title = idle ? `Без дела: ${idle} крестьян. Клик — выделить всех, Shift+клик — по одному` : 'Все крестьяне при деле';
     const peace = st.peace - st.t;
     $('rPeace').hidden = peace <= 0;
     if (peace > 0) $('rPeace').textContent = `Мирное время ${fmtTime(peace)}`;
@@ -791,7 +837,7 @@ function runGame(opts) {
     eng.render();
     drawOverlay(real);
     hudT -= real; bldT -= real;
-    if (hudT <= 0) { hudT = 0.25; cleanSel(); renderTop(); renderSel(); refreshButtons(); drawMini(); }
+    if (hudT <= 0) { hudT = 0.25; cleanSel(); renderTop(); renderSel(); renderSquads(); refreshButtons(); drawMini(); }
     if (bldT <= 0) { bldT = 2; renderPanel(); }
     if (st.over && $('rEnd').hidden) showEnd();
   }

@@ -132,5 +132,23 @@ Later stages: add `rules/{diplomacy,events}.js`, `ai/{kingdom,morven}-ai.js`, `d
 3b. Tribe greybox.
 Deferred: facing, roads/caravans/logistics, handcrafted campaign, mobile, audio, full lane battles/prologue.
 
+## Grilling 2026-10-27 (owner decisions, source of truth over older sections)
+Two separate games: Cossacks (`rts.html`) and Lane war (`lane.html`). Arena/Kingdom frozen.
+Cossacks:
+- Army target A: 100–150 soldiers by min 20–25, pop cap unchanged (MacBook perf).
+- Economy ×10: start res, costs, gather rates, carry, tree/rock stock, research costs. Food upkeep only ×3 (eating relatively ~3× lighter). Food part of every unit cost ×5 (×10 then −50%); other resources ×10.
+- Idle button: click selects all idle peasants, Shift+click cycles one by one.
+- Trackpad: no right-click needed. Bottom squad bar (squads, all peasants, all army, idle), facing = second click after a move or ↺/↻ buttons, Esc/✕ cancels, Shift+click adds.
+- Nations as data: Kazakh khanate (Шаруа, Сарбаз, Мерген bow no coal, Атты садақшы shoots on the move, Найзагер heavy lancer, Барымташы raider 2× capture, Жүзбасы+Дабылшы, no cannons; Юрта cheap house, Жайлау cav −20% food), Dzungar khanate (peasant, spearman, musketeer, Ойратский лучник, Хуяг armoured cav, Замбурек camel gun fires on move, Пушка Рената, Лама heal+morale; Лагерь palisade in field, Литейня Рената cheaper guns), Russian tsardom = current European set. All three in skirmish.
+- Counter triangle: archers beat unarmoured infantry; armoured/lancers beat archers; spears and zamburaks stop armoured cav; cannons break infantry and buildings, die to raids.
+- Campaign (after balance settles): historical, Kazakh batyrs vs Dzungars (XVIII c.). First one sample mission to set the format.
+Lane war:
+- Contested veins: safe mine at the fortress + 2–3 veins across the field; miners need cover; cavalry raids miners.
+- Academy buildings (Stick War style) on own half, not destructible, one research at a time per building (parallel across buildings). Each unit line: 2 passives + 1 auto-skill.
+  Humans: Barracks (pikeman: long pikes, quilted armour, Hedgehog ×2 vs cav while standing), Shooting school (musketeer: rifled barrels range, bayonets, Rank volley +40% with 5+ shooters), Stable (cossack/cuirassier: sabres, horses, Raid auto-hunt miners / Ram breaks first rank), Foundry (cannon unlock, carriages, powder, Grapeshot at close range), Fortress (bastions, wall guns, self-repair), Mine office (picks, carts, Militia miners fight back). Cannon range 430→~300.
+- Factions as data (roster, buildings, upgrades, skills, special rules) so new states are cheap later.
+- Undead playable, option B: same gold/veins/academies + Souls (from every death on the field) spent on raising and elites (Death knight, Bonecaster = gold + souls); no heal on retreat; cheap fast-training horde; own buildings (Crypt, Lair, Shrine, Black stable, Bone works, Citadel). Heroes: Morven (necromancer, mass raise + AoE), Tarn (ice, slows), Bone lord (melee tank, buffs skeletons).
+- AI: one smart AI for all levels (contest veins, raid miners, counter player's composition, planned research, retreat wounded, punish exposure). Levels: reaction 4–5 s / 2–3 s / 1 s / instant; counter none/partial/yes/yes+anticipate; income −20/0/0/+20%; aggression defend/medium/press veins/press from min 1. Check: King beats Knight 75–85% AI-vs-AI, games 12–20 min.
+
 ## Flux handoff (after stage 3)
 Owner runs local Claude Code on the MacBook with Flux (no ComfyUI). Give it a self-contained prompt: locate Flux runner (mflux / diffusers / Draw Things), ask owner if not found, no installs without consent; read `js/data/art-manifest.js` (id, path, size, scene); style prefix "flat vector illustration, minimalist, Polytopia + Dorfromantik, palette above, soft flat shadows, no gradients, no text"; portraits bust on #E9DFC4; 3 test images first, wait for OK; then all, webp q85 (events 1024×576, portraits 512×512, title 1920×1080), variant -b; only flip `ready:true` in manifest; commit, don't push.

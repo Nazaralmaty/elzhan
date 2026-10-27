@@ -53,11 +53,19 @@ export const UPGRADES = {
   gunnery:   { name: 'Артиллерийская школа', icon: '🧨', at: 'foundry', cost: { iron: 200, gold: 400 }, time: 60, desc: 'Пушки заряжают на 25% быстрее' }
 };
 
+// Economy scale (owner): every amount ×10 like in Cossacks, but the food part of a price only ×5
+// and eating only ×3, so food is a side worry. Numbers above are the base values before scaling.
+export const ECON = 10, FOOD_PRICE = 5, FOOD_EAT = 3;
+const scaleCost = cost => { for (const r in cost) cost[r] *= r === 'food' ? FOOD_PRICE : ECON; };
+for (const U of Object.values(UNITS)) { scaleCost(U.cost); if (U.shot?.cost) scaleCost(U.shot.cost); U.eat *= FOOD_EAT; }
+for (const B of Object.values(BUILDINGS)) { scaleCost(B.cost); if (B.shot?.cost) scaleCost(B.shot.cost); }
+for (const U of Object.values(UPGRADES)) scaleCost(U.cost);
+
 export const FORMATION_SIZES = [15, 36];
 export const SHAPES = { line: 'Линия', column: 'Колонна', square: 'Каре' };
-export const GATHER = { wood: 0.55, stone: 0.4, food: 0.42, mine: 0.32 }; // units per second of work
-export const CARRY = 10, TREE_WOOD = 80, ROCK_STONE = 300, POP_MAX = 400;
-export const START_RES = { food: 800, wood: 600, stone: 400, gold: 300, iron: 150, coal: 150 };
+export const GATHER = { wood: 5.5, stone: 4, food: 4.2, mine: 3.2 }; // units per second of work
+export const CARRY = 100, TREE_WOOD = 800, ROCK_STONE = 3000, POP_MAX = 400;
+export const START_RES = { food: 8000, wood: 6000, stone: 4000, gold: 3000, iron: 1500, coal: 1500 };
 export const SIDE_COLORS = ['#2F6FDB', '#C93A3A', '#E0A526', '#3BA55C'];
 export const SIDE_NAMES = ['Синие', 'Красные', 'Жёлтые', 'Зелёные'];
 

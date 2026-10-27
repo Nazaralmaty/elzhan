@@ -36,8 +36,11 @@ export function createGame({ size = 'medium', players = 2, seed = 1, difficulty 
       u.facing = -Math.PI / 2;
     }
     if (startRes === 'army') {
-      for (let k = 0; k < 15; k++) spawnUnit(st, p, k % 2 ? 'musketeer' : 'pikeman', th.x - 3 + (k % 5), th.z - 3 - Math.floor(k / 5));
+      // a ready formation of 15 pikemen plus loose musketeers
+      for (let k = 0; k < 15; k++) spawnUnit(st, p, 'pikeman', th.x - 3 + (k % 5), th.z - 3 - Math.floor(k / 5));
+      for (let k = 0; k < 6; k++) spawnUnit(st, p, 'musketeer', th.x - 3 + (k % 3), th.z - 7 - Math.floor(k / 3));
       spawnUnit(st, p, 'officer', th.x + 3, th.z - 4); spawnUnit(st, p, 'drummer', th.x + 4, th.z - 4);
+      formFormation(st, p, 'pikeman', 15, { x: th.x, z: th.z - 6 });
     }
   }
   recalcPop(st);
