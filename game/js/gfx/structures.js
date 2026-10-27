@@ -229,8 +229,9 @@ export function rtsFoundry() {
   P.push(...flag(-5, 0, 3.6, 1.4));
   return P;
 }
+const ORE = { gold: GOLD, iron: '#9a5a3c', coal: '#262626', stone: '#d8d2c4' };
 export function rtsMine(res) {
-  const ore = res === 'gold' ? GOLD : res === 'iron' ? '#9a5a3c' : '#2a2a2a';
+  const ore = ORE[res] || '#2a2a2a';
   const P = [];
   [[0, 0, 0, 3.4, 2.4], [2.2, 0, -1.4, 2.2, 2], [-2.2, 0, -1, 2.4, 1.9], [0.4, 0, -2.6, 2.4, 2.6]].forEach(([x, , z, r, h], i) => P.push(dodeca(r, i % 2 ? '#8a7f70' : '#7a7266', { at: [x, h * 0.45, z], scale: [1, h / r, 1], rot: [i, i * 2, 0], shade: 0.35 })));
   P.push(box(0.3, 3.2, 0.3, WOOD, T(-1.2, 1.6, 2.8)), box(0.3, 3.2, 0.3, WOOD, T(1.2, 1.6, 2.8)), box(3.2, 0.4, 0.5, WOOD, T(0, 3.2, 2.8)), box(2, 2.6, 0.6, '#14100d', T(0, 1.3, 2.55)));
@@ -242,7 +243,7 @@ export function rtsMine(res) {
   return P;
 }
 export function rtsDeposit(res) {
-  const ore = res === 'gold' ? GOLD : res === 'iron' ? '#9a5a3c' : '#262626';
+  const ore = ORE[res] || '#262626';
   const P = [];
   [[0, 0, 0, 2.6, 1.8], [1.8, 0, 1.2, 1.6, 1.3], [-1.6, 0, 1.0, 1.7, 1.4], [0.6, 0, -1.8, 1.8, 1.6], [-1.4, 0, -1.4, 1.4, 1.1]].forEach(([x, , z, r, h], i) => P.push(dodeca(r, i % 2 ? '#8a8378' : '#7b746a', { at: [x, h * 0.4, z], scale: [1, h / r, 1], rot: [i * 1.3, i * 2.1, 0], shade: 0.35 })));
   for (let i = 0; i < 18; i++) { const a = i * 2.1, r = 0.8 + (i % 5) * 0.5; P.push(dodeca(0.16 + (i % 3) * 0.08, ore, T(Math.cos(a) * r, 0.4 + (i % 4) * 0.35, Math.sin(a) * r))); }

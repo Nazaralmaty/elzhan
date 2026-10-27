@@ -19,7 +19,8 @@ export function createGame({ size = 'medium', players = 2, seed = 1, difficulty 
     units: [], byId: new Map(), buildings: [], bById: new Map(), formations: [], fById: new Map(), shots: [], events: [],
     sides: [], peace, difficulty, over: null, mapVersion: 0, hash: null, hashW: Math.ceil(W / BUCKET), hashH: Math.ceil(H / BUCKET), fogT: 0, capT: 0, scanT: 0
   };
-  st.pf = makePathfinder(W, H, i => map.kind[i] === GRASS && st.occ[i] === 0);
+  // forests slow units down but do not block them; rocks, water and buildings do
+  st.pf = makePathfinder(W, H, i => (map.kind[i] === GRASS || map.kind[i] === TREE) && st.occ[i] === 0);
   const rich = startRes === 'rich' ? 4 : 1;
   for (let p = 0; p < players; p++) {
     const res = Object.fromEntries(RES.map(r => [r, START_RES[r] * rich]));
@@ -29,9 +30,9 @@ export function createGame({ size = 'medium', players = 2, seed = 1, difficulty 
       stats: { killed: 0, lost: 0, gathered: 0, built: 0, captured: 0 }, gatherMult: p > 0 ? [0.8, 1, 1.2, 1.45][difficulty] : 1
     });
     const s = map.starts[p];
-    const th = placeBuilding(st, p, 'townhall', s.x - 3, s.z - 3, true);
+    const th = placeBuilding(st, p, 'townhall', s.x - 2, s.z - 2, true);
     for (let k = 0; k < 10; k++) {
-      const u = spawnUnit(st, p, 'peasant', th.x - 1 + (k % 5) * 1.4, th.z + 7 + Math.floor(k / 5) * 1.3);
+      const u = spawnUnit(st, p, 'peasant', th.x - 1 + (k % 5) * 1.3, th.z + 5 + Math.floor(k / 5) * 1.3);
       u.facing = -Math.PI / 2;
     }
     if (startRes === 'army') {
@@ -115,10 +116,16 @@ function exitPoint(st, b) {
 }
 
 /* ---------- placement ---------- */
+// first building from the kind's requirements that the side has not finished yet
+export function missingNeeds(st, side, kind) {
+  for (const need of BUILDINGS[kind].needs || []) if (!st.buildings.some(b => b.side === side && b.kind === need && b.done)) return need;
+  return null;
+}
 export function canPlace(st, side, kind, x, z) {
   const B = BUILDINGS[kind], S = st.sides[side];
   if (!B) return 'Нет такой постройки';
-  if (B.needs && !st.buildings.some(b => b.side === side && b.kind === B.needs && b.done)) return `Сначала нужна ${BUILDINGS[B.needs].name.toLowerCase()}`;
+  const miss = missingNeeds(st, side, kind);
+  if (miss) return `Сначала постройте: ${BUILDINGS[miss].name}`;
   if (x < 1 || z < 1 || x + B.w > st.W - 1 || z + B.h > st.H - 1) return 'За краем карты';
   if (kind === 'mine') {
     const d = st.map.deposits.find(d => d.x === x && d.z === z);
@@ -141,7 +148,7 @@ export function canPlace(st, side, kind, x, z) {
 export function snapPlacement(st, kind, x, z) {
   const B = BUILDINGS[kind];
   if (kind === 'mine') {
-    const d = st.map.deposits.find(d => x >= d.x - 1 && x < d.x + 5 && z >= d.z - 1 && z < d.z + 5);
+    const d = st.map.deposits.find(d => x >= d.x - 1.5 && x < d.x + 4.5 && z >= d.z - 1.5 && z < d.z + 4.5);
     if (d) return { x: d.x, z: d.z };
   }
   return { x: Math.round(x - B.w / 2), z: Math.round(z - B.h / 2) };
@@ -163,7 +170,6 @@ export function canTrain(st, bid, kind) {
   const b = building(st, bid), S = b && st.sides[b.side], U = UNITS[kind];
   if (!b || !b.done) return 'Здание не достроено';
   if (!BUILDINGS[b.kind].trains?.includes(kind)) return 'Здесь не обучают';
-  if (U.needs && !st.buildings.some(o => o.side === b.side && o.kind === U.needs && o.done)) return `Нужна ${BUILDINGS[U.needs].name.toLowerCase()}`;
   if (b.queue.length >= 12) return 'Очередь полна';
   if (popUsed(st, b.side) + queued(st, b.side) >= S.popCap) return 'Нужны дома: население на пределе';
   if (!canAfford(S, U.cost)) return 'Не хватает ресурсов';
@@ -178,9 +184,27 @@ export function train(st, bid, kind, n = 1) {
     const b = building(st, bid);
     pay(st.sides[b.side], UNITS[kind].cost);
     b.queue.push(kind);
+    b.lastKind = kind;
     done++;
   }
   return done ? '' : why;
+}
+// remove one queued unit (by position, or the last of a kind) and give its cost back
+export function cancelTrainAt(st, bid, index) {
+  const b = building(st, bid);
+  if (!b || index < 0 || index >= b.queue.length) return;
+  const [k] = b.queue.splice(index, 1);
+  refund(st.sides[b.side], UNITS[k].cost);
+  if (index === 0) b.trainT = 0;
+}
+export function cancelKind(st, bid, kind) {
+  const b = building(st, bid);
+  if (b) cancelTrainAt(st, bid, b.queue.lastIndexOf(kind));
+}
+// endless training: the building keeps ordering its last kind while resources and houses allow
+export function setRepeat(st, bid, on) {
+  const b = building(st, bid);
+  if (b) { b.repeat = on; if (on && !b.lastKind) b.lastKind = BUILDINGS[b.kind].trains?.[0]; }
 }
 export function cancelTrain(st, bid) {
   const b = building(st, bid);
@@ -303,6 +327,29 @@ export function commandWork(st, ids, x, z) {
     return true;
   }
   return false;
+}
+
+// Send peasants to the nearest job of a kind: 'wood', 'stone', 'farm' or 'mine'. Returns how many found work.
+export function autoWork(st, ids, job) {
+  let n = 0;
+  for (const id of ids) {
+    const u = unit(st, id);
+    if (!u || u.hp <= 0 || !UNITS[u.kind].peasant) continue;
+    if (job === 'wood' || job === 'stone') {
+      const cell = findResource(st, u.x, u.z, job === 'wood' ? TREE : ROCK, 45);
+      if (cell < 0) continue;
+      leaveFarm(st, u); setTask(st, u, { kind: 'gather', res: job, cell }); n++;
+    } else {
+      const want = job === 'farm' ? 'mill' : 'mine', S = st.sides[u.side];
+      const cap = b => job === 'farm' ? BUILDINGS.mill.farm : (hasUp(S, 'deepmines') ? 10 : BUILDINGS.mine.mine);
+      const used = b => job === 'farm' ? b.farmers.length + st.units.filter(o => o !== u && o.task?.kind === 'farm' && o.task.b === b.id && !b.farmers.includes(o.id)).length
+        : b.workers.length + st.units.filter(o => o !== u && o.task?.kind === 'mine' && o.task.b === b.id && !o.inside).length;
+      const b = st.buildings.filter(b => b.side === u.side && b.kind === want && b.done && used(b) < cap(b)).sort((a, c) => distToBuilding(a, u.x, u.z) - distToBuilding(c, u.x, u.z))[0];
+      if (!b) continue;
+      leaveFarm(st, u); setTask(st, u, { kind: job, b: b.id }); n++;
+    }
+  }
+  return n;
 }
 
 /* ---------- formations ---------- */
@@ -450,7 +497,8 @@ function nearestEnemyBuilding(st, side, x, z, r = Infinity) {
 function stepToward(st, u, tx, tz, speed, dt) {
   const dx = tx - u.x, dz = tz - u.z, d = Math.hypot(dx, dz);
   if (d < 0.05) return true;
-  const v = Math.min(d, speed * dt);
+  const inForest = st.map.kind[cellIdx(st, u.x, u.z)] === TREE;
+  const v = Math.min(d, speed * (inForest ? 0.7 : 1) * dt);
   const nx = u.x + dx / d * v, nz = u.z + dz / d * v;
   const ok = (x, z) => st.pf.ok(Math.floor(x), Math.floor(z));
   if (ok(nx, nz)) { u.x = nx; u.z = nz; }
@@ -770,7 +818,7 @@ function afterBuild(st, u, b) {
 }
 export function farmSpot(st, b, k) {
   // farm plots in a ring around the mill, moved off trees and buildings
-  const ring = 12, a = k / ring * Math.PI * 2 + 0.3, r = 4.6 + (k % 2) * 0.8, c = centerOf(b);
+  const ring = 12, a = k / ring * Math.PI * 2 + 0.3, r = 3.4 + (k % 2) * 1.1, c = centerOf(b);
   const x = c.x + Math.cos(a) * r, z = c.z + Math.sin(a) * r;
   if (!st || st.pf.ok(Math.floor(x), Math.floor(z))) return { x, z };
   const p = st.pf.nearestFree(x, z, 4);
@@ -926,6 +974,7 @@ function updateFormationMember(st, u, dt) {
 function updateBuilding(st, b, dt) {
   const S = st.sides[b.side], B = BUILDINGS[b.kind];
   if (!b.done) return;
+  if (b.repeat && !b.queue.length && b.lastKind && canTrain(st, b.id, b.lastKind) === '') { pay(S, UNITS[b.lastKind].cost); b.queue.push(b.lastKind); }
   if (b.queue.length) {
     const kind = b.queue[0];
     if (popUsed(st, b.side) >= S.popCap) { b.blocked = true; }

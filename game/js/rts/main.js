@@ -6,10 +6,11 @@ import { staticMesh, worldFog } from '../gfx/kit.js';
 import { rtsTownhall, rtsHouse, rtsMillBody, rtsStorehouse, rtsBarracks, rtsStable, rtsBlacksmith, rtsFoundry, rtsMine, rtsTower } from '../gfx/structures.js';
 import {
   createGame, tick, DT, unit, building, centerOf, distToBuilding, canPlace, snapPlacement, orderBuild, canTrain, train, cancelTrain, canResearch, research,
-  commandMove, commandAttack, commandWork, commandStop, setStance, canForm, formFormation, setShape, moveFormation, volley, disband, releaseWorkers, popUsed, canAfford, TREE, ROCK
+  commandMove, commandAttack, commandWork, commandStop, setStance, canForm, formFormation, setShape, moveFormation, volley, disband, releaseWorkers, popUsed, canAfford, TREE, ROCK,
+  missingNeeds, autoWork, cancelTrainAt, cancelKind, setRepeat
 } from './sim.js';
 import { aiTick } from './ai.js';
-import { UNITS, BUILDINGS, UPGRADES, BUILD_MENU, RES, RES_NAME, RES_ICON, SHAPES, costText } from './data.js';
+import { UNITS, BUILDINGS, UPGRADES, BUILD_MENU, RES, RES_NAME, RES_ICON, SHAPES, TECH_HINT } from './data.js';
 import { createWorld, CELL } from './view/world3d.js';
 
 const $ = id => document.getElementById(id);
@@ -117,6 +118,14 @@ function runGame(opts) {
     }
     renderPanel();
   }
+  function rallyText(g) {
+    const k = st.map.kind[Math.floor(g.z) * W + Math.floor(g.x)], b = building(st, st.occ[Math.floor(g.z) * W + Math.floor(g.x)]);
+    if (k === TREE) return 'Сбор на лесе: новые крестьяне сразу рубят';
+    if (k === ROCK) return 'Сбор на камне: новые крестьяне сразу ломают камень';
+    if (b?.kind === 'mill') return 'Сбор на мельнице: новые крестьяне идут в поле';
+    if (b?.kind === 'mine') return 'Сбор на шахте: новые крестьяне идут в шахту';
+    return 'Точка сбора установлена';
+  }
   function marker(x, z, color = '#7dff9a') { markers.push({ x, z, t: 0, color }); }
   function toast(text, kind = '') {
     const el = document.createElement('div');
@@ -128,11 +137,20 @@ function runGame(opts) {
   }
 
   /* ---------- orders ---------- */
+  // ground point under the cursor, snapped onto a tree or rock when the cursor is on its crown
+  function workPoint(e) {
+    const r0 = canvas.getBoundingClientRect();
+    ndc.set(((e.clientX - r0.left) / r0.width) * 2 - 1, -((e.clientY - r0.top) / r0.height) * 2 + 1);
+    ray.setFromCamera(ndc, eng.camera);
+    const cell = world.pickProp(ray);
+    if (cell >= 0) return { x: cell % W + 0.5, z: Math.floor(cell / W) + 0.5 };
+    return groundAt(e);
+  }
   function orderAt(e, facingFrom = null) {
     const units = myUnits();
     if (sel.building && !units.length) {
-      const g = groundAt(e), b = building(st, sel.building);
-      if (g && b && b.side === 0) { b.rally = { x: g.x, z: g.z }; marker(g.x, g.z, '#ffd76a'); toast('Точка сбора установлена'); }
+      const g = workPoint(e), b = building(st, sel.building);
+      if (g && b && b.side === 0) { b.rally = { x: g.x, z: g.z }; marker(g.x, g.z, '#ffd76a'); toast(rallyText(g)); }
       return;
     }
     if (!units.length) return;
@@ -147,6 +165,10 @@ function runGame(opts) {
     const others = units.filter(u => !UNITS[u.kind].peasant);
     if (peasants.length) {
       let cell = { x: g.x, z: g.z };
+      const r0 = canvas.getBoundingClientRect();
+      ndc.set(((e.clientX - r0.left) / r0.width) * 2 - 1, -((e.clientY - r0.top) / r0.height) * 2 + 1);
+      ray.setFromCamera(ndc, eng.camera);
+      const propCell = b ? -1 : world.pickProp(ray);
       // the cursor is often on a tree crown: look for a tree or rock under or near the point
       const k = st.map.kind[Math.floor(g.z) * W + Math.floor(g.x)];
       if (!b && k !== TREE && k !== ROCK) {
@@ -155,6 +177,7 @@ function runGame(opts) {
           if (kk === TREE || kk === ROCK) cell = { x: Math.floor(g.x) + i + 0.5, z: Math.floor(g.z) + j + 0.5 };
         }
       }
+      if (propCell >= 0) cell = { x: propCell % W + 0.5, z: Math.floor(propCell / W) + 0.5 };
       if (b && b.side === 0) cell = centerOf(b);
       if (commandWork(st, peasants.map(u => u.id), cell.x, cell.z)) { marker(cell.x, cell.z, '#ffd76a'); }
       else commandMove(st, peasants.map(u => u.id), g.x, g.z);
@@ -184,8 +207,17 @@ function runGame(opts) {
     mode = m;
     if (ghost) { eng.scene.remove(ghost); ghost.geometry.dispose(); ghost = null; }
     if (m?.type === 'build') {
+      const B = BUILDINGS[m.kind], foot = { townhall: [12, 12], house: [6, 6], mill: [8, 8], storehouse: [8, 8], barracks: [12, 10], stable: [12, 10], blacksmith: [8, 8], foundry: [12, 10], mine: [8, 8], tower: [6, 6] }[m.kind];
       ghost = staticMesh(BUILD_MODEL[m.kind]());
       ghost.material = ghostMat; ghost.castShadow = false; ghost.receiveShadow = false;
+      const sx = B.w * CELL / foot[0], sz = B.h * CELL / foot[1];
+      ghost.scale.set(sx, Math.min(sx, sz), sz);
+      if (m.kind === 'mill') {
+        // the ring of fields the mill will plough around itself
+        const ring = new THREE.Mesh(new THREE.RingGeometry(2.6 * CELL, 5.2 * CELL, 32), new THREE.MeshBasicMaterial({ color: '#e0bd55', transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }));
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.3; ring.scale.set(1 / sx, 1 / sz, 1);
+        ghost.add(ring);
+      }
       eng.scene.add(ghost);
       $('rHint').textContent = `${BUILDINGS[m.kind].name}: кликни место · Esc — отмена${m.kind === 'mine' ? ' · ставь на месторождение' : ''}`;
     } else if (m?.type === 'rally') $('rHint').textContent = 'Кликни точку сбора · Esc — отмена';
@@ -225,10 +257,12 @@ function runGame(opts) {
   canvas.addEventListener('pointermove', e => {
     hoverEvent = e;
     if (mode?.type === 'build') updateGhost(e);
+    if (performance.now() - hintT > 120) { hintT = performance.now(); cursorHint(e); }
     if (!down) return;
     if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 7) down.drag = true;
     down.cx = e.clientX; down.cy = e.clientY;
   });
+  canvas.addEventListener('pointerleave', () => { $('rCursor').hidden = true; });
   canvas.addEventListener('pointerup', e => {
     const d = down; down = null;
     if (!d) return;
@@ -240,7 +274,7 @@ function runGame(opts) {
       return;
     }
     if (mode?.type === 'build') { placeBuilding(e, e.shiftKey); return; }
-    if (mode?.type === 'rally') { const g = groundAt(e), b = building(st, sel.building); if (g && b) { b.rally = { x: g.x, z: g.z }; marker(g.x, g.z, '#ffd76a'); } setMode(null); return; }
+    if (mode?.type === 'rally') { const g = workPoint(e), b = building(st, sel.building); if (g && b) { b.rally = { x: g.x, z: g.z }; marker(g.x, g.z, '#ffd76a'); toast(rallyText(g)); } setMode(null); return; }
     if (mode?.type === 'attackMove') { orderAt(e); setMode(null); return; }
     if (d.drag) { boxSelect(d, e, d.shift); return; }
     // click: own unit / own building select; otherwise it's an order for the selection
@@ -327,7 +361,9 @@ function runGame(opts) {
   window.addEventListener('resize', onResize);
 
   /* ---------- command panel ---------- */
+  // every button: big picture (3D render or pictogram), short label, hotkey; details in the hint card
   let buttons = [];
+  const chips = cost => Object.entries(cost).map(([r, n]) => `<span class="chip ${st.sides[0].res[r] < n ? 'short' : ''}" title="${RES_NAME[r]}">${RES_ICON[r]} ${n}</span>`).join('');
   function renderPanel() {
     cleanSel();
     buttons = [];
@@ -341,21 +377,31 @@ function runGame(opts) {
     $('rCmds').innerHTML = Array.from({ length: 15 }, (_, i) => {
       const bt = buttons[i];
       if (!bt) return `<button type="button" class="rbtn" disabled style="visibility:hidden"></button>`;
-      return `<button type="button" class="rbtn${bt.on ? ' on' : ''}" data-i="${i}">${bt.img ? `<img src="${bt.img}" alt="">` : `<span class="ic">${bt.icon || ''}</span>`}<span class="lb">${bt.label}</span><kbd>${KEY_LABEL[i]}</kbd><span class="n"></span><i class="p"></i></button>`;
+      return `<button type="button" class="rbtn${bt.img ? ' pic' : ''}" data-i="${i}">${bt.img ? `<img src="${bt.img}" alt="">` : `<span class="ic">${bt.icon || ''}</span>`}${bt.badge ? `<span class="badge">${bt.badge}</span>` : ''}<span class="lb">${bt.label}</span><kbd>${KEY_LABEL[i]}</kbd><span class="n"></span><span class="lock">🔒</span><i class="p"></i></button>`;
     }).join('');
     renderSel();
     refreshButtons();
   }
+  const isPoor = why => /ресурс/i.test(why);
   function refreshButtons() {
     $('rCmds').querySelectorAll('.rbtn[data-i]').forEach(el => {
       const bt = buttons[+el.dataset.i];
       const why = bt.why ? bt.why() : '';
-      el.disabled = !!why && !/ресурс/i.test(why);
-      el.classList.toggle('poor', /ресурс/i.test(why));
+      const locked = !!bt.locked && !!bt.locked();
+      el.disabled = !!why && !isPoor(why) && !locked;
+      el.classList.toggle('poor', isPoor(why));
+      el.classList.toggle('locked', locked);
       el.classList.toggle('on', !!(bt.isOn && bt.isOn()));
       if (bt.count) el.querySelector('.n').textContent = bt.count() || '';
       if (bt.prog) el.querySelector('.p').style.width = (bt.prog() * 100).toFixed(0) + '%';
     });
+  }
+  function showInfo(bt) {
+    $('rInfo').classList.toggle('off', !bt);
+    if (!bt) return;
+    const why = bt.why ? bt.why() : '';
+    const pic = bt.img ? `<img src="${bt.img}" alt="">` : `<span class="ic">${bt.icon || ''}</span>`;
+    $('rInfo').innerHTML = `<div class="card">${pic}<div><b>${bt.title || bt.label}</b>${bt.cost ? `<div class="chips">${chips(bt.cost)}${bt.time ? `<span class="chip">⏱ ${bt.time} с</span>` : ''}</div>` : ''}<div>${bt.desc || ''}</div>${why ? `<div class="why">${why}</div>` : ''}${bt.extra || ''}</div></div>`;
   }
   $('rCmds').addEventListener('click', e => {
     const el = e.target.closest('.rbtn[data-i]');
@@ -365,25 +411,35 @@ function runGame(opts) {
     if (why) { toast(why, 'bad'); return; }
     bt.act(e.shiftKey);
     renderPanel();
+    showInfo(bt);
   });
-  $('rCmds').addEventListener('mouseover', e => {
+  // right click on a training button takes one unit of that kind back out of the queue
+  $('rCmds').addEventListener('contextmenu', e => {
+    e.preventDefault();
     const el = e.target.closest('.rbtn[data-i]');
-    if (!el) return;
-    const bt = buttons[+el.dataset.i], why = bt.why ? bt.why() : '';
-    $('rInfo').innerHTML = `<b>${bt.title || bt.label}</b>${bt.cost ? ` · <span class="cost">${costText(bt.cost)}</span>` : ''}<br>${bt.desc || ''}${why ? `<br><span class="why">${why}</span>` : ''}`;
+    const bt = el && buttons[+el.dataset.i];
+    if (bt?.cancel) { bt.cancel(); renderPanel(); }
   });
-  $('rCmds').addEventListener('mouseleave', () => { $('rInfo').textContent = ''; });
+  $('rCmds').addEventListener('mouseover', e => { const el = e.target.closest('.rbtn[data-i]'); if (el) showInfo(buttons[+el.dataset.i]); });
+  $('rCmds').addEventListener('mouseleave', () => showInfo(null));
 
   function peasantButtons() {
+    const ids = () => myUnits().filter(u => UNITS[u.kind].peasant).map(u => u.id);
     for (const k of BUILD_MENU) {
       const B = BUILDINGS[k];
       buttons.push({
-        label: B.name, title: 'Построить: ' + B.name, img: icons[k], cost: B.cost, desc: B.desc,
-        why: () => (B.needs && !st.buildings.some(o => o.side === 0 && o.kind === B.needs && o.done)) ? `Нужна ${BUILDINGS[B.needs].name.toLowerCase()}` : canAfford(st.sides[0], B.cost) ? '' : 'Не хватает ресурсов',
+        label: B.name, title: 'Построить: ' + B.name, img: icons[k], cost: B.cost, time: B.time, desc: B.desc,
+        locked: () => !!missingNeeds(st, 0, k),
+        why: () => { const m = missingNeeds(st, 0, k); return m ? `Сначала постройте ${BUILDINGS[m].icon} ${BUILDINGS[m].name}` : canAfford(st.sides[0], B.cost) ? '' : 'Не хватает ресурсов'; },
         act: () => setMode({ type: 'build', kind: k })
       });
     }
-    buttons[14] = { label: 'Стоп', icon: '✋', desc: 'Остановить и забыть работу', act: () => commandStop(st, [...sel.units]) };
+    const work = (job, icon, label, desc, none) => buttons.push({ label, icon, title: label, desc, act: () => { const n = autoWork(st, ids(), job); if (!n) toast(none, 'bad'); else toast(`${label}: ${n}`, 'good'); } });
+    work('wood', '🪓', 'Рубить лес', 'Каждый идёт к ближайшему дереву и носит брёвна на склад или в ратушу. Можно и просто кликнуть по дереву.', 'Рядом нет леса');
+    work('stone', '🪨', 'Ломать камень', 'К ближайшим серым скалам; камень носят на склад или в ратушу.', 'Рядом нет камня');
+    work('farm', '🌾', 'В поле', 'На свободные поля ближайшей мельницы: еда идёт сразу, без переноски. 12 мест на мельницу.', 'Нет мельницы со свободными полями');
+    work('mine', '⛏', 'В шахту', 'В ближайшую шахту, где есть места. Шахта даёт золото, железо или уголь.', 'Нет шахты со свободными местами');
+    buttons.push({ label: 'Стоп', icon: '✋', desc: 'Остановить и бросить работу', act: () => commandStop(st, [...sel.units]) });
   }
   function militaryButtons(mil) {
     const ids = [...sel.units];
@@ -392,16 +448,15 @@ function runGame(opts) {
     buttons.push({ label: 'Атака с ходу', icon: '⚔', desc: 'Идти к точке и бить всех по пути', act: () => setMode({ type: 'attackMove' }) });
     const forms = selFormations();
     if (forms.length) {
-      for (const [shape, name] of Object.entries(SHAPES)) buttons.push({ label: name, icon: shape === 'line' ? '▬' : shape === 'column' ? '▮' : '◻', desc: shape === 'line' ? 'Широкий фронт: все стреляют разом' : shape === 'column' ? 'Узкий строй: быстрее на марше' : 'Каре: броня +3 против конницы, медленно', isOn: () => selFormations().every(f => f.shape === shape), act: () => forms.forEach(f => setShape(st, f.id, shape)) });
+      for (const [shape, name] of Object.entries(SHAPES)) buttons.push({ label: name, icon: shape === 'line' ? '▬' : shape === 'column' ? '▮' : '⬜', desc: shape === 'line' ? 'Широкий фронт: все стреляют разом' : shape === 'column' ? 'Узкий строй: быстрее на марше' : 'Каре: броня +3 против конницы, медленно', isOn: () => selFormations().every(f => f.shape === shape), act: () => forms.forEach(f => setShape(st, f.id, shape)) });
       if (forms.some(f => UNITS[f.kind].shot)) buttons.push({ label: 'Залп!', icon: '💥', desc: 'Все заряженные мушкеты стреляют сейчас', act: () => forms.forEach(f => volley(st, f.id)) });
       buttons.push({ label: 'Распустить', icon: '✖', desc: 'Разбить строй: солдаты станут свободными', act: () => forms.forEach(f => disband(st, f.id)) });
     }
-    // forming new formations from loose soldiers
     const loose = mil.filter(u => !u.formation);
     for (const kind of ['pikeman', 'musketeer']) {
       if (!loose.some(u => u.kind === kind)) continue;
       for (const size of [15, 36]) buttons.push({
-        label: `Отряд ${size}`, img: icons[kind], title: `Отряд: ${UNITS[kind].name.toLowerCase()}ы ×${size}`, desc: `Офицер, барабанщик и ${size} свободных ${kind === 'pikeman' ? 'пикинёров' : 'мушкетёров'} встают в строй`,
+        label: `Отряд ${size}`, img: icons[kind], badge: size, title: `Отряд: ${UNITS[kind].name.toLowerCase()}ы ×${size}`, desc: `Офицер, барабанщик и ${size} свободных ${kind === 'pikeman' ? 'пикинёров' : 'мушкетёров'} встают в строй`,
         why: () => canForm(st, 0, kind, size, home),
         act: () => {
           const c = loose.reduce((a, u) => ({ x: a.x + u.x / loose.length, z: a.z + u.z / loose.length }), { x: 0, z: 0 });
@@ -413,30 +468,36 @@ function runGame(opts) {
   }
   function buildingButtons(b) {
     const B = BUILDINGS[b.kind];
-    if (!b.done) { buttons.push({ label: 'Отменить', icon: '✖', desc: 'Снести недостроенное здание (ресурсы не вернутся)', act: () => { b.hp = 0; } }); return; }
+    if (!b.done) { buttons.push({ label: 'Снести', icon: '✖', desc: 'Снести недостроенное здание (ресурсы не вернутся)', act: () => { b.hp = 0; } }); return; }
     for (const k of B.trains || []) {
       const U = UNITS[k];
       buttons.push({
-        label: U.name, img: icons[k], cost: U.cost, desc: U.desc + ' · Shift — по 5', title: 'Нанять: ' + U.name,
+        label: U.name, img: icons[k], cost: U.cost, time: U.time, desc: U.desc + '. Shift — сразу 5, правый клик — убрать одного из очереди.', title: 'Нанять: ' + U.name,
         why: () => { const w = canTrain(st, b.id, k); return w === 'Очередь полна' ? '' : w; },
         count: () => b.queue.filter(q => q === k).length,
         prog: () => b.queue[0] === k ? b.trainT / UNITS[k].time : 0,
+        cancel: () => cancelKind(st, b.id, k),
         act: shift => { const w = train(st, b.id, k, shift ? 5 : 1); if (w) toast(w, 'bad'); }
       });
+    }
+    if (B.trains) {
+      buttons.push({ label: 'Бесконечно', icon: '♾', title: 'Бесконечный найм', desc: 'Когда очередь пустеет, здание само заказывает последний вид юнита, пока хватает ресурсов и домов.', isOn: () => !!b.repeat, act: () => { setRepeat(st, b.id, !b.repeat); toast(b.repeat ? `Бесконечный найм: ${UNITS[b.lastKind].name}` : 'Бесконечный найм выключен'); } });
+      buttons.push({ label: 'Отмена', icon: '↩', desc: 'Убрать последнего из очереди, ресурсы вернутся. Можно кликнуть по иконке в очереди слева.', why: () => b.queue.length ? '' : 'Очередь пуста', act: () => cancelTrainAt(st, b.id, b.queue.length - 1) });
+      buttons.push({ label: 'Сбор', icon: '🚩', desc: 'Куда идут новые юниты. Флаг на лесе, камне, поле или шахте — крестьяне сразу начнут работать.', act: () => setMode({ type: 'rally' }) });
     }
     for (const [key, U] of Object.entries(UPGRADES)) {
       if (U.at !== b.kind) continue;
       buttons.push({
-        label: U.name, icon: st.sides[0].up[key] ? '✔' : '📜', cost: U.cost, desc: U.desc + ` · ${U.time} с`, title: 'Исследовать: ' + U.name,
+        label: U.name, icon: U.icon, cost: U.cost, time: U.time, desc: U.desc, title: 'Улучшение: ' + U.name,
         isOn: () => !!st.sides[0].up[key],
-        why: () => b.research?.key === key ? 'Изучается' : canResearch(st, b.id, key),
+        locked: () => !!U.needs && !st.sides[0].up[U.needs],
+        why: () => st.sides[0].up[key] ? 'Уже изучено' : b.research?.key === key ? 'Изучается' : canResearch(st, b.id, key),
         prog: () => b.research?.key === key ? b.research.t / b.research.T : 0,
         act: () => { const w = research(st, b.id, key); if (w) toast(w, 'bad'); }
       });
     }
-    if (b.queue.length) buttons.push({ label: 'Отмена', icon: '↩', desc: 'Убрать последнего из очереди (ресурсы вернутся)', act: () => cancelTrain(st, b.id) });
-    if (B.trains) buttons.push({ label: 'Сбор', icon: '🚩', desc: 'Куда идут новые юниты. Для крестьян — на лес, камень или поле', act: () => setMode({ type: 'rally' }) });
-    if (b.kind === 'mine') buttons.push({ label: 'Выпустить', icon: '⛏', desc: 'Вывести крестьян из шахты', count: () => b.workers.length, act: () => releaseWorkers(st, b.id) });
+    if (b.kind === 'mine') buttons.push({ label: 'Выпустить', icon: '🚪', desc: 'Вывести крестьян из шахты', count: () => b.workers.length, act: () => releaseWorkers(st, b.id) });
+    if (b.kind === 'mill') buttons.push({ label: 'Крестьян в поле', icon: '🌾', desc: 'Позвать свободных крестьян на пустые поля этой мельницы', act: () => { const idle = st.units.filter(u => u.side === 0 && UNITS[u.kind].peasant && !u.task && !u.inside); const n = autoWork(st, idle.map(u => u.id), 'farm'); toast(n ? `В поле: ${n}` : 'Нет свободных крестьян', n ? 'good' : 'bad'); } });
   }
 
   /* ---------- selection panel ---------- */
@@ -447,11 +508,11 @@ function runGame(opts) {
       const B = BUILDINGS[b.kind], S = st.sides[b.side];
       let extra = '';
       if (!b.done) extra = `<div class="sub">Стройка: ${Math.round(b.progress * 100)}%</div><div class="bar prog"><i style="width:${b.progress * 100}%"></i></div>`;
-      if (b.kind === 'mine') extra += `<div class="sub">${{ gold: 'Золото', iron: 'Железо', coal: 'Уголь' }[b.res] || ''} · крестьян в шахте: ${b.workers.length}/${S.up.deepmines ? 10 : 5}</div>`;
+      if (b.kind === 'mine') extra += `<div class="sub">${{ gold: 'Золото', iron: 'Железо', coal: 'Уголь', stone: 'Камень' }[b.res] || ''} · крестьян в шахте: ${b.workers.length}/${S.up.deepmines ? 10 : 5}</div>`;
       if (b.kind === 'mill') extra += `<div class="sub">На полях: ${b.farmers.length}/${B.farm}</div>`;
       if (b.research) extra += `<div class="sub">Изучается: ${UPGRADES[b.research.key].name}</div><div class="bar prog"><i style="width:${b.research.t / b.research.T * 100}%"></i></div>`;
       if (b.blocked) extra += `<div class="sub" style="color:var(--bad)">Нет мест: постройте дома</div>`;
-      const q = b.queue.length ? `<div class="queue">${b.queue.map((k, i) => `<span class="kind"><img src="${icons[k]}" alt="">${i === 0 ? `<i style="width:${b.trainT / UNITS[k].time * 100}%"></i>` : ''}</span>`).join('')}</div>` : '';
+      const q = b.queue.length ? `<div class="queue"><span class="sub">Очередь (клик — отменить):</span>${b.queue.map((k, i) => `<button type="button" class="kind" data-cancel="${i}" title="Отменить: ${UNITS[k].name}"><img src="${icons[k]}" alt="">${i === 0 ? `<i style="width:${b.trainT / UNITS[k].time * 100}%"></i>` : ''}</button>`).join('')}${b.repeat ? '<span class="sub">♾ бесконечно</span>' : ''}</div>` : (b.repeat ? '<div class="sub">♾ бесконечный найм ждёт ресурсов или домов</div>' : '');
       el.innerHTML = `<div class="head"><div class="por"><img src="${icons[b.kind]}" alt=""></div><div><h3>${B.name}${b.side !== 0 ? ` · ${S.name}` : ''}</h3><div class="sub">${B.desc}</div><div class="bar"><i style="width:${b.hp / b.maxHp * 100}%"></i></div><div class="sub">${Math.ceil(b.hp)} / ${b.maxHp}</div></div></div>${extra}${q}`;
       return;
     }
@@ -464,7 +525,8 @@ function runGame(opts) {
     }
     const counts = {};
     for (const u of units) counts[u.kind] = (counts[u.kind] || 0) + 1;
-    el.innerHTML = `<div class="sub">Выделено: ${units.length}</div><div class="kinds">${Object.entries(counts).map(([k, n]) => `<button type="button" class="kind" data-kind="${k}" title="${UNITS[k].name}"><img src="${icons[k]}" alt=""><b>${n}</b></button>`).join('')}</div>${formationInfo()}`;
+    const allPeasants = units.every(u => UNITS[u.kind].peasant);
+    el.innerHTML = `<div class="sub">Выделено: ${units.length}${allPeasants ? ` · кликни лес, камень, мельницу или шахту — или кнопку справа` : ''}</div>${allPeasants ? `<div class="sub">Порядок построек: ${TECH_HINT}</div>` : ''}<div class="kinds">${Object.entries(counts).map(([k, n]) => `<button type="button" class="kind" data-kind="${k}" title="${UNITS[k].name}"><img src="${icons[k]}" alt=""><b>${n}</b></button>`).join('')}</div>${formationInfo()}`;
   }
   function formationInfo() {
     const forms = selFormations();
@@ -472,9 +534,51 @@ function runGame(opts) {
     return `<div class="forms">${forms.slice(0, 4).map(f => `<div class="form">${UNITS[f.kind].name}ы ×${f.members.length} · ${SHAPES[f.shape].toLowerCase()} <div class="bar morale" title="Мораль"><i style="width:${Math.max(0, f.morale)}%"></i></div>${f.drummer ? '🥁' : ''}${f.officer ? '' : ' без офицера'}</div>`).join('')}</div>`;
   }
   $('rSel').addEventListener('click', e => {
+    const c = e.target.closest('[data-cancel]');
+    if (c && sel.building) { cancelTrainAt(st, sel.building, +c.dataset.cancel); renderPanel(); return; }
     const k = e.target.closest('[data-kind]');
     if (k) select(myUnits().filter(u => u.kind === k.dataset.kind));
   });
+
+  /* ---------- idle peasants and the cursor hint ---------- */
+  const idlePeasants = () => st.units.filter(u => u.side === 0 && UNITS[u.kind].peasant && !u.inside && !u.task && u.order.type === 'idle');
+  let idleIdx = 0;
+  $('rIdle').onclick = () => {
+    const list = idlePeasants();
+    if (!list.length) { toast('Все крестьяне при деле', 'good'); return; }
+    const u = list[idleIdx++ % list.length];
+    select([u]); rig.tx = u.x * CELL; rig.tz = u.z * CELL;
+  };
+  let hintT = 0;
+  function cursorHint(e) {
+    const el = $('rCursor');
+    if (!e || mode || down) { el.hidden = true; return; }
+    const units = myUnits();
+    if (!units.length) { el.hidden = true; return; }
+    const peasants = units.some(u => UNITS[u.kind].peasant), mil = units.some(u => !UNITS[u.kind].peasant);
+    let text = '';
+    const enemy = unitAt(e.clientX, e.clientY, u => u.side !== 0);
+    const b = !enemy && buildingAt(e);
+    if ((enemy || (b && b.side !== 0)) && mil) text = '⚔ Атаковать';
+    else if (peasants && b && b.side === 0) text = !b.done ? '🔨 Строить' : b.kind === 'mill' ? '🌾 В поле' : b.kind === 'mine' ? '⛏ В шахту' : b.hp < b.maxHp ? '🔨 Чинить' : '';
+    else if (peasants && !b) {
+      const r0 = canvas.getBoundingClientRect();
+      ndc.set(((e.clientX - r0.left) / r0.width) * 2 - 1, -((e.clientY - r0.top) / r0.height) * 2 + 1);
+      ray.setFromCamera(ndc, eng.camera);
+      let cell = world.pickProp(ray);
+      if (cell < 0) { const g = groundAt(e); if (g) cell = Math.floor(g.z) * W + Math.floor(g.x); }
+      const k = cell >= 0 ? st.map.kind[cell] : -1;
+      text = k === TREE ? '🪓 Рубить лес' : k === ROCK ? '🪨 Ломать камень' : '';
+      if (k === 4) {
+        const d = st.map.deposits.find(d => cell % W >= d.x && cell % W < d.x + 3 && Math.floor(cell / W) >= d.z && Math.floor(cell / W) < d.z + 3);
+        if (d && !d.mine) text = `${{ gold: '🪙 Золото', iron: '⛓ Железо', coal: '⚫ Уголь', stone: '🪨 Камень' }[d.kind]}: постройте здесь шахту`;
+      }
+    }
+    if (!text) { el.hidden = true; return; }
+    const r = canvas.parentElement.getBoundingClientRect();
+    el.textContent = text; el.hidden = false;
+    el.style.left = (e.clientX - r.left + 16) + 'px'; el.style.top = (e.clientY - r.top + 14) + 'px';
+  }
 
   /* ---------- top bar ---------- */
   const prevRes = {};
@@ -485,6 +589,10 @@ function runGame(opts) {
     $('rPop').textContent = `👥 ${used}/${S.popCap}`;
     $('rPop').classList.toggle('full', used >= S.popCap);
     $('rTime').textContent = fmtTime(st.t);
+    const idle = idlePeasants().length;
+    $('rIdle').textContent = `😴 ${idle}`;
+    $('rIdle').classList.toggle('warn', idle > 0);
+    $('rIdle').title = idle ? `Без дела: ${idle} крестьян. Клик — показать следующего` : 'Все крестьяне при деле';
     const peace = st.peace - st.t;
     $('rPeace').hidden = peace <= 0;
     if (peace > 0) $('rPeace').textContent = `Мирное время ${fmtTime(peace)}`;

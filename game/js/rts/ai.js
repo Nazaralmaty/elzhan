@@ -92,22 +92,25 @@ export function aiTick(st, side, dt) {
   if (building_.length < 3) {
     if (S.popCap - pop < 8 && S.popCap < 400 && !inProgress('house')) tryBuild('house', home, 2);
     else if ((mills.length === 0 || farmersWanted > farmSlots - 2) && !inProgress('mill') && my('mill').length < 6) tryBuild('mill', home, 3, 14);
-    else if (my('storehouse').length < 1 + Math.floor(st.t / 600) && st.t > 60 && !inProgress('storehouse')) {
+    else if (my('storehouse').length < 1 + Math.floor(st.t / 600) && st.t > 40 && !inProgress('storehouse')) {
       const cell = findResource(st, home.x, home.z, TREE, 40);
       tryBuild('storehouse', cell >= 0 ? { x: cell % st.W, z: Math.floor(cell / st.W) } : home, 2, 6);
     } else if (st.t > 90 && !inProgress('mine')) {
-      for (const res of ['gold', 'coal', 'iron']) {
+      // stone mine once the outcrops near home are thin
+      const rocksLeft = findResource(st, home.x, home.z, ROCK, 30) >= 0;
+      for (const res of rocksLeft && st.t < 900 ? ['gold', 'coal', 'iron'] : ['stone', 'gold', 'coal', 'iron']) {
         const have = my('mine').filter(b => b.res === res).length;
-        if (have >= (res === 'coal' ? 2 : 1) + (st.t > 900 ? 1 : 0)) continue;
+        if (have >= 1 + ((st.t > 900 && res !== 'stone') || (res === 'gold' && st.t > 400) ? 1 : 0)) continue;
         const d = st.map.deposits.filter(d => !d.mine && d.kind === res && canPlace(st, side, 'mine', d.x, d.z) === '').sort((a, b) => Math.hypot(a.x - home.x, a.z - home.z) - Math.hypot(b.x - home.x, b.z - home.z))[0];
         if (d && Math.hypot(d.x - home.x, d.z - home.z) < 40 && tryBuild('mine', { x: d.x, z: d.z }, 3)) break;
       }
     }
-    if (st.t > 150 && !my('barracks').length) tryBuild('barracks', home, 4, 14);
-    else if (st.t > 300 && !my('blacksmith').length && done('barracks').length) tryBuild('blacksmith', home, 3, 14);
-    else if (st.t > 420 && !my('stable').length && done('blacksmith').length) tryBuild('stable', home, 4, 16);
-    else if (st.t > 500 && my('tower').length < (diff >= 2 ? 3 : 2) && done('barracks').length) tryBuild('tower', towardEnemy(st, side, home, 9), 2, 5);
-    else if (st.t > 720 && !my('foundry').length && done('blacksmith').length && diff >= 1) tryBuild('foundry', home, 4, 16);
+    // the tech chain: storehouse → blacksmith → barracks → stable / towers → foundry
+    if (st.t > 110 && !my('blacksmith').length && done('storehouse').length) tryBuild('blacksmith', home, 3, 12);
+    else if (st.t > 150 && !my('barracks').length && done('blacksmith').length) tryBuild('barracks', home, 4, 14);
+    else if (st.t > 420 && !my('stable').length && done('barracks').length) tryBuild('stable', home, 4, 16);
+    else if (st.t > 500 && my('tower').length < (diff >= 2 ? 3 : 2) && done('barracks').length) tryBuild('tower', towardEnemy(st, side, home, 8), 2, 5);
+    else if (st.t > 720 && !my('foundry').length && done('stable').length && diff >= 1) tryBuild('foundry', home, 4, 16);
     else if (st.t > 900 && my('barracks').length < (diff >= 2 ? 2 : 1)) tryBuild('barracks', home, 4, 18);
   }
 
@@ -135,7 +138,10 @@ export function aiTick(st, side, dt) {
     if (st.t > 240 && drs < 1 && canTrain(st, b.id, 'drummer') === '') { train(st, b.id, 'drummer'); continue; }
     if (soldiers.length >= armyCap) continue;
     const pikes = soldiers.filter(u => u.kind === 'pikeman').length, muskets = soldiers.filter(u => u.kind === 'musketeer').length;
-    const kind = muskets < pikes && S.res.coal > 40 ? 'musketeer' : 'pikeman';
+    // fill one formation at a time: whichever loose group is closer to a full formation gets the recruit
+    const fsize = diff >= 2 && st.t > 900 ? 36 : 15;
+    const loosePikes = free.filter(u => u.kind === 'pikeman').length % fsize, looseMuskets = free.filter(u => u.kind === 'musketeer').length % fsize;
+    const kind = S.res.coal > 40 && (looseMuskets > loosePikes || (looseMuskets === loosePikes && muskets < pikes)) ? 'musketeer' : 'pikeman';
     if (spare('food') > 0 && canTrain(st, b.id, kind) === '') train(st, b.id, kind);
   }
   for (const b of done('stable')) {

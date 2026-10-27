@@ -11,44 +11,46 @@ export const UNITS = {
   officer:   { name: 'Офицер', hp: 90, armor: 2, melee: { dmg: 10, cd: 1.0, reach: 1.2 }, speed: 1.1, sight: 12, cost: { food: 50, gold: 60 }, time: 10, from: 'barracks', eat: 0.04, r: 0.3, command: true, desc: 'Нужен, чтобы построить отряд' },
   drummer:   { name: 'Барабанщик', hp: 40, armor: 0, speed: 1.1, sight: 9, cost: { food: 30, gold: 30 }, time: 6, from: 'barracks', eat: 0.04, r: 0.3, command: true, desc: 'Держит мораль отряда' },
   cossack:   { name: 'Казак', hp: 100, armor: 1, melee: { dmg: 11, cd: 1.0, reach: 1.3 }, speed: 2.4, sight: 13, cost: { food: 70, gold: 30, iron: 10 }, time: 11, from: 'stable', eat: 0.07, r: 0.55, cav: true, vsLight: 1.6, desc: 'Быстрый, режет стрелков, пушки и крестьян' },
-  dragoon:   { name: 'Драгун', hp: 110, armor: 1, melee: { dmg: 8, cd: 1.2, reach: 1.3 }, shot: { dmg: 24, range: 8, reload: 8, cost: { coal: 1 } }, speed: 2.1, sight: 12, cost: { food: 80, gold: 60, iron: 30 }, time: 13, from: 'stable', eat: 0.07, r: 0.55, cav: true, needs: 'blacksmith', desc: 'Конный стрелок' },
-  reiter:    { name: 'Рейтар', hp: 170, armor: 4, melee: { dmg: 16, cd: 1.2, reach: 1.4 }, speed: 2.0, sight: 10, cost: { food: 90, gold: 70, iron: 40 }, time: 15, from: 'stable', eat: 0.08, r: 0.55, cav: true, charge: 1.8, needs: 'blacksmith', desc: 'Тяжёлая конница, проламывает строй' },
+  dragoon:   { name: 'Драгун', hp: 110, armor: 1, melee: { dmg: 8, cd: 1.2, reach: 1.3 }, shot: { dmg: 24, range: 8, reload: 8, cost: { coal: 1 } }, speed: 2.1, sight: 12, cost: { food: 80, gold: 60, iron: 30 }, time: 13, from: 'stable', eat: 0.07, r: 0.55, cav: true, desc: 'Конный стрелок' },
+  reiter:    { name: 'Рейтар', hp: 170, armor: 4, melee: { dmg: 16, cd: 1.2, reach: 1.4 }, speed: 2.0, sight: 10, cost: { food: 90, gold: 70, iron: 40 }, time: 15, from: 'stable', eat: 0.08, r: 0.55, cav: true, charge: 1.8, desc: 'Тяжёлая конница, проламывает строй' },
   cannon:    { name: 'Пушка', hp: 220, armor: 3, shot: { dmg: 70, range: 18, min: 3, reload: 12, splash: 1.8, building: 4, cost: { coal: 3, iron: 1 } }, speed: 0.6, sight: 12, cost: { wood: 150, iron: 150, gold: 100 }, time: 24, from: 'foundry', eat: 0, r: 0.7, art: true, desc: 'Бьёт по площади и ломает здания. Тратит уголь и железо' }
 };
 
 export const BUILDINGS = {
-  townhall:   { name: 'Ратуша', w: 6, h: 6, hp: 4000, cost: { wood: 400, stone: 300, gold: 200 }, time: 90, pop: 20, drop: ['food', 'wood', 'stone', 'gold', 'iron', 'coal'], trains: ['peasant'], sight: 12, desc: 'Нанимает крестьян, принимает все ресурсы' },
-  house:      { name: 'Дом', w: 3, h: 3, hp: 600, cost: { wood: 80, stone: 20 }, time: 18, pop: 12, sight: 6, desc: '+12 к пределу населения' },
-  mill:       { name: 'Мельница', w: 4, h: 4, hp: 800, cost: { wood: 150, stone: 50 }, time: 25, farm: 12, sight: 7, desc: 'Поля вокруг: до 12 крестьян дают еду' },
-  storehouse: { name: 'Склад', w: 4, h: 4, hp: 800, cost: { wood: 120 }, time: 15, drop: ['wood', 'stone', 'food'], sight: 7, desc: 'Сюда носят дерево и камень' },
-  barracks:   { name: 'Казарма', w: 6, h: 5, hp: 2000, cost: { wood: 250, stone: 150 }, time: 45, trains: ['pikeman', 'musketeer', 'officer', 'drummer'], sight: 8, desc: 'Пехота, офицеры и барабанщики' },
-  stable:     { name: 'Конюшня', w: 6, h: 5, hp: 2000, cost: { wood: 300, stone: 100, gold: 80 }, time: 50, trains: ['cossack', 'dragoon', 'reiter'], sight: 8, desc: 'Конница' },
-  blacksmith: { name: 'Кузница', w: 4, h: 4, hp: 1200, cost: { wood: 150, stone: 200, gold: 50 }, time: 35, sight: 7, desc: 'Улучшения оружия и брони' },
-  foundry:    { name: 'Литейный двор', w: 6, h: 5, hp: 2000, cost: { wood: 200, stone: 300, iron: 150, gold: 100 }, time: 60, trains: ['cannon'], needs: 'blacksmith', sight: 8, desc: 'Пушки' },
-  mine:       { name: 'Шахта', w: 4, h: 4, hp: 1500, cost: { wood: 120, stone: 40 }, time: 30, mine: 5, sight: 6, desc: 'Ставится на месторождение. До 5 крестьян внутри' },
-  tower:      { name: 'Башня', w: 3, h: 3, hp: 1800, cost: { stone: 250, wood: 80 }, time: 40, shot: { dmg: 18, range: 10, reload: 3.5, cost: { coal: 1 } }, sight: 12, desc: 'Стреляет по врагам. Тратит уголь' }
+  townhall:   { name: 'Ратуша', icon: '🏛', w: 4, h: 4, hp: 4000, cost: { wood: 400, stone: 300, gold: 200 }, time: 90, pop: 20, drop: ['food', 'wood', 'stone', 'gold', 'iron', 'coal'], trains: ['peasant'], sight: 12, desc: 'Нанимает крестьян, принимает все ресурсы' },
+  house:      { name: 'Дом', icon: '🏠', w: 2, h: 2, hp: 600, cost: { wood: 80, stone: 20 }, time: 18, pop: 12, sight: 6, desc: '+12 к пределу населения' },
+  mill:       { name: 'Мельница', icon: '🌾', w: 3, h: 3, hp: 800, cost: { wood: 150, stone: 50 }, time: 25, farm: 12, sight: 7, desc: 'Поля вокруг: до 12 крестьян дают еду' },
+  storehouse: { name: 'Склад', icon: '📦', w: 3, h: 3, hp: 800, cost: { wood: 120 }, time: 15, drop: ['wood', 'stone', 'food'], sight: 7, desc: 'Сюда носят дерево и камень' },
+  barracks:   { name: 'Казарма', icon: '⚔', w: 4, h: 3, needs: ['blacksmith'], hp: 2000, cost: { wood: 250, stone: 150 }, time: 45, trains: ['pikeman', 'musketeer', 'officer', 'drummer'], sight: 8, desc: 'Пехота, офицеры и барабанщики' },
+  stable:     { name: 'Конюшня', icon: '🐎', w: 4, h: 3, needs: ['barracks'], hp: 2000, cost: { wood: 300, stone: 100, gold: 80 }, time: 50, trains: ['cossack', 'dragoon', 'reiter'], sight: 8, desc: 'Конница' },
+  blacksmith: { name: 'Кузница', icon: '⚒', w: 3, h: 3, needs: ['storehouse'], hp: 1200, cost: { wood: 150, stone: 200, gold: 50 }, time: 35, sight: 7, desc: 'Улучшения оружия и брони' },
+  foundry:    { name: 'Литейный двор', icon: '💣', w: 4, h: 3, hp: 2000, cost: { wood: 200, stone: 300, iron: 150, gold: 100 }, time: 60, trains: ['cannon'], needs: ['stable'], sight: 8, desc: 'Пушки' },
+  mine:       { name: 'Шахта', icon: '⛏', w: 3, h: 3, hp: 1500, cost: { wood: 120, stone: 40 }, time: 30, mine: 5, sight: 6, desc: 'Ставится на месторождение золота, железа, угля или камня. До 5 крестьян внутри, добыча не кончается' },
+  tower:      { name: 'Башня', icon: '🗼', w: 2, h: 2, needs: ['barracks'], hp: 1800, cost: { stone: 250, wood: 80 }, time: 40, shot: { dmg: 18, range: 10, reload: 3.5, cost: { coal: 1 } }, sight: 12, desc: 'Стреляет по врагам. Тратит уголь' }
 };
-export const BUILD_MENU = ['house', 'mill', 'storehouse', 'mine', 'barracks', 'stable', 'blacksmith', 'foundry', 'tower', 'townhall'];
+export const BUILD_MENU = ['house', 'mill', 'storehouse', 'mine', 'blacksmith', 'barracks', 'stable', 'tower', 'foundry', 'townhall'];
+// what has to stand before a building can be placed: storehouse → blacksmith → barracks → stable / tower → foundry
+export const TECH_HINT = 'Склад → Кузница → Казарма → Конюшня и Башня → Литейный двор';
 
 // research: at which building, cost, seconds, requirement
 export const UPGRADES = {
-  axes:      { name: 'Топоры', at: 'townhall', cost: { food: 200, gold: 100 }, time: 40, desc: 'Рубка леса +30%' },
-  stonecut:  { name: 'Каменотёсы', at: 'townhall', cost: { food: 250, gold: 150 }, time: 40, desc: 'Добыча камня +30%' },
-  carts:     { name: 'Тачки', at: 'townhall', cost: { wood: 300, gold: 150 }, time: 45, desc: 'Крестьянин несёт +50%' },
-  scythe:    { name: 'Косы', at: 'mill', cost: { wood: 250, gold: 100 }, time: 40, desc: 'Урожай +25%' },
-  threefield:{ name: 'Трёхполье', at: 'mill', cost: { wood: 400, gold: 250 }, time: 60, needs: 'scythe', desc: 'Урожай ещё +35%' },
-  picks:     { name: 'Кирки', at: 'blacksmith', cost: { wood: 300, iron: 100, gold: 150 }, time: 45, desc: 'Шахты дают +30%' },
-  deepmines: { name: 'Глубокие штольни', at: 'blacksmith', cost: { wood: 400, stone: 200, gold: 200 }, time: 60, needs: 'picks', desc: 'В шахту помещается 10 крестьян' },
-  pikes:     { name: 'Закалённые пики', at: 'blacksmith', cost: { iron: 150, gold: 100 }, time: 45, desc: 'Пикинёры и офицеры +30% урона' },
-  barrels:   { name: 'Нарезные стволы', at: 'blacksmith', cost: { iron: 250, gold: 200 }, time: 60, desc: 'Мушкетёры и драгуны +25% урона, точнее' },
-  bayonets:  { name: 'Штыки', at: 'blacksmith', cost: { iron: 120, gold: 80 }, time: 35, desc: 'Мушкетёры вдвое сильнее в рукопашной' },
-  armor:     { name: 'Кирасы', at: 'blacksmith', cost: { iron: 300, gold: 200 }, time: 60, desc: 'Броня всех бойцов +2' },
-  sabres:    { name: 'Дамасские сабли', at: 'stable', cost: { iron: 200, gold: 200 }, time: 50, desc: 'Конница +25% урона' },
-  horses:    { name: 'Породистые кони', at: 'stable', cost: { food: 400, gold: 250 }, time: 60, desc: 'Конница +25% здоровья и +10% скорости' },
-  drill:     { name: 'Муштра', at: 'barracks', cost: { food: 300, gold: 200 }, time: 50, desc: 'Найм в казарме и конюшне на 30% быстрее' },
-  volley:    { name: 'Плутонговый огонь', at: 'barracks', cost: { gold: 300, coal: 100 }, time: 60, desc: 'Перезарядка мушкетов −25%' },
-  grape:     { name: 'Картечь', at: 'foundry', cost: { iron: 200, gold: 200, coal: 100 }, time: 50, desc: 'Ядра бьют по площади +40%' },
-  gunnery:   { name: 'Артиллерийская школа', at: 'foundry', cost: { iron: 200, gold: 400 }, time: 60, desc: 'Пушки заряжают на 25% быстрее' }
+  axes:      { name: 'Топоры', icon: '🪓', at: 'townhall', cost: { food: 200, gold: 100 }, time: 40, desc: 'Рубка леса +30%' },
+  stonecut:  { name: 'Каменотёсы', icon: '🪨', at: 'townhall', cost: { food: 250, gold: 150 }, time: 40, desc: 'Добыча камня +30%' },
+  carts:     { name: 'Тачки', icon: '🛒', at: 'townhall', cost: { wood: 300, gold: 150 }, time: 45, desc: 'Крестьянин несёт +50%' },
+  scythe:    { name: 'Косы', icon: '🌾', at: 'mill', cost: { wood: 250, gold: 100 }, time: 40, desc: 'Урожай +25%' },
+  threefield:{ name: 'Трёхполье', icon: '🌻', at: 'mill', cost: { wood: 400, gold: 250 }, time: 60, needs: 'scythe', desc: 'Урожай ещё +35%' },
+  picks:     { name: 'Кирки', icon: '⛏', at: 'blacksmith', cost: { wood: 300, iron: 100, gold: 150 }, time: 45, desc: 'Шахты дают +30%' },
+  deepmines: { name: 'Глубокие штольни', icon: '🕳', at: 'blacksmith', cost: { wood: 400, stone: 200, gold: 200 }, time: 60, needs: 'picks', desc: 'В шахту помещается 10 крестьян' },
+  pikes:     { name: 'Закалённые пики', icon: '🔱', at: 'blacksmith', cost: { iron: 150, gold: 100 }, time: 45, desc: 'Пикинёры и офицеры +30% урона' },
+  barrels:   { name: 'Нарезные стволы', icon: '🎯', at: 'blacksmith', cost: { iron: 250, gold: 200 }, time: 60, desc: 'Мушкетёры и драгуны +25% урона, точнее' },
+  bayonets:  { name: 'Штыки', icon: '🗡', at: 'blacksmith', cost: { iron: 120, gold: 80 }, time: 35, desc: 'Мушкетёры вдвое сильнее в рукопашной' },
+  armor:     { name: 'Кирасы', icon: '🛡', at: 'blacksmith', cost: { iron: 300, gold: 200 }, time: 60, desc: 'Броня всех бойцов +2' },
+  sabres:    { name: 'Дамасские сабли', icon: '⚔', at: 'stable', cost: { iron: 200, gold: 200 }, time: 50, desc: 'Конница +25% урона' },
+  horses:    { name: 'Породистые кони', icon: '🐎', at: 'stable', cost: { food: 400, gold: 250 }, time: 60, desc: 'Конница +25% здоровья и +10% скорости' },
+  drill:     { name: 'Муштра', icon: '🥁', at: 'barracks', cost: { food: 300, gold: 200 }, time: 50, desc: 'Найм в казарме и конюшне на 30% быстрее' },
+  volley:    { name: 'Плутонговый огонь', icon: '💥', at: 'barracks', cost: { gold: 300, coal: 100 }, time: 60, desc: 'Перезарядка мушкетов −25%' },
+  grape:     { name: 'Картечь', icon: '💣', at: 'foundry', cost: { iron: 200, gold: 200, coal: 100 }, time: 50, desc: 'Ядра бьют по площади +40%' },
+  gunnery:   { name: 'Артиллерийская школа', icon: '🧨', at: 'foundry', cost: { iron: 200, gold: 400 }, time: 60, desc: 'Пушки заряжают на 25% быстрее' }
 };
 
 export const FORMATION_SIZES = [15, 36];

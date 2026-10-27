@@ -5,7 +5,7 @@ import { makeNoise } from './noise.js';
 import { TREE_WOOD, ROCK_STONE } from './data.js';
 
 export const GRASS = 0, WATER = 1, TREE = 2, ROCK = 3, DEPOSIT = 4;
-export const MAP_SIZES = { small: 96, medium: 128, large: 160 };
+export const MAP_SIZES = { small: 112, medium: 144, large: 184 };
 
 export function createMap({ size = 'medium', players = 2, seed = 1 } = {}) {
   const N = MAP_SIZES[size] || size, W = N, H = N;
@@ -64,10 +64,10 @@ export function createMap({ size = 'medium', players = 2, seed = 1 } = {}) {
     return null;
   }
   function addDeposit(kindName, cx, cz, rMin, rMax) {
-    const s = ringSpot(cx, cz, rMin, rMax, 4, 4, 2);
+    const s = ringSpot(cx, cz, rMin, rMax, 3, 3, 2);
     if (!s) return;
-    clearArea(s.x - 2, s.z - 2, 8, 8);
-    for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) kind[idx(s.x + i, s.z + j)] = DEPOSIT;
+    clearArea(s.x - 2, s.z - 2, 7, 7);
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) kind[idx(s.x + i, s.z + j)] = DEPOSIT;
     deposits.push({ id: deposits.length + 1, kind: kindName, x: s.x, z: s.z, mine: 0 });
   }
   function addRocks(cx, cz, rMin, rMax, count) {
@@ -92,14 +92,16 @@ export function createMap({ size = 'medium', players = 2, seed = 1 } = {}) {
     clearArea(s.x - 9, s.z - 9, 18, 18);
     addForest(s.x, s.z, 12, 16, 70);
     addForest(s.x, s.z, 14, 20, 50);
-    addRocks(s.x, s.z, 11, 15, 9);
+    addRocks(s.x, s.z, 11, 15, 14);
+    addRocks(s.x, s.z, 15, 22, 12);
+    addDeposit('stone', s.x, s.z, 16, 24);
     addDeposit('gold', s.x, s.z, 13, 18);
     addDeposit('iron', s.x, s.z, 14, 20);
     addDeposit('coal', s.x, s.z, 14, 20);
     addDeposit('coal', s.x, s.z, 18, 26);
   }
   // contested middle
-  for (let k = 0; k < 2 + players; k++) addDeposit(['gold', 'iron', 'coal'][k % 3], N / 2, N / 2, 0, N * 0.22);
+  for (let k = 0; k < 3 + players; k++) addDeposit(['gold', 'iron', 'coal', 'stone'][k % 4], N / 2, N / 2, 0, N * 0.22);
   for (let k = 0; k < players + 1; k++) addRocks(N / 2, N / 2, 4, N * 0.3, 10);
 
   // everything reachable from the first start: carve corridors where lakes or forests cut the map

@@ -62,10 +62,10 @@ export function createWorld(eng, st) {
       const f = n.noise(x * 0.08, z * 0.08);
       const kind = f > 0.6 ? 'pine' : f > 0.35 ? rng.pick(['oak', 'pine', 'birch']) : rng.pick(['oak', 'oak', 'birch']);
       const hue = kind === 'pine' ? ['#2f5f3a', '#3a6b40', '#2c5536'] : kind === 'birch' ? ['#7aa04a', '#8bb15a'] : ['#4f7f38', '#5f8f40', '#6b9440'];
-      const it = { kind, x: wx, z: wz, y: gy(wx / CELL, wz / CELL) - 0.1, s: 1.0 + rng.next() * 0.6, r: rng.next() * 6, color: rng.pick(hue) };
+      const it = { kind, cell: i, x: wx, z: wz, y: gy(wx / CELL, wz / CELL) - 0.1, s: 1.0 + rng.next() * 0.6, r: rng.next() * 6, color: rng.pick(hue) };
       props.push(it); cellProp.set(i, it);
     } else {
-      const it = { kind: 'rock', x: wx, z: wz, y: gy(wx / CELL, wz / CELL), s: 1.1 + rng.next() * 0.5, r: rng.next() * 6, color: rng.pick(['#8f8b82', '#9a958c', '#86827a']), sy: 0.9 };
+      const it = { kind: 'rock', cell: i, x: wx, z: wz, y: gy(wx / CELL, wz / CELL), s: 1.1 + rng.next() * 0.5, r: rng.next() * 6, color: rng.pick(['#8f8b82', '#9a958c', '#86827a']), sy: 0.9 };
       props.push(it); cellProp.set(i, it);
     }
   }
@@ -76,6 +76,20 @@ export function createWorld(eng, st) {
     props.push({ kind: k % 9 ? 'tuft' : 'bush', x: x * CELL, z: z * CELL, y: gy(x, z), s: k % 9 ? 0.5 + rng.next() * 0.5 : 0.5 + rng.next() * 0.5, r: rng.next() * 6, color: k % 9 ? `rgb(${Math.round(80 + g * 50)},${Math.round(118 + g * 45)},${Math.round(50 + g * 20)})` : '#4f7a3a' });
   }
   const propH = buildProps(scene, props);
+  // the tree or rock under a ray: cell index, or -1
+  function pickProp(ray) {
+    let best = -1, bd = Infinity;
+    for (const k of ['pine', 'oak', 'birch', 'rock']) {
+      const h = propH[k];
+      if (!h) continue;
+      for (const hit of ray.intersectObject(h.mesh, false)) {
+        const it = h.list[hit.instanceId];
+        if (it && cellProp.get(it.cell) === it && hit.distance < bd) { bd = hit.distance; best = it.cell; }
+        break;
+      }
+    }
+    return best;
+  }
   function removeProp(i) {
     const it = cellProp.get(i);
     if (!it) return;
@@ -87,7 +101,8 @@ export function createWorld(eng, st) {
   const depositMeshes = new Map();
   for (const d of map.deposits) {
     const m = staticMesh(rtsDeposit(d.kind));
-    m.position.set((d.x + 2) * CELL, gy(d.x + 2, d.z + 2), (d.z + 2) * CELL);
+    m.position.set((d.x + 1.5) * CELL, gy(d.x + 1.5, d.z + 1.5), (d.z + 1.5) * CELL);
+    m.scale.setScalar(0.75);
     scene.add(m);
     depositMeshes.set(d.id, m);
   }
@@ -97,41 +112,56 @@ export function createWorld(eng, st) {
   const rubbleList = [];
   const sideColor = s => st.sides[s].color;
   function buildingKey(b) { return `${b.kind}:${b.side}:${b.done ? 1 : 0}`; }
+  // models were drawn for bigger footprints; they are scaled to the current ones (metres: x, z)
+  const MODEL_FOOT = { townhall: [12, 12], house: [6, 6], mill: [8, 8], storehouse: [8, 8], barracks: [12, 10], stable: [12, 10], blacksmith: [8, 8], foundry: [12, 10], mine: [8, 8], tower: [6, 6] };
+  const footScale = b => { const [mx, mz] = MODEL_FOOT[b.kind], sx = b.w * CELL / mx, sz = b.h * CELL / mz; return [sx, Math.min(sx, sz) * 1.05, sz]; };
   function makeBuilding(b) {
     const group = new THREE.Group();
     const B = BUILDINGS[b.kind], c = centerOf(b);
     const base = gy(c.x, c.z);
     group.position.set(c.x * CELL, base, c.z * CELL);
+    const model = new THREE.Group();
+    model.scale.set(...footScale(b));
+    group.add(model);
     let body;
     if (b.kind === 'mine') body = staticMesh(rtsMine(b.res), sideColor(b.side));
     else body = staticMesh(BUILDERS[b.kind](b.id % 4), sideColor(b.side));
-    group.add(body);
+    model.add(body);
     let sails = null;
     if (b.kind === 'mill') {
       // sails spin about their own hub axis, which faces +z
       const hub = new THREE.Group();
       hub.position.set(0, 6.8, 2.55); hub.rotation.y = Math.PI / 2;
       sails = new THREE.Mesh(windmillSails(), body.material); sails.castShadow = true; sails.scale.setScalar(1.15);
-      hub.add(sails); group.add(hub);
+      hub.add(sails); model.add(hub);
     }
     let scaf = null;
-    if (!b.done) { scaf = staticMesh(scaffold(B.w * CELL * 0.92, B.h * CELL * 0.92, 6)); group.add(scaf); }
-    // farm plots around a finished mill
-    let fields = null;
-    if (b.kind === 'mill' && b.done) {
-      const parts = [];
-      for (let k = 0; k < BUILDINGS.mill.farm; k++) {
-        const p = farmSpot(st, b, k), a = Math.atan2(p.z - c.z, p.x - c.x);
-        const fx = (p.x - c.x) * CELL, fz = (p.z - c.z) * CELL;
-        parts.push(box(2.6, 0.12, 2.0, k % 2 ? '#c9a64e' : '#b99a42', { at: [fx, gy(p.x, p.z) - base + 0.05, fz], rot: [0, -a, 0] }));
-        for (let r = 0; r < 4; r++) parts.push(box(2.4, 0.22, 0.12, k % 3 ? '#d9b85a' : '#9fb04a', { at: [fx + Math.cos(-a + Math.PI / 2) * (r - 1.5) * 0.45, gy(p.x, p.z) - base + 0.2, fz - Math.sin(-a + Math.PI / 2) * (r - 1.5) * 0.45], rot: [0, -a, 0] }));
-      }
-      fields = staticMesh(parts);
-      fields.castShadow = false;
-      group.add(fields);
-    }
+    if (!b.done) { scaf = staticMesh(scaffold(B.w * CELL * 0.95, B.h * CELL * 0.95, 4)); group.add(scaf); }
     scene.add(group);
-    return { group, body, sails, scaf, fields, key: buildingKey(b), kind: b.kind };
+    const v = { group, model, body, sails, scaf, fields: null, fieldKey: '', key: buildingKey(b), kind: b.kind };
+    if (b.kind === 'mill') syncFields(b, v);
+    return v;
+  }
+  // mill fields: plots with a farmer grow wheat, free plots are bare ploughed earth
+  function syncFields(b, v) {
+    const key = `${b.done}:${b.farmers.length}`;
+    if (v.fieldKey === key) return;
+    v.fieldKey = key;
+    if (v.fields) { v.group.remove(v.fields); v.fields.geometry.dispose(); }
+    const c = centerOf(b), base = gy(c.x, c.z), parts = [];
+    for (let k = 0; k < BUILDINGS.mill.farm; k++) {
+      const p = farmSpot(st, b, k), a = Math.atan2(p.z - c.z, p.x - c.x), y = gy(p.x, p.z) - base;
+      const fx = (p.x - c.x) * CELL, fz = (p.z - c.z) * CELL, grown = b.done && k < b.farmers.length;
+      const along = [Math.cos(-a + Math.PI / 2), -Math.sin(-a + Math.PI / 2)];
+      parts.push(box(2.9, 0.1, 2.3, '#6e5236', { at: [fx, y + 0.04, fz], rot: [0, -a, 0] }));
+      for (let r = 0; r < 5; r++) {
+        const o = (r - 2) * 0.44;
+        parts.push(box(2.6, grown ? 0.5 : 0.08, 0.22, grown ? (r % 2 ? '#e0bd55' : '#d2ad46') : '#58412b', { at: [fx + along[0] * o, y + (grown ? 0.3 : 0.12), fz + along[1] * o], rot: [0, -a, 0] }));
+      }
+    }
+    v.fields = staticMesh(parts);
+    v.fields.castShadow = false;
+    v.group.add(v.fields);
   }
   function syncBuildings() {
     const seen = new Set();
@@ -142,6 +172,7 @@ export function createWorld(eng, st) {
       // rise while under construction
       if (!b.done) v.body.scale.y = 0.12 + 0.88 * b.progress;
       else v.body.scale.y = 1;
+      if (b.kind === 'mill') syncFields(b, v);
       if (b.kind === 'mine') { const d = map.deposits.find(d => d.id === b.deposit); const m = d && depositMeshes.get(d.id); if (m) m.visible = false; }
     }
     for (const [id, v] of bview) if (!seen.has(id)) { disposeGroup(v.group); bview.delete(id); }
@@ -332,7 +363,8 @@ export function createWorld(eng, st) {
       if (Math.random() < dt * (b.kind === 'townhall' ? 0.8 : 2)) {
         const c = centerOf(b), base = gy(c.x, c.z);
         const pts = b.kind === 'blacksmith' ? [[2.2, 6.2, -2.2]] : b.kind === 'foundry' ? [[-3, 9.4, -3], [3, 9.4, -3]] : [[2.6, 8.5, -2.6]];
-        for (const [ox, oy, oz] of pts) fx.dust(c.x * CELL + ox, base + oy, c.z * CELL + oz, 1.2);
+        const v = bview.get(b.id), k = v ? v.model.scale : { x: 1, y: 1, z: 1 };
+        for (const [ox, oy, oz] of pts) fx.dust(c.x * CELL + ox * k.x, base + oy * k.y, c.z * CELL + oz * k.z, 1.2);
       }
     }
     for (let i = rubbleList.length - 1; i >= 0; i--) { const r = rubbleList[i]; r.t += dt; if (r.t > 60) { scene.remove(r.m); r.m.geometry.dispose(); rubbleList.splice(i, 1); } }
@@ -341,7 +373,7 @@ export function createWorld(eng, st) {
 
   syncBuildings();
   syncFog();
-  return { terrain: terrain.mesh, heightAt: gy, syncBuildings, syncFog, drawUnits, drawShots, playEvents, update, models, crowd, fx, bview, view };
+  return { terrain: terrain.mesh, heightAt: gy, pickProp, syncBuildings, syncFog, drawUnits, drawShots, playEvents, update, models, crowd, fx, bview, view };
 }
 
 function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
