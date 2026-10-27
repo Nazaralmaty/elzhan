@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Модели · стенд</title>
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.min.js" } }</script>
+<style>html,body{margin:0;height:100%;background:#222}canvas{width:100%;height:100%;display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script type="module">
+// Dev stand: every unit model in several poses, for checking rigs and animation by eye.
+import * as THREE from 'three';
+import { createEngine } from '../js/gfx/engine.js';
+import { createCrowd } from '../js/gfx/crowd.js';
+import { buildModels } from '../js/gfx/models.js';
+const eng = createEngine(document.getElementById('c'), { dist: 15, pitch: 0.32, preserve: true });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#6f9a4f' }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; eng.scene.add(ground);
+const models = buildModels();
+const crowd = createCrowd(eng.scene, models, { capacity: 8 });
+const q = new URLSearchParams(location.search);
+const list = (q.get('m') || 'musketeer,pikeman,miner,cossack,cannon').split(',');
+const acts = (q.get('a') || 'idle,aim,reload,melee,walk').split(',');
+const t = +(q.get('t') || 0.15);
+const color = new THREE.Color('#2F6FDB');
+eng.rig.tx = (acts.length - 1) * 1.6; eng.rig.tz = (list.length - 1) * 1.5; eng.rig.yaw = +(q.get('yaw') || 0.5);
+eng.rig.dist = +(q.get('d') || 14);
+eng.updateCamera();
+crowd.begin();
+list.forEach((m, j) => acts.forEach((a, i) => {
+  crowd.draw({ model: m, x: i * 3.2, y: 0, z: j * 3, yaw: +(q.get('face') || 0), color, walk: a === 'walk' ? 1.2 : 0, moving: a === 'walk', act: a === 'walk' ? 'idle' : a, actT: a === 'melee' ? t : a === 'fire' ? 0.05 : 0.3, aim: a === 'aim' || a === 'fire' ? 1 : 0, dead: a === 'dead' ? 1 : -1, t: 1, roll: 0 });
+}));
+crowd.end();
+eng.render();
+</script></body></html>
