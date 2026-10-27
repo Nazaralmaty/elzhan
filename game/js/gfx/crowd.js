@@ -134,6 +134,9 @@ export function createCrowd(scene, models, { capacity = 256, shadows = true } = 
         const a = cy < 0.6 ? lerp(0.5, 2.8, cy / 0.6) : lerp(2.8, 0.5, (cy - 0.6) / 0.4);
         aR = [-0.3, 0, a]; aL = [0.3, 0, a]; lean += 0.15;
       } else aR = [0, 0, 0.25 + sw * 0.4];
+    } else if (st === 'drum') {
+      const beat = (u.t || 0) * 7 + (u.seed || 0) * 6;
+      aR = [-0.35, 0, 0.9 + Math.max(0, Math.sin(beat)) * 0.6]; aL = [0.35, 0, 0.9 + Math.max(0, -Math.sin(beat)) * 0.6];
     } else if (st === 'carry') { aR = [-0.3, 0, -0.35]; aL = [0.3, 0, -0.35]; lean += 0.08; }
     const by = bob;
     put(mk, 'legL', P.legL.pivot[0], P.legL.pivot[1] + by, P.legL.pivot[2], 0, 0, dead ? 0 : sw, c);

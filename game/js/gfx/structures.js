@@ -157,3 +157,110 @@ export function fence(x0, z0, x1, z1) {
 }
 
 export { staticMesh, staticMaterial, merge };
+
+/* ---------- Cossacks mode buildings: footprints in metres (1 cell = 2 m), centred on the origin ---------- */
+const cobble = (w, d) => box(w + 0.6, 0.25, d + 0.6, '#8f8676', T(0, 0.05, 0));
+
+export function rtsTownhall() {
+  const P = [cobble(12, 12)];
+  P.push(box(11, 1.0, 9, STONE2, T(0, 0.5, -0.5)));
+  P.push(...halfTimber({ x: 0, z: -0.5, w: 10.4, d: 8.4, h: 3.1, floors: 2, roof: '#ffffff', roofTint: true, stoneBase: false, chimney: true }).map(g => g.translate(0, 0.8, 0)));
+  // bell tower with clock
+  P.push(box(3, 11, 3, STONE, { at: [0, 5.5, 4.2], shade: 0.25 }), box(3.3, 0.4, 3.3, STONE2, T(0, 11, 4.2)), cyl(0.7, 0.7, 0.12, 14, '#efe6cf', { at: [0, 9, 5.75], rot: [Math.PI / 2, 0, 0] }), box(0.08, 0.5, 0.05, '#222', T(0, 9.15, 5.85)));
+  P.push(cone(2.4, 4, 4, '#ffffff', { at: [0, 13.2, 4.2], rot: [0, Math.PI / 4, 0], tint: 1 }), ...flag(0, 15, 4.2, 1.8));
+  P.push(box(1.6, 2.4, 0.2, WOODD, T(-2.5, 2.0, 3.75)), box(1.6, 2.4, 0.2, WOODD, T(2.5, 2.0, 3.75)));
+  // well and market stalls
+  P.push(cyl(0.8, 0.9, 0.9, 10, STONE, T(-4.6, 0.6, 4.6)), box(1.8, 0.12, 0.25, WOODD, T(-4.6, 2, 4.6)), box(0.12, 1.6, 0.12, WOODD, T(-5.4, 1.4, 4.6)), box(0.12, 1.6, 0.12, WOODD, T(-3.8, 1.4, 4.6)));
+  P.push(box(2, 0.8, 1, WOOD, T(4.4, 0.55, 4.8)), prism(1.4, 0.6, 2.2, '#ffffff', { at: [4.4, 1.6, 4.8], rot: [0, Math.PI / 2, 0], tint: 1 }), box(0.1, 1.2, 0.1, WOODD, T(3.5, 1.1, 5.2)), box(0.1, 1.2, 0.1, WOODD, T(5.3, 1.1, 5.2)));
+  return P;
+}
+export function rtsHouse(v = 0) {
+  const roofs = ['#a65537', '#8f4a32', '#c7a35a', '#6d5a4a'];
+  return [box(6, 0.2, 6, '#8f8676', T(0, 0.02, 0)), ...halfTimber({ x: 0, z: 0, w: 4.6, d: 3.8, h: 2.6, roof: roofs[v % 4], ry: v % 2 ? Math.PI / 2 : 0 }), box(1.2, 0.6, 0.6, WOOD, T(2.2, 0.4, 2.4)), cyl(0.3, 0.3, 0.6, 8, WOOD, T(-2.3, 0.4, 2.3))];
+}
+export function rtsMillBody() {
+  return [box(8, 0.2, 8, '#9a8f75', T(0, 0.02, 0)), cyl(1.9, 2.5, 7, 10, PLASTER, { at: [0, 3.5, 0], shade: 0.25 }), cone(2.4, 2.6, 10, THATCH, T(0, 8.3, 0)), box(1, 1.6, 0.12, WOODD, T(0, 0.9, 2.45)),
+    box(0.7, 0.7, 0.1, '#2c3a44', T(0, 4.5, 2.2)), ...halfTimber({ x: -2.6, z: -2.4, w: 2.6, d: 2.2, h: 2, roof: THATCH, chimney: false }), cyl(0.5, 0.5, 0.8, 8, '#c9b48a', T(2.6, 0.5, 2.6)), cyl(0.5, 0.5, 0.8, 8, '#c9b48a', T(3.3, 0.5, 2.0))];
+}
+export function rtsStorehouse() {
+  const P = [box(8, 0.2, 8, '#8f8676', T(0, 0.02, 0)), box(6.6, 3.2, 4.6, WOOD, { at: [0, 1.7, -1], shade: 0.3 }), prism(5.6, 2.2, 7.2, '#7a5a3c', { at: [0, 3.3, -1], rot: [0, Math.PI / 2, 0] })];
+  for (let i = 0; i < 5; i++) P.push(box(0.12, 3.2, 0.12, WOODD, T(-3.2 + i * 1.6, 1.7, 1.35)));
+  P.push(box(2.6, 2.6, 0.1, '#2a1f17', T(0, 1.4, 1.32)));
+  for (let i = 0; i < 6; i++) P.push(cyl(0.22, 0.22, 2.2, 7, '#8a6342', { at: [-2.6 + (i % 3) * 0.48, 0.35 + Math.floor(i / 3) * 0.42, 2.8], rot: [0, 0, Math.PI / 2] }));
+  P.push(dodeca(0.5, '#8d8a84', T(2.4, 0.4, 2.8)), dodeca(0.42, '#9a968f', T(3.0, 0.35, 2.3)), dodeca(0.36, '#85827c', T(2.6, 0.75, 2.5)));
+  return P;
+}
+export function rtsBarracks() {
+  const P = [box(12, 0.25, 10, '#8f8676', T(0, 0.05, 0))];
+  P.push(box(10.5, 3, 5.4, STONE, { at: [0, 1.5, -1.8], shade: 0.25 }));
+  P.push(...halfTimber({ x: 0, z: -1.8, w: 10.4, d: 5.2, h: 2.6, roof: '#ffffff', roofTint: true, stoneBase: false, chimney: true }).map(g => g.translate(0, 2.9, 0)));
+  for (let i = 0; i < 5; i++) P.push(box(0.5, 0.9, 0.1, '#2c3a44', T(-4 + i * 2, 1.8, 1.0)));
+  P.push(box(1.4, 2.2, 0.15, WOODD, T(0, 1.1, 0.95)));
+  // drill yard: fence, dummies, flag
+  P.push(...fence(-5.6, 2.2, -5.6, 4.6), ...fence(-5.6, 4.6, 5.6, 4.6), ...fence(5.6, 4.6, 5.6, 2.2));
+  for (const x of [-3, -1.2]) P.push(box(0.12, 1.6, 0.12, WOODD, T(x, 0.8, 3.4)), box(0.8, 0.12, 0.12, WOODD, T(x, 1.3, 3.4)), sphere(0.22, '#c9b48a', T(x, 1.75, 3.4)), box(0.45, 0.6, 0.3, '#c9b48a', T(x, 1.1, 3.4)));
+  P.push(...flag(4.2, 0, 3.4, 1.6));
+  P.push(cyl(0.05, 0.05, 1.6, 4, '#8a6a45', { at: [2.5, 0.8, 3.0], rot: [0.3, 0, 0] }), cyl(0.05, 0.05, 1.6, 4, '#8a6a45', { at: [2.5, 0.8, 3.0], rot: [-0.3, 0, 0] }));
+  return P;
+}
+export function rtsStable() {
+  const P = [box(12, 0.25, 10, '#9a8f75', T(0, 0.05, 0)), box(10.5, 2.8, 4.6, '#8a6242', { at: [0, 1.4, -2.2], shade: 0.3 }), prism(5.6, 2, 11.2, '#ffffff', { at: [0, 2.8, -2.2], rot: [0, Math.PI / 2, 0], tint: 1, shade: 0.2 })];
+  for (let i = 0; i < 5; i++) P.push(box(1.3, 1.7, 0.1, i % 2 ? '#5a3b25' : '#4e3423', T(-4 + i * 2, 0.95, 0.12)), box(1.4, 0.12, 0.14, '#3a2a1e', T(-4 + i * 2, 1.86, 0.16)));
+  P.push(...fence(-5.6, 1.4, -5.6, 4.6), ...fence(-5.6, 4.6, 5.6, 4.6), ...fence(5.6, 4.6, 5.6, 1.4));
+  P.push(cone(0.9, 1.4, 8, THATCH, T(-3.5, 0.7, 3.2)), box(1.4, 0.5, 0.5, WOOD, T(2.8, 0.35, 3.6)), box(1.2, 0.08, 0.4, '#4a7fb0', T(2.8, 0.58, 3.6)));
+  P.push(...flag(5, 0, -4.4, 1.4));
+  return P;
+}
+export function rtsBlacksmith() {
+  const P = [box(8, 0.2, 8, '#8f8676', T(0, 0.02, 0)), box(6, 3, 4.6, STONE, { at: [0, 1.5, -1], shade: 0.3 }), prism(5.4, 2, 6.8, SLATE, { at: [0, 3, -1], rot: [0, Math.PI / 2, 0] })];
+  P.push(box(1.3, 5.6, 1.3, '#6e5a4c', T(2.2, 3, -2.2)), box(1.6, 0.25, 1.6, '#5a4a3e', T(2.2, 5.9, -2.2)));
+  // open forge front: posts, awning, anvil, quench barrel, glowing hearth
+  P.push(box(0.2, 2.6, 0.2, WOODD, T(-2.8, 1.3, 2.6)), box(0.2, 2.6, 0.2, WOODD, T(2.8, 1.3, 2.6)), box(6.2, 0.15, 2.4, '#5a4636', { at: [0, 2.6, 2.0], rot: [0.12, 0, 0] }));
+  P.push(box(0.8, 0.5, 0.4, '#3a3a3a', T(-0.8, 0.6, 2.0)), box(0.3, 0.4, 0.3, '#2a2a2a', T(-0.8, 0.3, 2.0)), cyl(0.4, 0.4, 0.8, 8, WOOD, T(1.4, 0.5, 2.2)), box(1.3, 0.8, 0.9, '#5d4c40', T(-2.0, 0.5, 1.2)), box(0.8, 0.12, 0.5, '#ff8a3a', T(-2.0, 0.95, 1.2)));
+  return P;
+}
+export function rtsFoundry() {
+  const P = [box(12, 0.25, 10, '#8a7f70', T(0, 0.05, 0)), box(10, 4, 5.6, '#9c5a43', { at: [0, 2, -1.8], shade: 0.3 }), prism(6.4, 2.2, 10.6, SLATE, { at: [0, 4, -1.8], rot: [0, Math.PI / 2, 0] })];
+  for (const x of [-3, 3]) P.push(cyl(0.7, 0.9, 9, 10, '#8a4a36', T(x, 4.5, -3)), cyl(0.85, 0.85, 0.4, 10, '#6e3a2a', T(x, 9, -3)));
+  for (let i = 0; i < 4; i++) P.push(box(0.9, 1.4, 0.1, '#ffb066', T(-3.6 + i * 2.4, 1.6, 1.0)));
+  P.push(box(2, 3, 0.15, WOODD, T(0, 1.5, 1.0)));
+  P.push(cyl(0.2, 0.26, 2, 8, '#3b3b3b', { at: [3.2, 0.7, 3.4], rot: [0, 0, Math.PI / 2] }), cyl(0.4, 0.4, 0.1, 10, WOODD, { at: [3.0, 0.4, 3.0], rot: [Math.PI / 2, 0, 0] }), cyl(0.4, 0.4, 0.1, 10, WOODD, { at: [3.0, 0.4, 3.8], rot: [Math.PI / 2, 0, 0] }));
+  for (let i = 0; i < 6; i++) P.push(sphere(0.14, '#2a2a2a', T(-3 + (i % 3) * 0.3, 0.3 + Math.floor(i / 3) * 0.24, 3.4)));
+  P.push(...flag(-5, 0, 3.6, 1.4));
+  return P;
+}
+export function rtsMine(res) {
+  const ore = res === 'gold' ? GOLD : res === 'iron' ? '#9a5a3c' : '#2a2a2a';
+  const P = [];
+  [[0, 0, 0, 3.4, 2.4], [2.2, 0, -1.4, 2.2, 2], [-2.2, 0, -1, 2.4, 1.9], [0.4, 0, -2.6, 2.4, 2.6]].forEach(([x, , z, r, h], i) => P.push(dodeca(r, i % 2 ? '#8a7f70' : '#7a7266', { at: [x, h * 0.45, z], scale: [1, h / r, 1], rot: [i, i * 2, 0], shade: 0.35 })));
+  P.push(box(0.3, 3.2, 0.3, WOOD, T(-1.2, 1.6, 2.8)), box(0.3, 3.2, 0.3, WOOD, T(1.2, 1.6, 2.8)), box(3.2, 0.4, 0.5, WOOD, T(0, 3.2, 2.8)), box(2, 2.6, 0.6, '#14100d', T(0, 1.3, 2.55)));
+  // head frame with wheel
+  P.push(box(0.2, 4.5, 0.2, WOODD, { at: [2.6, 2.2, 1.6], rot: [0, 0, 0.12] }), box(0.2, 4.5, 0.2, WOODD, { at: [3.6, 2.2, 1.6], rot: [0, 0, -0.12] }), torus(0.6, 0.06, '#4a3424', { at: [3.1, 4.3, 1.6] }, 5, 14));
+  for (let i = 0; i < 12; i++) { const a = i * 2.3, r = 1.2 + (i % 4) * 0.6; P.push(dodeca(0.15 + (i % 3) * 0.06, ore, T(Math.cos(a) * r, 0.5 + (i % 5) * 0.4, Math.sin(a) * r * 0.7 + 0.4))); }
+  P.push(box(1.1, 0.7, 1.3, '#5e4330', T(-2.6, 0.55, 3.2)), ...[0, 1, 2].map(i => dodeca(0.22, ore, T(-2.9 + i * 0.3, 1.0, 3.2))));
+  P.push(box(0.12, 1.4, 1.2, '#ffffff', { at: [1.6, 3.6, 2.9], tint: 1 }));
+  return P;
+}
+export function rtsDeposit(res) {
+  const ore = res === 'gold' ? GOLD : res === 'iron' ? '#9a5a3c' : '#262626';
+  const P = [];
+  [[0, 0, 0, 2.6, 1.8], [1.8, 0, 1.2, 1.6, 1.3], [-1.6, 0, 1.0, 1.7, 1.4], [0.6, 0, -1.8, 1.8, 1.6], [-1.4, 0, -1.4, 1.4, 1.1]].forEach(([x, , z, r, h], i) => P.push(dodeca(r, i % 2 ? '#8a8378' : '#7b746a', { at: [x, h * 0.4, z], scale: [1, h / r, 1], rot: [i * 1.3, i * 2.1, 0], shade: 0.35 })));
+  for (let i = 0; i < 18; i++) { const a = i * 2.1, r = 0.8 + (i % 5) * 0.5; P.push(dodeca(0.16 + (i % 3) * 0.08, ore, T(Math.cos(a) * r, 0.4 + (i % 4) * 0.35, Math.sin(a) * r))); }
+  return P;
+}
+export function rtsTower() {
+  return [box(6, 0.2, 6, '#8f8676', T(0, 0.02, 0)), ...roundTower(0, 0, 2.2, 9.5), box(0.12, 1.2, 0.8, '#2a2420', T(2.2, 1.2, 0)), ...flag(0, 14, 0, 1.6)];
+}
+export function scaffold(w, d, h) {
+  const P = [];
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) P.push(box(0.14, h, 0.14, '#8a6a45', T(sx * w / 2, h / 2, sz * d / 2)));
+  for (let y = 1.2; y < h; y += 1.6) { P.push(box(w, 0.1, 0.1, '#8a6a45', T(0, y, d / 2)), box(w, 0.1, 0.1, '#8a6a45', T(0, y, -d / 2)), box(0.1, 0.1, d, '#8a6a45', T(w / 2, y, 0)), box(0.1, 0.1, d, '#8a6a45', T(-w / 2, y, 0))); }
+  P.push(box(w * 0.6, 0.12, 0.8, '#a07a50', { at: [0, h * 0.55, d / 2 + 0.3], rot: [0, 0, 0.2] }));
+  return P;
+}
+export function rubble(w, d) {
+  const P = [];
+  for (let i = 0; i < 9; i++) P.push(dodeca(0.4 + (i % 3) * 0.25, i % 2 ? '#6e665c' : '#4e463e', T((i % 3 - 1) * w * 0.28, 0.2, (Math.floor(i / 3) - 1) * d * 0.28)));
+  P.push(box(w * 0.6, 0.15, 0.3, '#2c2620', { at: [0, 0.3, 0], rot: [0, 0.5, 0.1] }), box(w * 0.5, 0.15, 0.3, '#2c2620', { at: [0.4, 0.4, 0.5], rot: [0, -0.8, -0.15] }));
+  return P;
+}

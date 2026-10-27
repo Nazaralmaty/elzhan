@@ -50,7 +50,9 @@ function torso(o) {
   if (o.armor) parts.push(box(0.34, 0.42, 0.46, o.armor, { at: [0.01, 0.34, 0] }), box(0.36, 0.05, 0.48, DSTEEL, { at: [0.01, 0.13, 0] }));
   if (o.cape) parts.push(box(0.05, 0.95, 0.46, TINT, { at: [-0.2, 0.08, 0], rot: [0, 0, -0.08], tint: 1, shade: 0.35 }));
   if (o.sash) parts.push(box(0.02, 0.7, 0.07, TINT, { at: [0.17, 0.3, 0], rot: [0.62, 0, 0], tint: 1 }));
-  if (o.sack) parts.push(sphere(0.2, '#b99a5e', { at: [-0.28, 0.35, 0], scale: [0.8, 1, 1] }));
+  if (o.sack) parts.push(sphere(0.2, o.sack === true ? '#b99a5e' : o.sack, { at: [-0.28, 0.35, 0], scale: [0.8, 1, 1] }));
+  if (o.logs) parts.push(cyl(0.1, 0.1, 1.1, 7, '#8a6342', { at: [-0.05, 0.62, 0.12], rot: [0.15, 0, Math.PI / 2 - 0.3] }), cyl(0.09, 0.09, 1.0, 7, '#7a5435', { at: [-0.05, 0.7, 0.0], rot: [-0.1, 0, Math.PI / 2 - 0.25] }));
+  if (o.drum) parts.push(cyl(0.2, 0.2, 0.22, 12, TINT, { at: [0.2, 0.05, 0.12], tint: 1 }), cyl(0.21, 0.21, 0.04, 12, WHITE, { at: [0.2, 0.17, 0.12] }), box(0.02, 0.6, 0.04, WHITE, { at: [0.08, 0.35, 0.05], rot: [0.5, 0, 0] }));
   return parts;
 }
 
@@ -77,6 +79,10 @@ const W = {
   rustysword: () => [box(0.04, 0.1, 0.04, '#5a4a3a', { at: [0, -0.6, 0] }), box(0.025, 0.7, 0.07, '#8a7a68', { at: [0, -0.98, 0] })],
   pick: () => [box(0.04, 0.85, 0.04, WOOD, { at: [0.0, -0.55, 0], rot: [0, 0, 0] }), box(0.42, 0.05, 0.05, DSTEEL, { at: [0.0, -0.95, 0], rot: [0, 0, 0.15] })],
   staff: (orb) => [box(0.045, 1.7, 0.045, WOODD, { at: [0, -0.35, 0] }), ball(0.08, orb, { at: [0, 0.52, 0] }, 1)],
+  axe: () => [box(0.04, 0.8, 0.04, WOOD, { at: [0, -0.5, 0] }), box(0.2, 0.16, 0.03, DSTEEL, { at: [0.08, -0.85, 0] })],
+  hoe: () => [box(0.035, 1.1, 0.035, WOOD, { at: [0, -0.6, 0] }), box(0.22, 0.05, 0.12, DSTEEL, { at: [0.09, -1.14, 0] })],
+  hammer: () => [box(0.035, 0.5, 0.035, WOOD, { at: [0, -0.62, 0] }), box(0.16, 0.09, 0.09, DSTEEL, { at: [0, -0.86, 0] })],
+  banner: () => [box(0.04, 2.2, 0.04, WOODD, { at: [0, 0.2, 0] }), box(0.03, 0.6, 0.8, TINT, { at: [0, 1.0, -0.42], tint: 1 }), ball(0.06, BRASS, { at: [0, 1.32, 0] }, 0)],
   rammer: () => [box(0.03, 1.6, 0.03, WOOD, { at: [0, -0.4, 0] }), cyl(0.05, 0.05, 0.12, 6, '#3a3a3a', { at: [0, 0.42, 0] })]
 };
 const shield = (color, tint) => cyl(0.26, 0.26, 0.05, 10, color, { at: [0.04, -0.4, -0.05], rot: [Math.PI / 2, 0, 0], tint });
@@ -196,5 +202,17 @@ export function buildModels() {
   M.alden = humanModel({ hat: 'plume', armor: '#c9d0d8', cape: true, weapon: 'bigsword', shield: '#ffffff', shieldTint: 1, trousers: '#c9d0d8', boots: '#8a929c', scale: 1.15, style: 'sword', moustache: true });
   M.irena = humanModel({ robe: true, hat: 'witch', weapon: 'staff', orb: '#FFB347', trim: BRASS, hair: '#b5532c', scale: 1.08, style: 'staff' });
   M.corvin = humanModel({ hat: 'feather', coatColor: '#3d5a3a', sash: true, long: 'rifle', trousers: '#5a4a38', boots: '#3a2a1e', scale: 1.1, moustache: true });
+  // Cossacks mode
+  const peasant = { hat: 'cap', coatColor: '#d8cdb3', sash: true, trousers: '#6b5a48', boots: '#3a2c20' };
+  M.peasant = humanModel({ ...peasant, style: 'none' });
+  M.peasantAxe = humanModel({ ...peasant, weapon: 'axe', style: 'pick' });
+  M.peasantHoe = humanModel({ ...peasant, weapon: 'hoe', style: 'pick' });
+  M.peasantHammer = humanModel({ ...peasant, weapon: 'hammer', style: 'pick' });
+  M.peasantLogs = humanModel({ ...peasant, logs: true, style: 'carry' });
+  M.peasantStone = humanModel({ ...peasant, sack: '#9a968f', style: 'carry' });
+  M.officer = humanModel({ hat: 'plume', sash: true, weapon: 'sword', facings: '#e9dfc4', trousers: WHITE, style: 'sword', moustache: true, scale: 1.05 });
+  M.drummer = humanModel({ hat: 'tricorn', drum: true, facings: '#e9dfc4', trousers: WHITE, style: 'drum' });
+  M.dragoon = riderModel({ hat: 'tricorn', weapon: 'saber', belts: true, trousers: '#e8e0cc', boots: BOOT }, { coat: '#5a3d28' });
+  M.reiter = riderModel({ hat: 'helm', armor: '#4a525c', weapon: 'sword', trousers: '#2a2a2a', boots: BOOT, cape: true }, { coat: '#2b211b', mane: '#111' });
   return M;
 }

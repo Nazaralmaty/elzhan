@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Казаки · стратегия</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Nunito:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/lane.css">
+<link rel="stylesheet" href="css/rts.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+
+<main id="rSetup">
+  <div class="setup-wrap">
+    <header class="setup-head">
+      <div><p class="label">Стратегия в реальном времени</p><h1>Казаки: <span>снова война</span></h1></div>
+      <p>Крестьяне рубят лес, ломают камень, пашут поля и спускаются в шахты. Ты строишь город, нанимаешь пикинёров, мушкетёров, конницу и пушки, собираешь их в отряды с офицером и барабанщиком и ведёшь в бой. <a class="inline-link" href="lane.html">← Стенка на стенку</a> · <a class="inline-link" href="index.html">Арена</a></p>
+    </header>
+    <div class="setup-grid">
+      <div class="panel">
+        <h2>Новая партия</h2>
+        <div><p class="label">Карта</p><div class="seg">
+          <label><input type="radio" name="rsize" value="small"> Малая<small>96×96</small></label>
+          <label><input type="radio" name="rsize" value="medium" checked> Средняя<small>128×128</small></label>
+          <label><input type="radio" name="rsize" value="large"> Большая<small>160×160</small></label></div></div>
+        <div><p class="label">Соперники</p><div class="seg">
+          <label><input type="radio" name="rfoes" value="1" checked> 1</label>
+          <label><input type="radio" name="rfoes" value="2"> 2</label>
+          <label><input type="radio" name="rfoes" value="3"> 3</label></div></div>
+        <div><p class="label">Сложность</p><div class="seg">
+          <label><input type="radio" name="rdif" value="0"> Лёгкая</label>
+          <label><input type="radio" name="rdif" value="1" checked> Средняя</label>
+          <label><input type="radio" name="rdif" value="2"> Трудная</label>
+          <label><input type="radio" name="rdif" value="3"> Очень трудная</label></div></div>
+        <div><p class="label">Мирное время</p><div class="seg">
+          <label><input type="radio" name="rpeace" value="0"> Нет</label>
+          <label><input type="radio" name="rpeace" value="300" checked> 5 мин</label>
+          <label><input type="radio" name="rpeace" value="600"> 10 мин</label>
+          <label><input type="radio" name="rpeace" value="1200"> 20 мин</label></div></div>
+        <div><p class="label">Старт</p><div class="seg">
+          <label><input type="radio" name="rstart" value="normal" checked> Обычный</label>
+          <label><input type="radio" name="rstart" value="rich"> Богатый<small>×4 ресурсы</small></label>
+          <label><input type="radio" name="rstart" value="army"> С армией<small>готовый отряд</small></label></div></div>
+        <div><p class="label">Сид карты</p><div class="seed"><input id="rSeed" inputmode="numeric" aria-label="Сид карты"><button class="gbtn" type="button" id="rReseed">Случайный</button></div></div>
+        <div class="go"><button class="gbtn primary" type="button" id="rStart">Начать <kbd>Enter</kbd></button><span class="hint" id="rGl"></span></div>
+      </div>
+      <div class="panel">
+        <h2>Как играть</h2>
+        <ul class="howto">
+          <li><b>Экономика.</b> Выдели крестьян и кликни лес, камень, мельницу или шахту. Мельница кормит всех — без еды люди умирают. Уголь тратится на каждый выстрел.</li>
+          <li><b>Стройка.</b> Крестьяне → кнопка здания → клик по земле. Шахту ставят прямо на месторождение золота, железа или угля.</li>
+          <li><b>Отряд.</b> В казарме найми офицера, барабанщика и 15 солдат одного рода, выдели солдат и нажми «Отряд 15». Отряд держит строй, стреляет залпами, у него есть мораль.</li>
+          <li><b>Тактика.</b> Каре держит конницу, линия даёт самый сильный залп, колонна быстрее идёт. Протяни правой кнопкой — отряд развернётся в эту сторону.</li>
+          <li><b>Захват.</b> Солдат рядом с беззащитным крестьянином или зданием захватывает его. Охраняй шахты и поля.</li>
+          <li><b>Победа</b> — у соперника не осталось ни ратуши, ни крестьян.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="rGame" hidden>
+  <header class="r-top">
+    <div class="r-res" id="rRes"></div>
+    <span class="r-stat" title="Население / предел" id="rPop"></span>
+    <span class="grow"></span>
+    <span class="r-stat r-peace" id="rPeace" hidden></span>
+    <span class="r-stat num" id="rTime">0:00</span>
+    <div class="r-speed" id="rSpeed"></div>
+    <button class="lbtn" type="button" id="rHelpBtn" aria-label="Памятка">?</button>
+    <button class="lbtn" type="button" id="rExit">Выйти</button>
+  </header>
+  <div class="r-stage">
+    <canvas id="rCanvas"></canvas>
+    <canvas id="rOverlay"></canvas>
+    <div id="rToasts" aria-live="polite"></div>
+    <div id="rHint" hidden></div>
+  </div>
+  <footer class="r-bar">
+    <canvas id="rMini" title="Карта: клик — камера, правый клик — идти туда"></canvas>
+    <section class="r-sel" id="rSel"></section>
+    <section class="r-cmd"><div class="r-grid" id="rCmds"></div><p class="r-info" id="rInfo"></p></section>
+  </footer>
+  <div class="overlay" id="rHelp" hidden>
+    <div class="modal r-help" role="dialog" aria-modal="true" aria-labelledby="rHelpTitle">
+      <h2 id="rHelpTitle">Памятка</h2>
+      <ul>
+        <li><b>Выделение:</b> клик по своему юниту или зданию, рамка — протянуть по земле, двойной клик — все такие же на экране, <kbd>Shift</kbd> — добавить. Клик по солдату отряда выделяет весь отряд.</li>
+        <li><b>Приказ:</b> с выделенными юнитами клик (или правый клик) по земле — идти, по врагу — атаковать, по лесу, камню, мельнице, шахте или стройке — работать. Правый клик для здания — точка сбора.</li>
+        <li><b>Кнопки команд</b> стоят сеткой и нажимаются клавишами <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd><kbd>T</kbd> / <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>F</kbd><kbd>G</kbd> / <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd><kbd>V</kbd><kbd>B</kbd>. С <kbd>Shift</kbd> найм идёт по 5.</li>
+        <li><b>Отряды:</b> офицер + барабанщик + 15 или 36 солдат одного рода. Мораль падает от потерь и смерти офицера; ниже 20 отряд бежит. Барабанщик её восстанавливает.</li>
+        <li><b>Построения:</b> линия — сильный залп, колонна — быстрый марш, каре — защита от конницы. Правой кнопкой протяни от точки — отряд встанет лицом туда.</li>
+        <li><b>Ресурсы:</b> еду едят все, дерево и камень носят на склад или в ратушу, золото, железо и уголь дают шахты. Каждый выстрел тратит уголь.</li>
+        <li><b>Камера:</b> свайп двумя пальцами или стрелки — двигать, щипок, <kbd>+</kbd>/<kbd>−</kbd> — масштаб, <kbd>,</kbd>/<kbd>.</kbd> — повернуть, <kbd>Home</kbd> — к ратуше. <kbd>Ctrl</kbd>+цифра — запомнить группу, цифра — выбрать. <kbd>P</kbd> — пауза, <kbd>Esc</kbd> — отмена.</li>
+      </ul>
+      <div class="row"><button class="gbtn primary" type="button" id="rHelpClose">Понятно</button></div>
+    </div>
+  </div>
+  <div class="overlay" id="rEnd" hidden><div class="modal" role="dialog" aria-modal="true" id="rEndBody"></div></div>
+</div>
+
+<script type="module" src="js/rts/main.js"></script>
+</body>
+</html>

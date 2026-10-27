@@ -1,6 +1,6 @@
 // Terrain mesh with vertex colours and a detail texture, instanced trees, rocks, grass tufts, distant hills.
 import * as THREE from 'three';
-import { box, cyl, cone, ball, dodeca, merge, tintMaterial, addGrain } from './kit.js';
+import { box, cyl, cone, ball, dodeca, merge, tintMaterial, addGrain, addWorldFog } from './kit.js';
 import { makeNoise } from '../rts/noise.js';
 
 export function detailTexture(seed = 3) {
@@ -25,7 +25,7 @@ export function detailTexture(seed = 3) {
 }
 
 // heights on a regular grid; colorAt returns an sRGB hex-ish [r,g,b] 0..1
-export function buildTerrain({ x0, z0, w, d, step = 1, height, colorAt, uvScale = 0.22, fogMap = null }) {
+export function buildTerrain({ x0, z0, w, d, step = 1, height, colorAt, uvScale = 0.22 }) {
   const nx = Math.round(w / step), nz = Math.round(d / step);
   const geo = new THREE.PlaneGeometry(w, d, nx, nz);
   geo.rotateX(-Math.PI / 2);
@@ -46,17 +46,7 @@ export function buildTerrain({ x0, z0, w, d, step = 1, height, colorAt, uvScale 
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97, metalness: 0, map: detailTexture() });
-  if (fogMap) {
-    // fog of war: a texture over the map; r = explored, g = visible now
-    mat.onBeforeCompile = sh => {
-      sh.uniforms.fogMap = { value: fogMap.texture };
-      sh.uniforms.fogRect = { value: new THREE.Vector4(fogMap.x0, fogMap.z0, fogMap.w, fogMap.d) };
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vFogUv;\nuniform vec4 fogRect;')
-        .replace('#include <project_vertex>', '#include <project_vertex>\nvec4 fwp = modelMatrix * vec4(transformed, 1.0);\nvFogUv = (fwp.xz - fogRect.xy) / fogRect.zw;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec2 vFogUv;\nuniform sampler2D fogMap;')
-        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\nvec2 fv = texture2D(fogMap, vFogUv).rg;\ngl_FragColor.rgb *= mix(0.0, mix(0.42, 1.0, fv.g), fv.r);');
-    };
-  }
+  mat.onBeforeCompile = sh => addWorldFog(sh);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   function heightAt(x, z) {

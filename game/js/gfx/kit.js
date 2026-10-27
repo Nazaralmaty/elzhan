@@ -106,8 +106,30 @@ export function staticMesh(list, tintColor = '#ffffff', material) {
   return mesh;
 }
 
+// Fog of war shared by every world material: a texture over the map (r = explored, g = visible now).
+const blank = new THREE.DataTexture(new Uint8Array([255, 255, 0, 255]), 1, 1);
+blank.needsUpdate = true;
+export const worldFog = { map: { value: blank }, rect: { value: new THREE.Vector4(0, 0, 1, 1) }, on: { value: 0 } };
+export function addWorldFog(sh) {
+  sh.uniforms.wFogMap = worldFog.map; sh.uniforms.wFogRect = worldFog.rect; sh.uniforms.wFogOn = worldFog.on;
+  sh.vertexShader = sh.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec2 vWFog;\nuniform vec4 wFogRect;')
+    .replace('#include <project_vertex>', `#include <project_vertex>
+  #ifdef USE_INSTANCING
+    vec4 wfp = modelMatrix * instanceMatrix * vec4(transformed, 1.0);
+  #else
+    vec4 wfp = modelMatrix * vec4(transformed, 1.0);
+  #endif
+  vWFog = (wfp.xz - wFogRect.xy) / wFogRect.zw;`);
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', '#include <common>\nvarying vec2 vWFog;\nuniform sampler2D wFogMap;\nuniform float wFogOn;')
+    .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+  if (wFogOn > 0.5) { vec2 fv = texture2D(wFogMap, vWFog).rg; gl_FragColor.rgb *= mix(0.0, mix(0.45, 1.0, fv.g), fv.r); }`);
+}
+
 // World-space value noise that breaks up flat colours (stone, plaster, wood grain, cloth).
 export function addGrain(sh, amount = 0.16, scale = 3.2) {
+  addWorldFog(sh);
   sh.vertexShader = sh.vertexShader
     .replace('#include <common>', '#include <common>\nvarying vec3 vGrainPos;')
     .replace('#include <project_vertex>', `#include <project_vertex>
